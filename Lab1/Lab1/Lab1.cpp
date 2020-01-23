@@ -7,6 +7,7 @@
 #include <ctime>
 #include <cstring>
 #include <vector>
+#include <stdio.h>
 using std::cout;
 using std::cin;
 using std::endl;
@@ -35,10 +36,11 @@ int set_id()
 }
 void add_new_monster()
 {
+    my_cls();
     cout << "Створіть власного монстра!\n";
     info_monster new_monster;
     cout << "Введіть ім'я монстра: ";
-    puts(new_monster.name);//тут
+    scanf_s("%200s", new_monster.name, (unsigned)_countof(new_monster.name));
     cout << "Введіть кількість одиниць здоров'я монстра(1-50000): ";
     cin >> new_monster.xp;
     cout << "Введіть кількість одиниць атаки монстра(1-1000): ";
@@ -46,9 +48,9 @@ void add_new_monster()
     cout << "Введіть шанс монстра виконати спеціальну атаку(0.00 - 1.00): ";
     cin >> new_monster.chance;
     cout << "Введіть один із можливих типів спеціальної атаки монстра(збільшити пошкодження, повторити атаку, вилікувати себе, паралізувати супротивника): ";
-    puts(new_monster.type_of_attack);//тут
+    scanf_s("%100s", new_monster.type_of_attack, (unsigned)_countof(new_monster.type_of_attack));
     new_monster.id = set_id();
-    my_cls;
+    my_cls();
     cout << "Новий монстр створений!\nЙого персональний ID: " << new_monster.id << endl;
     //time_t seconds = time(NULL);//тут
     //new_monster.time_info = localtime(&seconds);//тут
