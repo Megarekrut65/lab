@@ -88,22 +88,25 @@ void faund_name()//пошук не працює
         char* p;
         p = all_monsters[i].name;
         cout << "p[" << i << "] = " << p << endl;
-        int fragment_size = strlen(fragment_name), name_size = strlen(all_monsters[i].name);//неправильно довжина
+        int fragment_size = strlen(fragment_name), name_size = strlen(all_monsters[i].name);
         cout << "fragment_name = " << fragment_name << "||||||"<<endl;
         cout << "p = " << p << "||||||" << endl;
         cout << "fragment_size = " << fragment_size << endl;
-        cout << "name_size = " << fragment_size << endl;
+        cout << "name_size = " << name_size << endl;
         if (fragment_size > name_size) break;
         else
         {
             bool flag = true;
-            for (int j = 0,k = 0,j_save = 0; j < name_size,k < fragment_size,j >= k,j_save < name_size; j++)
+            for (int j = 0,k = 0,j_save = 0; (j_save + fragment_size) < name_size; j++)
             {
+                cout << "p[" << j << "] = " << p[j] << endl;
+                cout << "fragment[" << k << "] = " << fragment_name[k] << endl;
                 if (p[j] == fragment_name[k])
                 {
                     k++;
                     cout << "k = " << k << endl;
                     flag = true;
+                    if (k >= fragment_size) break;
                 }
                 else
                 {
@@ -113,13 +116,8 @@ void faund_name()//пошук не працює
                     j = j_save;
                     flag = false;
                 }
-                cout << "j =  " << j << endl;
             }
-            if (flag)
-            {
-                nombers_monsters.push_back(i);
-                break;
-            }
+            if (flag) nombers_monsters.push_back(i);
         }
     }
     int test;
