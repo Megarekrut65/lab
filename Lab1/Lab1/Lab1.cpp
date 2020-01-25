@@ -20,7 +20,7 @@ struct info_monster
     unsigned int xp;//1-50000
     unsigned short int damage;//1-1000
     double chance;//0-1 
-    std:: string type_of_attack;//збільшити пошкодження, повторити атаку,вилікувати себе, паралізувати супротивника; 
+    short int type_of_attack;//збільшити пошкодження, повторити атаку,вилікувати себе, паралізувати супротивника; 
     char time_info[26];  //time_t seconds = time(NULL); tm* timeinfo = localtime(&seconds); cout << "Current Datetime:" << asctime(timeinfo) << endl;   
 };
 std:: vector<info_monster> all_monsters;//місце де зберігаються всі монстри
@@ -39,11 +39,11 @@ void add_new_monster()//створює нового монстра
 {
     my_cls();
     cout << "Create your own monster!\n";
-    info_monster new_monster;
+    info_monster new_monster;//другий монстр не додається проблема або в вводі імені або в циклах
     cout << "Enter a monster name: ";
-    cin.get(new_monster.name, 200);
-    //scanf_s("%200s", new_monster.name, (unsigned)_countof(new_monster.name));//при вводі двох слів зависає
-    while (true)
+    cin.get(new_monster.name,200);
+    bool flag_xp = true, flag_damage = true, flag_chance = true;
+    while (flag_xp)
     {
         cout << "Enter the number of monster health units (1-50000): ";
         int temp_xp;
@@ -57,10 +57,10 @@ void add_new_monster()//створює нового монстра
         else
         {
             new_monster.xp = temp_xp;
-            break;
+            flag_xp = false;
         }      
     }
-    while (true)
+    while (flag_damage)
     {
         cout << "Enter the number of monster attack units (1-1000): ";
         int temp_damage;
@@ -75,10 +75,10 @@ void add_new_monster()//створює нового монстра
         else
         {
             new_monster.damage = temp_damage;
-            break;
+            flag_damage = false;
         }
     }
-    while (true)
+    while (flag_chance)
     {
         cout << "Enter the monster's chance to launch a special attack (0.00 - 1.00): ";
         double temp_chance;
@@ -94,7 +94,7 @@ void add_new_monster()//створює нового монстра
         else
         {
             new_monster.chance = temp_chance;
-            break;
+            flag_chance = false;
         }
     }
     cout << "Choose one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
@@ -102,13 +102,13 @@ void add_new_monster()//створює нового монстра
 types_attack:
     switch (_getch())
     {
-    case'1': new_monster.type_of_attack = "Increase damage";
+    case'1': new_monster.type_of_attack = 1;
         break;
-    case'2': new_monster.type_of_attack = "Repeat the attack";
+    case'2': new_monster.type_of_attack = 2;
         break;
-    case '3': new_monster.type_of_attack = "Cure yourself";
+    case '3': new_monster.type_of_attack = 3;
         break;
-    case'4': new_monster.type_of_attack = "Paralyze the enemy";
+    case'4': new_monster.type_of_attack = 4;
         break;
     default: goto types_attack;
         break;
@@ -122,10 +122,11 @@ types_attack:
     cout << "Creation date and time: " << new_monster.time_info<< endl;
     cout << "Press '0' to continue.\n";
     not_null:
-    if (_getch() != '0') goto not_null;  
+    if (_getch() != '0') goto not_null;
 }
 void write_monsters(std::vector<int> monsters_nombers)//виводить дані монстра на еран
 {
+    char arr_types[][20] = {"Increase damage","Repeat the attack","Cure yourself","Paralyze the enemy"};
     cout << "Monsters found:\n";
     for (int i = 0; i < monsters_nombers.size(); i++) 
     {
@@ -135,7 +136,7 @@ void write_monsters(std::vector<int> monsters_nombers)//виводить дан�
         cout << "XP: " <<all_monsters[monsters_nombers[i]].xp << endl;
         cout << "Damage: " << all_monsters[monsters_nombers[i]].damage << endl;
         cout << "Chance to launch a special attack: " << all_monsters[monsters_nombers[i]].chance << endl;
-        cout << "Type of special monster attack: " << all_monsters[monsters_nombers[i]].type_of_attack << endl;
+        cout << "Type of special monster attack: " << arr_types[all_monsters[monsters_nombers[i]].type_of_attack - 1] << endl;
         cout << "Creation date and time: " << all_monsters[monsters_nombers[i]].time_info;
     }
 }
