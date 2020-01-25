@@ -41,7 +41,8 @@ void add_new_monster()//створює нового монстра
     cout << "Create your own monster!\n";
     info_monster new_monster;
     cout << "Enter a monster name: ";
-    scanf_s("%200s", new_monster.name, (unsigned)_countof(new_monster.name));//при вводі двох слів зависає
+    cin.get(new_monster.name, 200);
+    //scanf_s("%200s", new_monster.name, (unsigned)_countof(new_monster.name));//при вводі двох слів зависає
     while (true)
     {
         cout << "Enter the number of monster health units (1-50000): ";
