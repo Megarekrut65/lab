@@ -39,14 +39,15 @@ void add_new_monster()//створює нового монстра
 {
     my_cls();
     cout << "Create your own monster!\n";
-    info_monster new_monster;//другий монстр не додається проблема або в вводі імені або в циклах
+    info_monster new_monster;
     cout << "Enter a monster name: ";
-    cin.get(new_monster.name,200);
+    gets_s(new_monster.name);
+    if (strlen(new_monster.name) == 0) gets_s(new_monster.name);
     bool flag_xp = true, flag_damage = true, flag_chance = true;
     while (flag_xp)
     {
         cout << "Enter the number of monster health units (1-50000): ";
-        int temp_xp;
+        int temp_xp = 0;
         cin >> temp_xp;
         if ((temp_xp < 1) || (temp_xp > 50000))
         {
@@ -63,7 +64,7 @@ void add_new_monster()//створює нового монстра
     while (flag_damage)
     {
         cout << "Enter the number of monster attack units (1-1000): ";
-        int temp_damage;
+        int temp_damage = 0;
         cin >> temp_damage;
         if ((temp_damage < 1) || (temp_damage > 1000))
         {
@@ -81,7 +82,7 @@ void add_new_monster()//створює нового монстра
     while (flag_chance)
     {
         cout << "Enter the monster's chance to launch a special attack (0.00 - 1.00): ";
-        double temp_chance;
+        double temp_chance = 0;
         cin >> temp_chance;
         if ((temp_chance < 0) || (temp_chance > 1))
         {
