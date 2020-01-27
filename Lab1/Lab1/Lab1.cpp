@@ -13,6 +13,12 @@ using std::cout;
 using std::cin;
 using std::endl;
 
+struct my_time
+{
+    int days;
+    int months;
+    int years;
+};
 struct info_monster
 {
     unsigned int id;
@@ -21,7 +27,7 @@ struct info_monster
     unsigned short int damage;//1-1000
     double chance;//0-1 
     short int type_of_attack;//збільшити пошкодження, повторити атаку,вилікувати себе, паралізувати супротивника; 
-    char time_info[26];  //time_t seconds = time(NULL); tm* timeinfo = localtime(&seconds); cout << "Current Datetime:" << asctime(timeinfo) << endl;   
+    my_time time_info;  
 };
 std:: vector<info_monster> all_monsters;//місце де зберігаються всі монстри
 void my_cls()//очищує екран і виводить назву програми
@@ -29,7 +35,7 @@ void my_cls()//очищує екран і виводить назву прогр
     system("CLS");
     cout << "<The Forest of Monsters>"<< endl << endl;
 }
-void test_id()
+void test_id()//temp
 {
     srand(time(0));
     long int id_monster = (rand() % 90000 + 10000);
@@ -41,6 +47,39 @@ void test_id()
         cout << id_monster << endl;
         cin.get();
     }
+}
+int stringtoint(char* string_months)//переводить місяць з string в int
+{
+    int int_months = 0;
+    char all_months[12][4] = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+    for (int i = 0; i < 12; i++)
+    {
+        int k = 0;
+        if (string_months[0] == all_months[i][0]) k++;
+        if (string_months[0] == all_months[i][0]) k++;
+        if (string_months[0] == all_months[i][0]) k++;
+        if (k == 3)
+        {
+            int_months = i + 1;
+            break;
+        }
+    }
+    return int_months;
+}
+my_time set_time()//створює дату
+{
+    char now_time[26], * string_months = new char [4];
+    time_t seconds = time(NULL);
+    ctime_s(now_time, 26, &seconds);
+    my_time t;
+    t.days = (now_time[8] - '0') * 10 + (now_time[9] - '0');
+    string_months[0] = now_time[4];
+    string_months[1] = now_time[5];
+    string_months[2] = now_time[6];
+    string_months[3] = '\0';
+    t.months = stringtoint(string_months);
+    t.years = (now_time[20] - '0')*1000 + (now_time[21] - '0') * 100 + (now_time[22] - '0') * 10 + (now_time[23] - '0');
+    return t;
 }
 int set_id()//створює унікальний код
 {
@@ -145,10 +184,15 @@ types_attack:
     new_monster.id = set_id();
     my_cls();
     cout << "New monster created!\nHis personal ID: " << new_monster.id << endl;
-    time_t seconds = time(NULL);
-    ctime_s(new_monster.time_info,26,&seconds);
+    new_monster.time_info = set_time();
     all_monsters.push_back(new_monster);
-    cout << "Creation date and time: " << new_monster.time_info<< endl;
+    cout << "Creation date and time: ";
+    if (new_monster.time_info.days / 10 == 0) cout << "0" << new_monster.time_info.days;
+    else cout << new_monster.time_info.days;
+    cout << ".";
+    if (new_monster.time_info.months / 10 == 0) cout << "0" << new_monster.time_info.months;
+    else cout << new_monster.time_info.months;
+    cout << "." << new_monster.time_info.years << endl;
     cout << "Press '0' to continue.\n";
     not_null:
     if (_getch() != '0') goto not_null;
@@ -166,7 +210,14 @@ void write_monsters(std::vector<int> monsters_nombers)//виводить дан�
         cout << "Damage: " << all_monsters[monsters_nombers[i]].damage << endl;
         cout << "Chance to launch a special attack: " << all_monsters[monsters_nombers[i]].chance << endl;
         cout << "Type of special monster attack: " << arr_types[all_monsters[monsters_nombers[i]].type_of_attack - 1] << endl;
-        cout << "Creation date and time: " << all_monsters[monsters_nombers[i]].time_info;
+        
+        /*cout << "Creation date: ";
+        if (all_monsters[monsters_nombers[i]].time_info.days / 10 == 0) cout << "0" << all_monsters[monsters_nombers[i]].time_info.days;
+        else cout << all_monsters[monsters_nombers[i]].time_info.days;
+        cout << ".";
+        if (all_monsters[monsters_nombers[i]].time_info.months / 10 == 0) cout << "0" << all_monsters[monsters_nombers[i]].time_info.months;
+        else cout << all_monsters[monsters_nombers[i]].time_info.months;
+        cout << "." << all_monsters[monsters_nombers[i]].time_info.years << endl;*/
     }
 }
 void find_name()//пошук монстра по імені
@@ -175,7 +226,8 @@ void find_name()//пошук монстра по імені
     cout << "Enter the full name or snippet of the monster name:\n";
     char fragment_name[200];
     std:: vector <int> nombers_monsters;
-    scanf_s("%200s",fragment_name, (unsigned)_countof(fragment_name));
+    gets_s(fragment_name);
+    if (strlen(fragment_name) == 0) gets_s(fragment_name);
     int fragment_size = strlen(fragment_name);
     for (int i = 0; i < all_monsters.size(); i++)
     {
@@ -240,7 +292,7 @@ void Interactive_dialog_mode()
     case '2':
     {
         my_cls();
-        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by ID.\n";
+        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n3)Search by type of special monster attack.\n";
         found_monstr:
         switch (_getch())
         {
@@ -251,6 +303,11 @@ void Interactive_dialog_mode()
             }
             break;
             case '2':
+            {
+
+            }
+            break;
+            case '3':
             {
 
             }
@@ -286,7 +343,8 @@ int main()
         break;
         case '3':
         {
-            
+            my_time t;
+            t = set_time();
         }
         break;
         case '0':
