@@ -15,9 +15,9 @@ using std::endl;
 
 struct my_time
 {
-    int days;
-    int months;
-    int years;
+    int day;
+    int month;
+    int year;
     int sec;
     int min;
     int hour;  
@@ -69,19 +69,21 @@ int stringtoint(char* string_months)//переводить місяць з strin
     }
     return int_months;
 }
-my_time set_time()//створює дату
+my_time set_time(int nomber_monster)//створює дату
 {
-    char now_time[26], * string_months = new char [4];
-    time_t seconds = time(NULL);
-    ctime_s(now_time, 26, &seconds);
+    
+    char* string_months = new char [4];
     my_time t;
-    t.days = (now_time[8] - '0') * 10 + (now_time[9] - '0');
-    string_months[0] = now_time[4];
-    string_months[1] = now_time[5];
-    string_months[2] = now_time[6];
+    t.day = (all_monsters[nomber_monster].time_info[8] - '0') * 10 + (all_monsters[nomber_monster].time_info[9] - '0');
+    string_months[0] = all_monsters[nomber_monster].time_info[4];
+    string_months[1] = all_monsters[nomber_monster].time_info[5];
+    string_months[2] = all_monsters[nomber_monster].time_info[6];
     string_months[3] = '\0';
-    t.months = stringtoint(string_months);
-    t.years = (now_time[20] - '0')*1000 + (now_time[21] - '0') * 100 + (now_time[22] - '0') * 10 + (now_time[23] - '0');
+    t.month = stringtoint(string_months);
+    t.year = (all_monsters[nomber_monster].time_info[20] - '0')*1000 + (all_monsters[nomber_monster].time_info[21] - '0') * 100 + (all_monsters[nomber_monster].time_info[22] - '0') * 10 + (all_monsters[nomber_monster].time_info[23] - '0');
+    t.hour = (all_monsters[nomber_monster].time_info[11] - '0') * 10 + (all_monsters[nomber_monster].time_info[12] - '0');
+    t.min = (all_monsters[nomber_monster].time_info[14] - '0') * 10 + (all_monsters[nomber_monster].time_info[15] - '0');
+    t.sec = (all_monsters[nomber_monster].time_info[17] - '0') * 10 + (all_monsters[nomber_monster].time_info[18] - '0');
     return t;
 }
 int set_id()//створює унікальний код
@@ -170,7 +172,7 @@ void add_new_monster()//створює нового монстра
     }
     cout << "Choose one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
          << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-types_attack:
+    types_attack:
     switch (_getch())
     {
     case'1': new_monster.type_of_attack = 1;
@@ -211,7 +213,108 @@ void write_monsters(std::vector<int> monsters_nombers)//виводить дан�
         cout << "Creation date and time: " << all_monsters[monsters_nombers[i]].time_info;
     }
 }
-void find_xp_damage()
+void find_types_time()//пошук монстра по типу атки та часу створення
+{
+    my_cls();
+    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+    int one_types_attack = 1;
+types_attack:
+    switch (_getch())
+    {
+    case '1': one_types_attack = 1;
+        break;
+    case '2': one_types_attack = 2;
+        break;
+    case '3': one_types_attack = 3;
+        break;
+    case '4': one_types_attack = 4;
+        break;
+    default: goto types_attack;
+        break;
+    }
+    cout << "Enter the maximum date and time the monster was created.\n";
+    my_time find_time;
+    cout << "Enter year(1970-....): ";
+    cin >> find_time.year;
+    cout << "Enter month(1-12): ";
+    cin >> find_time.month;
+    cout << "Enter day(1-31): ";
+    cin >> find_time.day;
+    cout << "Enter hour(0-23): ";
+    cin >> find_time.hour;
+    cout << "Enter minute(0-59): ";
+    cin >> find_time.min;
+    cout << "Enter second(0-59): ";
+    cin >> find_time.sec;
+    my_cls();
+    std::vector <int> nombers_monsters;
+    for (int i = 0; i < all_monsters.size(); i++)
+    {
+        if (one_types_attack == all_monsters[i].type_of_attack)
+        {
+            my_time monster_time;
+            monster_time = set_time(i);
+            if (monster_time.year > find_time.year) continue;//1
+            else
+            {
+                if (monster_time.year < find_time.year)//2
+                {
+                    nombers_monsters.push_back(i);
+                    continue;
+                }
+                if (monster_time.month > find_time.month) continue;//1
+                else
+                {
+                    if (monster_time.month < find_time.month)//2
+                    {
+                        nombers_monsters.push_back(i);
+                        continue;
+                    }
+                    if (monster_time.day > find_time.day) continue;//1
+                    else
+                    {
+                        if (monster_time.day < find_time.day)//2
+                        {
+                            nombers_monsters.push_back(i);
+                            continue;
+                        }
+                        if(monster_time.hour > find_time.hour) continue;//1
+                        else
+                        {
+                            if (monster_time.hour < find_time.hour)//2
+                            {
+                                nombers_monsters.push_back(i);
+                                continue;
+                            }
+                            if (monster_time.min > find_time.min) continue;//1
+                            else
+                            {
+                                if (monster_time.min < find_time.min)//2
+                                {
+                                    nombers_monsters.push_back(i);
+                                    continue;
+                                }
+                                if (monster_time.sec > find_time.sec) continue;//1 
+                                else
+                                {
+                                    if (monster_time.sec <= find_time.sec) nombers_monsters.push_back(i);//2
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+    if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
+    else write_monsters(nombers_monsters);
+    cout << "Press '0' to exit.\n";
+not_null:
+    if (_getch() != '0') goto not_null;
+}
+void find_xp_damage()//пошук монстар по рівню життя і атаці
 {
     my_cls();
     cout << "Enter minimum health level of monster(1-50000): ";
@@ -228,7 +331,7 @@ void find_xp_damage()
     if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
     else write_monsters(nombers_monsters);
     cout << "Press '0' to exit.\n";
-    not_null:
+not_null:
     if (_getch() != '0') goto not_null;
 }
 void find_name()//пошук монстра по імені
@@ -272,16 +375,16 @@ void find_name()//пошук монстра по імені
     if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
     else write_monsters(nombers_monsters);
     cout << "Press '0' to exit.\n";
-    not_null:
+not_null:
     if (_getch() != '0') goto not_null;
 }
 void Interactive_dialog_mode()
 {
-    next:
+next:
     my_cls();
     cout << "Menu:\n";
     cout << "1)Add a new monster.\n2)Find an existing monster.\n0)Back.\n";
-    menu:
+menu:
     switch (_getch())
     {
     case '1':
@@ -294,7 +397,7 @@ void Interactive_dialog_mode()
     {
         my_cls();
         cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n3)Search by type of special monster attack.\n";
-        found_monstr:
+    found_monstr:
         switch (_getch())
         {
             case '1':
@@ -311,7 +414,8 @@ void Interactive_dialog_mode()
             break;
             case '3':
             {
-
+                find_types_time();
+                goto next;
             }
             break;
             default: goto found_monstr;
@@ -326,10 +430,10 @@ void Interactive_dialog_mode()
 }
 int main()
 {
-    next:
+next:
     my_cls();
     cout << "Select the application mode:\n1)Interactive dialog mode.\n2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
-    mode:
+mode:
     switch(_getch())
     {
         case '1':
@@ -341,12 +445,14 @@ int main()
         case '2':
         {
             test_id();
+            goto next;
         }
         break;
         case '3':
         {
             my_time t;
-            t = set_time();
+            t = set_time(0);
+            goto next;
         }
         break;
         case '0':
@@ -358,8 +464,7 @@ int main()
         break;
         default: goto mode;
     }
-
-    
+ 
    return 0;
 }
 
