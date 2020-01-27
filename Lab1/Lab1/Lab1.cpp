@@ -18,6 +18,9 @@ struct my_time
     int days;
     int months;
     int years;
+    int sec;
+    int min;
+    int hour;  
 };
 struct info_monster
 {
@@ -188,14 +191,6 @@ types_attack:
     ctime_s(new_monster.time_info, 26, &seconds);
     cout << "Creation date and time: " << new_monster.time_info << endl;
     all_monsters.push_back(new_monster);
-    /*new_monster.time_info = set_time();
-    cout << "Creation date and time: ";
-    if (new_monster.time_info.days / 10 == 0) cout << "0" << new_monster.time_info.days;
-    else cout << new_monster.time_info.days;
-    cout << ".";
-    if (new_monster.time_info.months / 10 == 0) cout << "0" << new_monster.time_info.months;
-    else cout << new_monster.time_info.months;
-    cout << "." << new_monster.time_info.years << endl;*/
     cout << "Press '0' to continue.\n";
     not_null:
     if (_getch() != '0') goto not_null;
@@ -214,14 +209,27 @@ void write_monsters(std::vector<int> monsters_nombers)//виводить дан�
         cout << "Chance to launch a special attack: " << all_monsters[monsters_nombers[i]].chance << endl;
         cout << "Type of special monster attack: " << arr_types[all_monsters[monsters_nombers[i]].type_of_attack - 1] << endl;
         cout << "Creation date and time: " << all_monsters[monsters_nombers[i]].time_info;
-        /*cout << "Creation date: ";
-        if (all_monsters[monsters_nombers[i]].time_info.days / 10 == 0) cout << "0" << all_monsters[monsters_nombers[i]].time_info.days;
-        else cout << all_monsters[monsters_nombers[i]].time_info.days;
-        cout << ".";
-        if (all_monsters[monsters_nombers[i]].time_info.months / 10 == 0) cout << "0" << all_monsters[monsters_nombers[i]].time_info.months;
-        else cout << all_monsters[monsters_nombers[i]].time_info.months;
-        cout << "." << all_monsters[monsters_nombers[i]].time_info.years << endl;*/
     }
+}
+void find_xp_damage()
+{
+    my_cls();
+    cout << "Enter minimum health level of monster(1-50000): ";
+    int min_xp = 1,max_damage=1000;
+    cin >> min_xp;
+    cout << "Enter the maximum attack level of monster(1-1000): ";
+    cin >> max_damage;
+    my_cls();
+    std::vector <int> nombers_monsters;
+    for (int i = 0; i < all_monsters.size(); i++)
+    {
+        if ((min_xp <= all_monsters[i].xp) && (max_damage >= all_monsters[i].damage)) nombers_monsters.push_back(i);
+    }
+    if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
+    else write_monsters(nombers_monsters);
+    cout << "Press '0' to exit.\n";
+    not_null:
+    if (_getch() != '0') goto not_null;
 }
 void find_name()//пошук монстра по імені
 {
@@ -230,30 +238,23 @@ void find_name()//пошук монстра по імені
     char fragment_name[200];
     std:: vector <int> nombers_monsters;
     gets_s(fragment_name);
+    my_cls();
     if (strlen(fragment_name) == 0) gets_s(fragment_name);
     int fragment_size = strlen(fragment_name);
     for (int i = 0; i < all_monsters.size(); i++)
     {
         char* p;
         p = all_monsters[i].name;
-        cout << "p[" << i << "] = " << p << endl;
         int name_size = strlen(all_monsters[i].name);
-        cout << "fragment_name = " << fragment_name << "||||||"<<endl;
-        cout << "p = " << p << "||||||" << endl;
-        cout << "fragment_size = " << fragment_size << endl;
-        cout << "name_size = " << name_size << endl;
         if (fragment_size > name_size) break;
         else
         {
             bool flag = true;
             for (int j = 0,k = 0,j_save = 0; (j_save + fragment_size) < name_size; j++)
             {
-                cout << "p[" << j << "] = " << p[j] << endl;
-                cout << "fragment[" << k << "] = " << fragment_name[k] << endl;
                 if (p[j] == fragment_name[k])
                 {
                     k++;
-                    cout << "k = " << k << endl;
                     flag = true;
                     if (k >= fragment_size) break;
                 }
@@ -261,7 +262,6 @@ void find_name()//пошук монстра по імені
                 {
                     k = 0;
                     j_save++;
-                    cout << "j_save = " << j_save << endl;
                     j = j_save;
                     flag = false;
                 }
@@ -269,13 +269,11 @@ void find_name()//пошук монстра по імені
             if (flag) nombers_monsters.push_back(i);
         }
     }
-    my_cls();
     if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
     else write_monsters(nombers_monsters);
     cout << "Press '0' to exit.\n";
     not_null:
     if (_getch() != '0') goto not_null;
-
 }
 void Interactive_dialog_mode()
 {
@@ -307,7 +305,8 @@ void Interactive_dialog_mode()
             break;
             case '2':
             {
-
+                find_xp_damage();
+                goto next;
             }
             break;
             case '3':
