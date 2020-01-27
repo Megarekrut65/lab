@@ -29,10 +29,38 @@ void my_cls()//очищує екран і виводить назву прогр
     system("CLS");
     cout << "<The Forest of Monsters>"<< endl << endl;
 }
+void test_id()
+{
+    srand(time(0));
+    long int id_monster = (rand() % 90000 + 10000);
+    cout << id_monster << endl;
+    while (true)
+    {
+        srand(id_monster);
+        id_monster = (rand() % 90000 + 10000);
+        cout << id_monster << endl;
+        cin.get();
+    }
+}
 int set_id()//створює унікальний код
 {
     srand(time(0));
-    long int id_monster=(rand()%90000 + 10000);
+    long int id_monster = (rand() % 90000 + 10000);
+    bool flag = true;
+    while (flag)
+    {
+        flag = false;
+        for (int i = 0; i < all_monsters.size(); i++)
+        {
+            if (id_monster == all_monsters[i].id)
+            {
+                flag = true;
+                srand(id_monster);
+                id_monster = (rand() % 90000 + 10000);
+                break;
+            }
+        }
+    } 
     return id_monster;
 }
 void add_new_monster()//створює нового монстра
@@ -253,7 +281,7 @@ int main()
         break;
         case '2':
         {
-
+            test_id();
         }
         break;
         case '3':
