@@ -27,7 +27,7 @@ struct info_monster
     unsigned short int damage;//1-1000
     double chance;//0-1 
     short int type_of_attack;//збільшити пошкодження, повторити атаку,вилікувати себе, паралізувати супротивника; 
-    my_time time_info;  
+    char time_info[26];  
 };
 std:: vector<info_monster> all_monsters;//місце де зберігаються всі монстри
 void my_cls()//очищує екран і виводить назву програми
@@ -184,15 +184,18 @@ types_attack:
     new_monster.id = set_id();
     my_cls();
     cout << "New monster created!\nHis personal ID: " << new_monster.id << endl;
-    new_monster.time_info = set_time();
+    time_t seconds = time(NULL);
+    ctime_s(new_monster.time_info, 26, &seconds);
+    cout << "Creation date and time: " << new_monster.time_info << endl;
     all_monsters.push_back(new_monster);
+    /*new_monster.time_info = set_time();
     cout << "Creation date and time: ";
     if (new_monster.time_info.days / 10 == 0) cout << "0" << new_monster.time_info.days;
     else cout << new_monster.time_info.days;
     cout << ".";
     if (new_monster.time_info.months / 10 == 0) cout << "0" << new_monster.time_info.months;
     else cout << new_monster.time_info.months;
-    cout << "." << new_monster.time_info.years << endl;
+    cout << "." << new_monster.time_info.years << endl;*/
     cout << "Press '0' to continue.\n";
     not_null:
     if (_getch() != '0') goto not_null;
@@ -210,7 +213,7 @@ void write_monsters(std::vector<int> monsters_nombers)//виводить дан�
         cout << "Damage: " << all_monsters[monsters_nombers[i]].damage << endl;
         cout << "Chance to launch a special attack: " << all_monsters[monsters_nombers[i]].chance << endl;
         cout << "Type of special monster attack: " << arr_types[all_monsters[monsters_nombers[i]].type_of_attack - 1] << endl;
-        
+        cout << "Creation date and time: " << all_monsters[monsters_nombers[i]].time_info;
         /*cout << "Creation date: ";
         if (all_monsters[monsters_nombers[i]].time_info.days / 10 == 0) cout << "0" << all_monsters[monsters_nombers[i]].time_info.days;
         else cout << all_monsters[monsters_nombers[i]].time_info.days;
