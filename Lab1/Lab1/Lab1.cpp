@@ -20,7 +20,7 @@ struct my_time
     int year;
     int sec;
     int min;
-    int hour;  
+    int hour;
 };
 struct info_monster
 {
@@ -30,18 +30,13 @@ struct info_monster
     unsigned short int damage;//1-1000
     double chance;//0-1 
     short int type_of_attack;//збільшити пошкодження, повторити атаку,вилікувати себе, паралізувати супротивника; 
-    char time_info[26];  
-   // info_monster(char name[],unsigned int xp,unsigned short int damage, double chance, short int type_of_attack)
-   // {
-    //    this->name = name;
-    //    this->xp = xp;
-   // }
+    char time_info[26];
 };
-std:: vector<info_monster> all_monsters;//місце де зберігаються всі монстри
+std::vector<info_monster> all_monsters;//місце де зберігаються всі монстри
 void my_cls()//очищує екран і виводить назву програми
 {
     system("CLS");
-    cout << "<The Forest of Monsters>"<< endl << endl;
+    cout << "<The Forest of Monsters>" << endl << endl;
 }
 void test_id()//temp
 {
@@ -59,7 +54,7 @@ void test_id()//temp
 int stringtoint(char* string_months)//переводить місяць з string в int
 {
     int int_months = 0;
-    char all_months[12][4] = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+    char all_months[12][4] = { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
     for (int i = 0; i < 12; i++)
     {
         int k = 0;
@@ -76,8 +71,8 @@ int stringtoint(char* string_months)//переводить місяць з strin
 }
 my_time set_time(int nomber_monster)//створює дату
 {
-    
-    char* string_months = new char [4];
+
+    char* string_months = new char[4];
     my_time t;
     t.day = (all_monsters[nomber_monster].time_info[8] - '0') * 10 + (all_monsters[nomber_monster].time_info[9] - '0');
     string_months[0] = all_monsters[nomber_monster].time_info[4];
@@ -85,7 +80,7 @@ my_time set_time(int nomber_monster)//створює дату
     string_months[2] = all_monsters[nomber_monster].time_info[6];
     string_months[3] = '\0';
     t.month = stringtoint(string_months);
-    t.year = (all_monsters[nomber_monster].time_info[20] - '0')*1000 + (all_monsters[nomber_monster].time_info[21] - '0') * 100 + (all_monsters[nomber_monster].time_info[22] - '0') * 10 + (all_monsters[nomber_monster].time_info[23] - '0');
+    t.year = (all_monsters[nomber_monster].time_info[20] - '0') * 1000 + (all_monsters[nomber_monster].time_info[21] - '0') * 100 + (all_monsters[nomber_monster].time_info[22] - '0') * 10 + (all_monsters[nomber_monster].time_info[23] - '0');
     t.hour = (all_monsters[nomber_monster].time_info[11] - '0') * 10 + (all_monsters[nomber_monster].time_info[12] - '0');
     t.min = (all_monsters[nomber_monster].time_info[14] - '0') * 10 + (all_monsters[nomber_monster].time_info[15] - '0');
     t.sec = (all_monsters[nomber_monster].time_info[17] - '0') * 10 + (all_monsters[nomber_monster].time_info[18] - '0');
@@ -109,7 +104,7 @@ int set_id()//створює унікальний код
                 break;
             }
         }
-    } 
+    }
     return id_monster;
 }
 void add_new_monster()//створює нового монстра
@@ -136,7 +131,7 @@ void add_new_monster()//створює нового монстра
         {
             new_monster.xp = temp_xp;
             flag_xp = false;
-        }      
+        }
     }
     while (flag_damage)
     {
@@ -176,8 +171,8 @@ void add_new_monster()//створює нового монстра
         }
     }
     cout << "Choose one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-         << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    types_attack:
+        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+types_attack:
     switch (_getch())
     {
     case'1': new_monster.type_of_attack = 1;
@@ -198,7 +193,7 @@ void add_new_monster()//створює нового монстра
     cout << "Creation date and time: " << new_monster.time_info << endl;
     all_monsters.push_back(new_monster);
     cout << "Press '0' to continue.\n";
-    not_null:
+not_null:
     if (_getch() != '0') goto not_null;
 }
 void delete_monster()//видаляє монстра з вказаним ід
@@ -229,14 +224,14 @@ not_null:
 }
 void write_monsters(std::vector<int> monsters_nombers)//виводить дані монстра на еран
 {
-    char arr_types[][20] = {"Increase damage","Repeat the attack","Cure yourself","Paralyze the enemy"};
+    char arr_types[][20] = { "Increase damage","Repeat the attack","Cure yourself","Paralyze the enemy" };
     cout << "Monsters found:\n";
-    for (int i = 0; i < monsters_nombers.size(); i++) 
+    for (int i = 0; i < monsters_nombers.size(); i++)
     {
-        cout << "<"<<i + 1 << ">\n";
-        cout <<"ID: " << all_monsters[monsters_nombers[i]].id << ".\n";
-        cout << "Name: " <<all_monsters[monsters_nombers[i]].name << ".\n";
-        cout << "XP: " <<all_monsters[monsters_nombers[i]].xp << ".\n";
+        cout << "<" << i + 1 << ">\n";
+        cout << "ID: " << all_monsters[monsters_nombers[i]].id << ".\n";
+        cout << "Name: " << all_monsters[monsters_nombers[i]].name << ".\n";
+        cout << "XP: " << all_monsters[monsters_nombers[i]].xp << ".\n";
         cout << "Damage: " << all_monsters[monsters_nombers[i]].damage << ".\n";
         cout << "Chance to launch a special attack: " << all_monsters[monsters_nombers[i]].chance << ".\n";
         cout << "Type of special monster attack: " << arr_types[all_monsters[monsters_nombers[i]].type_of_attack - 1] << "." << endl;
@@ -319,7 +314,7 @@ types_attack:
                             nombers_monsters.push_back(i);
                             continue;
                         }
-                        if(monster_time.hour > find_time.hour) continue;//1
+                        if (monster_time.hour > find_time.hour) continue;//1
                         else
                         {
                             if (monster_time.hour < find_time.hour)//2
@@ -358,7 +353,7 @@ void find_xp_damage()//пошук монстар по рівню життя і �
 {
     my_cls();
     cout << "Enter minimum health level of monster(1-50000): ";
-    int min_xp = 1,max_damage=1000;
+    int min_xp = 1, max_damage = 1000;
     cin >> min_xp;
     cout << "Enter the maximum attack level of monster(1-1000): ";
     cin >> max_damage;
@@ -379,8 +374,8 @@ void find_name()//пошук монстра по імені
     my_cls();
     cout << "Enter the full name or snippet of the monster name:\n";
     char fragment_name[200];
-    std:: vector <int> nombers_monsters;
-    gets_s(fragment_name);    
+    std::vector <int> nombers_monsters;
+    gets_s(fragment_name);
     if (strlen(fragment_name) == 0) gets_s(fragment_name);
     int fragment_size = strlen(fragment_name);
     my_cls();
@@ -393,7 +388,7 @@ void find_name()//пошук монстра по імені
         else
         {
             int k = 0;
-            for (int j = 0,j_save = 0; (j_save + fragment_size) < (name_size + 1); j++)
+            for (int j = 0, j_save = 0; (j_save + fragment_size) < (name_size + 1); j++)
             {
                 if (p[j] == fragment_name[k])
                 {
@@ -403,7 +398,7 @@ void find_name()//пошук монстра по імені
                 else
                 {
                     j_save++;
-                    k = 0;                 
+                    k = 0;
                     j = j_save;
                     j--;
                 }
@@ -435,36 +430,36 @@ menu:
     case '2':
     {
         my_cls();
-        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n" 
-             <<"3)Search by type of special monster attack.\n4)Show all the monsters.\n";
+        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
+            << "3)Search by type of special monster attack.\n4)Show all the monsters.\n";
     found_monstr:
         switch (_getch())
         {
-            case '1':
-            {
-                find_name();
-                goto next;
-            }
-            break;
-            case '2':
-            {
-                find_xp_damage();
-                goto next;
-            }
-            break;
-            case '3':
-            {
-                find_types_time();
-                goto next;
-            }
-            break;
-            case '4':
-            {
-                write_all_monsters();
-                goto next;
-            }
-            break;
-            default: goto found_monstr;
+        case '1':
+        {
+            find_name();
+            goto next;
+        }
+        break;
+        case '2':
+        {
+            find_xp_damage();
+            goto next;
+        }
+        break;
+        case '3':
+        {
+            find_types_time();
+            goto next;
+        }
+        break;
+        case '4':
+        {
+            write_all_monsters();
+            goto next;
+        }
+        break;
+        default: goto found_monstr;
         }
     }
     break;
@@ -475,7 +470,7 @@ menu:
     }
     break;
     case '0':
-    break;
+        break;
     default: goto menu;
     }
 
@@ -486,38 +481,38 @@ next:
     my_cls();
     cout << "Select the application mode:\n1)Interactive dialog mode.\n2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
 mode:
-    switch(_getch())
+    switch (_getch())
     {
-        case '1':
-        {
-            Interactive_dialog_mode();
-            goto next;
-        }
-        break;
-        case '2':
-        {
-            test_id();
-            goto next;
-        }
-        break;
-        case '3':
-        {
-            my_time t;
-            t = set_time(0);
-            goto next;
-        }
-        break;
-        case '0':
-        {
-            my_cls();
-            cout << "Exit...";
-            return 0;
-        }
-        break;
-        default: goto mode;
+    case '1':
+    {
+        Interactive_dialog_mode();
+        goto next;
     }
- 
-   return 0;
+    break;
+    case '2':
+    {
+        test_id();
+        goto next;
+    }
+    break;
+    case '3':
+    {
+        my_time t;
+        t = set_time(0);
+        goto next;
+    }
+    break;
+    case '0':
+    {
+        my_cls();
+        cout << "Exit...";
+        return 0;
+    }
+    break;
+    default: goto mode;
+    }
+
+    return 0;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
