@@ -197,6 +197,25 @@ void add_new_monster()//створює нового монстра
     not_null:
     if (_getch() != '0') goto not_null;
 }
+void delete_monster()
+{
+    cout << "Enter id of monster: ";
+    unsigned int monster_id;
+    int nomber_monster_death = -1;
+    cin >> monster_id;
+    for (int i = 0; i < all_monsters.size(); i++)
+    {
+        if (monster_id == all_monsters[i].id)
+        {
+            nomber_monster_death = i;
+            break;
+        }
+    }
+    if (nomber_monster_death != -1)
+    {
+
+    }
+}
 void write_monsters(std::vector<int> monsters_nombers)//виводить дані монстра на еран
 {
     char arr_types[][20] = {"Increase damage","Repeat the attack","Cure yourself","Paralyze the enemy"};
@@ -310,7 +329,7 @@ types_attack:
     }
     if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
     else write_monsters(nombers_monsters);
-    cout << "Press '0' to exit.\n";
+    cout << "\nPress '0' to exit.\n";
 not_null:
     if (_getch() != '0') goto not_null;
 }
@@ -330,7 +349,7 @@ void find_xp_damage()//пошук монстар по рівню життя і �
     }
     if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
     else write_monsters(nombers_monsters);
-    cout << "Press '0' to exit.\n";
+    cout << "/nPress '0' to exit.\n";
 not_null:
     if (_getch() != '0') goto not_null;
 }
@@ -341,9 +360,9 @@ void find_name()//пошук монстра по імені
     char fragment_name[200];
     std:: vector <int> nombers_monsters;
     gets_s(fragment_name);
-    my_cls();
-    if (strlen(fragment_name) == 0) gets_s(fragment_name);
     int fragment_size = strlen(fragment_name);
+    if (fragment_size == 0) gets_s(fragment_name);
+    my_cls();
     for (int i = 0; i < all_monsters.size(); i++)
     {
         char* p;
@@ -374,7 +393,7 @@ void find_name()//пошук монстра по імені
     }
     if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
     else write_monsters(nombers_monsters);
-    cout << "Press '0' to exit.\n";
+    cout << "\nPress '0' to exit.\n";
 not_null:
     if (_getch() != '0') goto not_null;
 }
@@ -383,7 +402,7 @@ void Interactive_dialog_mode()
 next:
     my_cls();
     cout << "Menu:\n";
-    cout << "1)Add a new monster.\n2)Find an existing monster.\n0)Back.\n";
+    cout << "1)Add a new monster.\n2)Find an existing monster.\n3)Delete a monster.\n0)Back.\n";
 menu:
     switch (_getch())
     {
@@ -420,6 +439,11 @@ menu:
             break;
             default: goto found_monstr;
         }
+    }
+    break;
+    case '3':
+    {
+
     }
     break;
     case '0':
