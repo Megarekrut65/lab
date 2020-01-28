@@ -31,6 +31,11 @@ struct info_monster
     double chance;//0-1 
     short int type_of_attack;//збільшити пошкодження, повторити атаку,вилікувати себе, паралізувати супротивника; 
     char time_info[26];  
+   // info_monster(char name[],unsigned int xp,unsigned short int damage, double chance, short int type_of_attack)
+   // {
+    //    this->name = name;
+    //    this->xp = xp;
+   // }
 };
 std:: vector<info_monster> all_monsters;//місце де зберігаються всі монстри
 void my_cls()//очищує екран і виводить назву програми
@@ -184,7 +189,6 @@ void add_new_monster()//створює нового монстра
     case'4': new_monster.type_of_attack = 4;
         break;
     default: goto types_attack;
-        break;
     }
     new_monster.id = set_id();
     my_cls();
@@ -197,12 +201,14 @@ void add_new_monster()//створює нового монстра
     not_null:
     if (_getch() != '0') goto not_null;
 }
-void delete_monster()
+void delete_monster()//видаляє монстра з вказаним ід
 {
+    my_cls();
     cout << "Enter id of monster: ";
     unsigned int monster_id;
     int nomber_monster_death = -1;
     cin >> monster_id;
+    my_cls();
     for (int i = 0; i < all_monsters.size(); i++)
     {
         if (monster_id == all_monsters[i].id)
@@ -213,8 +219,13 @@ void delete_monster()
     }
     if (nomber_monster_death != -1)
     {
-
+        all_monsters.erase(all_monsters.begin() + nomber_monster_death);
+        cout << "The monster - removed!\n";
     }
+    else cout << "Monster not found!\n";
+    cout << "\nPress '0' to exit.\n";
+not_null:
+    if (_getch() != '0') goto not_null;
 }
 void write_monsters(std::vector<int> monsters_nombers)//виводить дані монстра на еран
 {
@@ -222,15 +233,25 @@ void write_monsters(std::vector<int> monsters_nombers)//виводить дан�
     cout << "Monsters found:\n";
     for (int i = 0; i < monsters_nombers.size(); i++) 
     {
-        cout << i + 1 << ".\n";
-        cout <<"ID: " << all_monsters[monsters_nombers[i]].id << endl;
-        cout << "Name: " <<all_monsters[monsters_nombers[i]].name << endl;
-        cout << "XP: " <<all_monsters[monsters_nombers[i]].xp << endl;
-        cout << "Damage: " << all_monsters[monsters_nombers[i]].damage << endl;
-        cout << "Chance to launch a special attack: " << all_monsters[monsters_nombers[i]].chance << endl;
-        cout << "Type of special monster attack: " << arr_types[all_monsters[monsters_nombers[i]].type_of_attack - 1] << endl;
+        cout << "<"<<i + 1 << ">\n";
+        cout <<"ID: " << all_monsters[monsters_nombers[i]].id << ".\n";
+        cout << "Name: " <<all_monsters[monsters_nombers[i]].name << ".\n";
+        cout << "XP: " <<all_monsters[monsters_nombers[i]].xp << ".\n";
+        cout << "Damage: " << all_monsters[monsters_nombers[i]].damage << ".\n";
+        cout << "Chance to launch a special attack: " << all_monsters[monsters_nombers[i]].chance << ".\n";
+        cout << "Type of special monster attack: " << arr_types[all_monsters[monsters_nombers[i]].type_of_attack - 1] << "." << endl;
         cout << "Creation date and time: " << all_monsters[monsters_nombers[i]].time_info;
     }
+}
+void write_all_monsters()//видає на екран дані всіх монстрів
+{
+    my_cls();
+    std::vector<int> nombers;
+    for (int i = 0; i < all_monsters.size(); i++) nombers.push_back(i);
+    write_monsters(nombers);
+    cout << "\nPress '0' to exit.\n";
+not_null:
+    if (_getch() != '0') goto not_null;
 }
 void find_types_time()//пошук монстра по типу атки та часу створення
 {
@@ -349,7 +370,7 @@ void find_xp_damage()//пошук монстар по рівню життя і �
     }
     if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
     else write_monsters(nombers_monsters);
-    cout << "/nPress '0' to exit.\n";
+    cout << "\nPress '0' to exit.\n";
 not_null:
     if (_getch() != '0') goto not_null;
 }
@@ -359,9 +380,9 @@ void find_name()//пошук монстра по імені
     cout << "Enter the full name or snippet of the monster name:\n";
     char fragment_name[200];
     std:: vector <int> nombers_monsters;
-    gets_s(fragment_name);
+    gets_s(fragment_name);    
+    if (strlen(fragment_name) == 0) gets_s(fragment_name);
     int fragment_size = strlen(fragment_name);
-    if (fragment_size == 0) gets_s(fragment_name);
     my_cls();
     for (int i = 0; i < all_monsters.size(); i++)
     {
@@ -371,24 +392,23 @@ void find_name()//пошук монстра по імені
         if (fragment_size > name_size) break;
         else
         {
-            bool flag = true;
-            for (int j = 0,k = 0,j_save = 0; (j_save + fragment_size) < name_size; j++)
+            int k = 0;
+            for (int j = 0,j_save = 0; (j_save + fragment_size) < (name_size + 1); j++)
             {
                 if (p[j] == fragment_name[k])
                 {
                     k++;
-                    flag = true;
                     if (k >= fragment_size) break;
                 }
                 else
                 {
-                    k = 0;
                     j_save++;
+                    k = 0;                 
                     j = j_save;
-                    flag = false;
+                    j--;
                 }
             }
-            if (flag) nombers_monsters.push_back(i);
+            if (k == fragment_size) nombers_monsters.push_back(i);
         }
     }
     if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
@@ -415,7 +435,8 @@ menu:
     case '2':
     {
         my_cls();
-        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n3)Search by type of special monster attack.\n";
+        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n" 
+             <<"3)Search by type of special monster attack.\n4)Show all the monsters.\n";
     found_monstr:
         switch (_getch())
         {
@@ -437,13 +458,20 @@ menu:
                 goto next;
             }
             break;
+            case '4':
+            {
+                write_all_monsters();
+                goto next;
+            }
+            break;
             default: goto found_monstr;
         }
     }
     break;
     case '3':
     {
-
+        delete_monster();
+        goto next;
     }
     break;
     case '0':
@@ -452,7 +480,7 @@ menu:
     }
 
 }
-int main()
+int main()//no coments
 {
 next:
     my_cls();
