@@ -24,15 +24,96 @@ struct my_time
 };
 struct info_monster
 {
-    unsigned int id;
+    int id;
     char name[200];
-    unsigned int xp;//1-50000
-    unsigned short int damage;//1-1000
-    double chance;//0-1 
-    short int type_of_attack;//збільшити пошкодження, повторити атаку,вилікувати себе, паралізувати супротивника; 
+    int xp;//1-50000
+    int damage;//1-1000
+    float chance;//0-1 
+    int type_of_attack;//збільшити пошкодження, повторити атаку,вилікувати себе, паралізувати супротивника; 
     char time_info[26];
 };
+char binary_file_name[] = "binary.txt", text_file_name[] = "text.txt";
 std::vector<info_monster> all_monsters;//місце де зберігаються всі монстри
+void open_file(bool t_or_b = true)
+{
+    if (t_or_b)
+    {
+        FILE* fpt;
+        fopen_s(&fpt, text_file_name, "r");
+        while (!feof(fpt))
+        {
+           info_monster monster;
+           cout << "monster" << endl;
+           int i;
+           cin >> i;
+           fscanf_s(fpt, "%d", &monster.id);
+           char rubbish[2];
+           fgets(rubbish, 2, fpt);
+           fgets(monster.name, 200, fpt);
+           int l = strlen(monster.name);
+           monster.name[l - 1] = '\0';
+           fscanf_s(fpt, "%d", &monster.xp);
+           fgets(rubbish, 2, fpt);
+           fscanf_s(fpt, "%d", &monster.damage);
+           fgets(rubbish, 2, fpt);
+           fscanf_s(fpt, "%f", &monster.chance);
+           fgets(rubbish, 2, fpt);
+           fscanf_s(fpt, "%d", &monster.type_of_attack);
+           fgets(rubbish, 2, fpt);
+           fgets(monster.time_info, 26, fpt);
+           all_monsters.push_back(monster);
+        }
+        fclose(fpt);
+        delete fpt;
+    }
+    else
+    {
+        FILE* fpb;
+        fopen_s(&fpb, binary_file_name, "rb");    
+        while (!feof(fpb))
+        {
+           info_monster monster;
+           fread(&monster, sizeof(info_monster), 1, fpb);
+           all_monsters.push_back(monster);
+        }
+        fclose(fpb);
+        delete fpb;      
+    }
+}
+bool file_save_text(char *mode)
+{
+    FILE* fp;
+    fopen_s(&fp, text_file_name, mode);
+    if (fp == NULL) return false;
+    unsigned int i;
+    if (mode[0] == 'a') i = all_monsters.size() - 1;
+    else i = 0;
+    for (; i < all_monsters.size(); i++)
+    {
+        fprintf_s(fp, "%d\n", all_monsters[i].id);
+        fputs(all_monsters[i].name, fp);
+        fputs("\n", fp);
+        fprintf_s(fp, "%d\n", all_monsters[i].xp);
+        fprintf_s(fp, "%d\n", all_monsters[i].damage);
+        fprintf_s(fp, "%f\n", all_monsters[i].chance);
+        fprintf_s(fp, "%d\n", all_monsters[i].type_of_attack);
+        fputs(all_monsters[i].time_info, fp);
+    }
+    fclose(fp);
+    return true;
+}
+bool file_save_binary(char *mode)
+{
+    FILE* fp;
+    fopen_s(&fp, binary_file_name, mode);
+    if (fp == NULL) return false;
+    unsigned int i;
+    if (mode[0] == 'a') i = all_monsters.size() - 1;
+    else i = 0;
+    for (; i < all_monsters.size(); i++) fwrite(&all_monsters[i], sizeof(info_monster), 1, fp);
+    fclose(fp);
+    return true;
+}
 void my_cls()//очищує екран і виводить назву програми
 {
     system("CLS");
@@ -94,7 +175,7 @@ int set_id()//створює унікальний код
     while (flag)
     {
         flag = false;
-        for (int i = 0; i < all_monsters.size(); i++)
+        for (unsigned int i = 0; i < all_monsters.size(); i++)
         {
             if (id_monster == all_monsters[i].id)
             {
@@ -154,7 +235,7 @@ void add_new_monster()//створює нового монстра
     while (flag_chance)
     {
         cout << "Enter the monster's chance to launch a special attack (0.00 - 1.00): ";
-        double temp_chance = 0;
+        float temp_chance = 0;
         cin >> temp_chance;
         if ((temp_chance < 0) || (temp_chance > 1))
         {
@@ -192,6 +273,17 @@ types_attack:
     ctime_s(new_monster.time_info, 26, &seconds);
     cout << "Creation date and time: " << new_monster.time_info << endl;
     all_monsters.push_back(new_monster);
+    char mode[] = "a";
+    if (!file_save_text(mode))
+    {
+        my_cls();
+        cout << "Error!...\n";
+    }
+    if (!file_save_binary(mode))
+    {
+        my_cls();
+        cout << "Error!...\n";
+    }
     cout << "Press '0' to continue.\n";
 not_null:
     if (_getch() != '0') goto not_null;
@@ -204,7 +296,7 @@ void delete_monster()//видаляє монстра з вказаним ід
     int nomber_monster_death = -1;
     cin >> monster_id;
     my_cls();
-    for (int i = 0; i < all_monsters.size(); i++)
+    for (unsigned int i = 0; i < all_monsters.size(); i++)
     {
         if (monster_id == all_monsters[i].id)
         {
@@ -226,15 +318,15 @@ void write_monsters(std::vector<int> monsters_nombers)//виводить дан�
 {
     char arr_types[][20] = { "Increase damage","Repeat the attack","Cure yourself","Paralyze the enemy" };
     cout << "Monsters found:\n";
-    for (int i = 0; i < monsters_nombers.size(); i++)
+    for (unsigned int i = 0; i < monsters_nombers.size(); i++)
     {
         cout << "<" << i + 1 << ">\n";
         cout << "ID: " << all_monsters[monsters_nombers[i]].id << ".\n";
-        cout << "Name: " << all_monsters[monsters_nombers[i]].name << ".\n";
+        cout << "Name: " << all_monsters[monsters_nombers[i]].name <<".\n";
         cout << "XP: " << all_monsters[monsters_nombers[i]].xp << ".\n";
         cout << "Damage: " << all_monsters[monsters_nombers[i]].damage << ".\n";
         cout << "Chance to launch a special attack: " << all_monsters[monsters_nombers[i]].chance << ".\n";
-        cout << "Type of special monster attack: " << arr_types[all_monsters[monsters_nombers[i]].type_of_attack - 1] << "." << endl;
+        cout << "Type of special monster attack: " << arr_types[all_monsters[monsters_nombers[i]].type_of_attack - 1]<< "." << endl;
         cout << "Creation date and time: " << all_monsters[monsters_nombers[i]].time_info;
     }
 }
@@ -242,7 +334,7 @@ void write_all_monsters()//видає на екран дані всіх монс
 {
     my_cls();
     std::vector<int> nombers;
-    for (int i = 0; i < all_monsters.size(); i++) nombers.push_back(i);
+    for (unsigned int i = 0; i < all_monsters.size(); i++) nombers.push_back(i);
     write_monsters(nombers);
     cout << "\nPress '0' to exit.\n";
 not_null:
@@ -284,7 +376,7 @@ types_attack:
     cin >> find_time.sec;
     my_cls();
     std::vector <int> nombers_monsters;
-    for (int i = 0; i < all_monsters.size(); i++)
+    for (unsigned int i = 0; i < all_monsters.size(); i++)
     {
         if (one_types_attack == all_monsters[i].type_of_attack)
         {
@@ -359,7 +451,7 @@ void find_xp_damage()//пошук монстар по рівню життя і �
     cin >> max_damage;
     my_cls();
     std::vector <int> nombers_monsters;
-    for (int i = 0; i < all_monsters.size(); i++)
+    for (unsigned int i = 0; i < all_monsters.size(); i++)
     {
         if ((min_xp <= all_monsters[i].xp) && (max_damage >= all_monsters[i].damage)) nombers_monsters.push_back(i);
     }
@@ -376,10 +468,10 @@ void find_name()//пошук монстра по імені
     char fragment_name[200];
     std::vector <int> nombers_monsters;
     gets_s(fragment_name);
-    if (strlen(fragment_name) == 0) gets_s(fragment_name);
+    if (fragment_name == "") gets_s(fragment_name);
     int fragment_size = strlen(fragment_name);
     my_cls();
-    for (int i = 0; i < all_monsters.size(); i++)
+    for (unsigned int i = 0; i < all_monsters.size(); i++)
     {
         char* p;
         p = all_monsters[i].name;
@@ -414,6 +506,17 @@ not_null:
 }
 void Interactive_dialog_mode()
 {
+    my_cls();
+    cout << "Select the opening mode:\n1)Text mode.\n2)Binary mode.\n";
+ file_mode: 
+    switch (_getch())
+    {
+        case '1': open_file(true);
+            break;
+        case '2': open_file(false);
+            break;
+        default: goto file_mode;
+    }
 next:
     my_cls();
     cout << "Menu:\n";
