@@ -10,15 +10,3 @@ Increase damage
 2
 2
 2020
-34969
-load
-99
-1
-0
-Increase damage
-12
-43
-29
-2
-2
-2020
