@@ -99,7 +99,7 @@ bool create_binary_file()
     {
 
         file.close();
-        std::ofstream file_create(binary_file_name);
+        std::ofstream file_create(binary_file_name,std::ios_base::binary);
         file_create.close();
         return false;
     }
@@ -161,7 +161,7 @@ void open_file(bool t_or_b)//переносить інформацію з фай
             std::ifstream file(binary_file_name, std::ios_base::binary);
             while (!file.eof())
             {
-                info_monster monster("", 0, 0, 0,"", my_time (0, 0, 0, 0, 0, 1971),0);
+                info_monster monster("0", 0, 0, 0,"0", my_time (0, 0, 0, 0, 0, 1980),0);
                 file.read((char*)&monster, sizeof(monster));
                 all_monsters.push_back(monster);
             }
@@ -215,7 +215,7 @@ bool save_binary_file(string path)//переносить інформацію з
 }
 bool add_in_binary_file(info_monster monster,string path)//додає інформацію в кінець текстового файлу
 {
-    std::ofstream file(path, std::ios_base::binary,std::ios_base::app);
+    std::ofstream file(path, std::ios_base::binary|std::ios_base::app);
     if (!file.is_open()) return false;
     file.write((char*)&monster, sizeof(monster));
     file.close();
