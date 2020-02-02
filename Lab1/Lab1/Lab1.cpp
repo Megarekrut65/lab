@@ -42,12 +42,12 @@ struct info_monster
 {
     int id ;
     string name;
-    int xp;//1-50000
+    unsigned int xp;//1-50000
     int damage ;//1-1000
     float chance;//0-1 
     string type_of_attack;//збільшити пошкодження, повторити атаку,вилікувати себе, паралізувати супротивника; 
     my_time time_info =  my_time(0, 0, 0, 0, 0, 1970);
-    info_monster(string name, int xp, int damage, float chance, string type_of_attack,my_time time_info = my_time(0, 0, 0, 0, 0, 1970), int id = -1)
+    info_monster(string name, unsigned int xp, int damage, float chance, string type_of_attack,my_time time_info = my_time(0, 0, 0, 0, 0, 1970), int id = -1)
     {   
         this->name = name;
         this->xp = xp;
@@ -106,7 +106,7 @@ bool create_binary_file()
     file.close();
     return true;
 }
-void open_file(bool t_or_b = true)
+void open_file(bool t_or_b)//переносить інформацію з файла в масив
 {
     if (t_or_b)
     {
@@ -126,7 +126,7 @@ void open_file(bool t_or_b = true)
             while (!file.eof())
             {
                 string name = "", type_of_attack = "";
-                int id = 0,xp = 0,damage = 0; 
+                unsigned int id = 0,xp = 0,damage = 0;
                 float chance = 2;
                 int hour = 0, min = 0, sec = 0, day = 0, month = 0, year = 0;
                 file >> id;
@@ -137,12 +137,7 @@ void open_file(bool t_or_b = true)
                 file >> chance;
                 getline(file, type_of_attack);
                 if(type_of_attack.size()==0) getline(file, type_of_attack);            
-                file >> hour;
-                file >> min;
-                file >> sec;
-                file >> day;
-                file >> month;
-                file >> year;          
+                file >> hour >> min >> sec >> day >> month >> year;        
                 if (xp==0) break;
                 else all_monsters.push_back(info_monster(name, xp, damage, chance, type_of_attack, my_time(hour, min, sec, day, month, year), id));
             }
@@ -174,7 +169,7 @@ void open_file(bool t_or_b = true)
         }
     }
 }
-bool save_text_file(string path)
+bool save_text_file(string path)//переносить інформацію з масиву в текстовий файл
 {
     std::ofstream file(path);
     if(!file.is_open()) return false;
@@ -186,13 +181,13 @@ bool save_text_file(string path)
         file << all_monsters[i].damage << endl;
         file << all_monsters[i].chance << endl;
         file << all_monsters[i].type_of_attack << endl;
-        file << all_monsters[i].time_info.hour << endl << all_monsters[i].time_info.min << endl << all_monsters[i].time_info.sec << endl
-             << all_monsters[i].time_info.day << endl << all_monsters[i].time_info.month << endl << all_monsters[i].time_info.year << endl;
+        file << all_monsters[i].time_info.hour << " " << all_monsters[i].time_info.min << " " << all_monsters[i].time_info.sec << " "
+             << all_monsters[i].time_info.day << " " << all_monsters[i].time_info.month << " " << all_monsters[i].time_info.year << endl;
     }
     file.close();
     return true;
 }
-bool add_in_text_file(info_monster monster,string path)
+bool add_in_text_file(info_monster monster,string path)//додає інформацію в кінець текстового файлу
 {
     std::ofstream file(path,std::ios_base::app);
     if (!file.is_open()) return false;
@@ -202,27 +197,27 @@ bool add_in_text_file(info_monster monster,string path)
         file << monster.damage << endl;
         file << monster.chance << endl;
         file << monster.type_of_attack << endl;
-        file << monster.time_info.hour << endl << monster.time_info.min << endl << monster.time_info.sec << endl
-            << monster.time_info.day << endl << monster.time_info.month << endl << monster.time_info.year << endl;
+        file << monster.time_info.hour << " "  << monster.time_info.min << " " << monster.time_info.sec << " "
+            << monster.time_info.day << " " << monster.time_info.month << " " << monster.time_info.year << endl;
     file.close();
     return true;
 }
-bool save_binary_file(string path)
+bool save_binary_file(string path)//переносить інформацію з масиву в бінарний файл
 {
     std::ofstream file(path, std::ios_base::binary);
     if (!file.is_open()) return false;
     for (unsigned int i = 0; i < all_monsters.size(); i++)
     {
-        file.write((char*)&all_monsters[i], sizeof(info_monster));
+        file.write((char*)&all_monsters[i], sizeof(all_monsters[i]));
     }
     file.close();
     return true;
 }
-bool add_in_binary_file(info_monster monster,string path)
+bool add_in_binary_file(info_monster monster,string path)//додає інформацію в кінець текстового файлу
 {
     std::ofstream file(path, std::ios_base::binary,std::ios_base::app);
     if (!file.is_open()) return false;
-    file.write((char*)&monster, sizeof(info_monster));
+    file.write((char*)&monster, sizeof(monster));
     file.close();
     return true;
 }
@@ -279,7 +274,7 @@ my_time set_time(char time_char[])//переводить дату з рядка 
 int set_id()//створює унікальний код
 {
     srand(time(0));
-    long int id_monster = (rand() % 90000 + 10000);
+    long int id_monster = (rand() % 9000 + 1000);
     bool flag = true;
     while (flag)
     {
@@ -302,7 +297,7 @@ void add_new_monster()//створює нового монстра
     my_cls();
     cout << "Create your own monster!\n";
     string name,type_of_attack;
-    int xp, damage;
+    unsigned int xp, damage;
     float chance;
     cout << "Enter a monster name: ";
     getline(cin,name);
@@ -310,7 +305,7 @@ void add_new_monster()//створює нового монстра
     while (true)
     {
         cout << "Enter the number of monster health units (1-50000): ";
-        int temp_xp = 0;
+        unsigned int temp_xp = 0;
         cin >> temp_xp;
         if ((temp_xp < 1) || (temp_xp > 50000))
         {
@@ -551,7 +546,7 @@ void find_xp_damage()//пошук монстар по рівню життя і �
 {
     my_cls();
     cout << "Enter minimum health level of monster(1-50000): ";
-    int min_xp = 1, max_damage = 1000;
+    unsigned int min_xp = 1, max_damage = 1000;
     cin >> min_xp;
     cout << "Enter the maximum attack level of monster(1-1000): ";
     cin >> max_damage;
@@ -679,11 +674,22 @@ menu:
     break;
     case '0': 
     {
+        if (!save_text_file(text_file_name) || !save_binary_file(binary_file_name))
+        {
+            my_cls();
+            cout << "Error saving file!...\n";
+            cout << "Press '0' to continue.\n";
+        not_null_file:
+            if (_getch() != '0') goto not_null_file;
+        }
         if (!save_text_file("copy_text.txt") || !save_binary_file("copy_binary.txt"))
         {
             my_cls();
             cout << "Error saving copy file!...\n";
-        }
+            cout << "Press '0' to continue.\n";
+        not_null_copy:
+            if (_getch() != '0') goto not_null_copy;
+        }    
         clean_arr();
     }
         break;
