@@ -1,0 +1,36 @@
+39944
+1
+1
+1
+1
+Increase damage
+1
+59
+55
+2
+2
+2020
+40561
+2
+2
+2
+1
+Repeat the attack
+2
+3
+4
+2
+2
+2020
+42550
+name
+111
+1
+1
+Paralyze the enemy
+2
+13
+13
+2
+2
+2020
