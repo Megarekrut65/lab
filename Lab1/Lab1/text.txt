@@ -1,0 +1,14 @@
+6635
+Ped close
+6010
+231
+0.33
+Repeat the attack
+22 49 29 3 2 2020
+4894
+2
+1
+1
+1
+Increase damage
+23 55 58 3 2 2020
