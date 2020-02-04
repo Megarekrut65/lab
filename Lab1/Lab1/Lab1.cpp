@@ -88,9 +88,8 @@ struct info_monster
 };
 struct result
 {
-    string operation_name;
-    vector <float> operation_time;
-
+    vector <float> time;
+    vector <long int> size;
 };
 string bin_file = "binary.bin", txt_file = "text.txt";//назви файлів
 vector<info_monster> all_monsters;//місце де зберігаються дані про всіх монстрів
@@ -98,7 +97,12 @@ vector<info_monster> all_monsters;//місце де зберігаються д�
 void clean_arr()//очищує масив
 {
     int arr_size = all_monsters.size();
-    for(int i = 0; i < arr_size;i++) all_monsters.erase(all_monsters.begin());
+    int j = 0;
+    for (int i = 0; i < arr_size; i++)
+    {
+        all_monsters.erase(all_monsters.begin());
+        cout << "Delete all monsters(" << arr_size <<"): " << (double)j++/arr_size << "%\n";
+    }
 }
 void my_cls()//очищує екран і виводить назву програми
 {
@@ -1344,7 +1348,7 @@ info_monster monster_generator()
     srand(time(0));
     int id = set_id();
     string name;
-    int n = (rand() % 50 + 5), m = n;
+    int n = (rand() % 30 + 5), m = n;
     char* buff = new char[n + 1];
     for (int i = 0; i < n; i++)
     {
@@ -1373,25 +1377,70 @@ info_monster monster_generator()
 
     return info_monster(name, xp, damage, chance, type, my_time(rand() % 24, rand() % 60, rand() % 60, rand() % 28 + 1, rand() % 12 + 1, rand() % 10 + 2020), id); 
 }
+int size_file(string path)
+{
+    std::ifstream file(path);
+    file.seekg(0, std::ios::end);
+    int sizef = file.tellg();
+    file.seekg(0, std::ios::beg);
+    file.close();
+    return sizef;
+}
 void benchmark_mode()
 {
     my_cls();
     int n;
-    vector <float> result;
+    result name_find, xp_damage_find, time_type_find, open_bin, open_txt, save_bin, save_txt;
     cout << "Enter N(1-...): ";
     cin >> n;
     auto the_start = std::chrono::high_resolution_clock::now();
     auto the_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> duration = the_end - the_start;
-    while (duration.count <= 10)
+    int m = n, k = 2,number = 0;
+    while (true)
     {
+        cout << "\n\n        <N = " << n << ">\n";
+        cout << "m = " << m << endl;
+        all_monsters.clear();
         for (int i = 0; i < n; i++) all_monsters.push_back(monster_generator());
+        cout << "arrow size = " << all_monsters.size() << endl;
+        the_start = std::chrono::high_resolution_clock::now();
         save_text_file("benchmark_text.txt");
+        the_end = std::chrono::high_resolution_clock::now();
+        duration = the_end - the_start;       
+        save_txt.time.push_back(duration.count());
+        save_txt.size.push_back(size_file("benchmark_text.txt"));
+        if (save_txt.time[number] >= 10) break;
+        cout << number << ".  " << "time save txt = " << save_txt.time[number] << endl;
+        cout << number << ".  " << "size save txt = " << save_txt.size[number] << endl;
+        the_start = std::chrono::high_resolution_clock::now();
         save_binary_file("benchmark_binary.bin");
+        the_end = std::chrono::high_resolution_clock::now();
+        duration = the_end - the_start;
+        save_bin.time.push_back(duration.count());
+        save_bin.size.push_back(size_file("benchmark_binary.bin"));
+        if (save_bin.time[number] >= 10) break;
+        cout << number << ".  " << "time save binary = " << save_bin.time[number] << endl;
+        cout << number << ".  " << "size save binary = " << save_bin.size[number] << endl;
+        the_start = std::chrono::high_resolution_clock::now();
         open_text_file("benchmark_text.txt");
-        for (int i = 0; i < n; i++) write_monster(i);
+        the_end = std::chrono::high_resolution_clock::now();
+        duration = the_end - the_start;
+        open_txt.time.push_back(duration.count());
+        if (open_txt.time[number] >= 10) break;
+        cout << number << ".  " << "time open txt = " << open_txt.time[number] << endl;
+        the_start = std::chrono::high_resolution_clock::now();
         open_binary_file("benchmark_binary.bin");
-        for (int i = 0; i < n; i++) write_monster(i);
+        the_end = std::chrono::high_resolution_clock::now();
+        duration = the_end - the_start;
+        open_bin.time.push_back(duration.count());
+        if (open_bin.time[number] >= 10) break;
+        cout << number << ".  " << "time open binary = " << open_bin.time[number] << endl;
+        n = k*m;
+        k++;
+        number++;
+        delete_file("benchmark_text.txt");
+        delete_file("benchmark_binary.bin");
     }
     clean_arr();
 }
