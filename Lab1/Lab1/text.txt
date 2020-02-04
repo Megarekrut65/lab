@@ -1,14 +1,14 @@
-6635
-Ped close
-6010
-231
-0.33
-Repeat the attack
-22 49 29 3 2 2020
-4894
-2
+4151
+Name1
 1
 1
 1
 Increase damage
-23 55 58 3 2 2020
+11 1 8 4 2 2020
+4180
+Name2
+2
+2
+0.2
+Repeat the attack
+11 1 17 4 2 2020

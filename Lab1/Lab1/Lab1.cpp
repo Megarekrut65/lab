@@ -162,11 +162,12 @@ void open_file(bool t_or_b)//переносить інформацію з фай
         else
         {
             std::ifstream file(binary_file_name, std::ios_base::binary);
+            info_monster monster = info_monster("0", 0, 0, 0, "0", my_time(0, 0, 0, 0, 0, 1980), 0);
             while (!file.eof())
-            {
-                info_monster monster("0", 0, 0, 0,"0", my_time (0, 0, 0, 0, 0, 1980),0);
+            {        
                 file.read((char*)&monster, sizeof(monster));
-                all_monsters.push_back(monster);
+                if(monster.time_info.year!= 1980) all_monsters.push_back(monster);
+                monster.time_info.year = 1980;
             }
             file.close();
         }
@@ -515,6 +516,14 @@ void edit_monster()
             break;
             default: goto other_keys;
         }
+        if (!save_text_file(text_file_name) || !save_binary_file(binary_file_name))
+        {
+            my_cls();
+            cout << "Error saving file!...\n";
+        }
+        cout << "\nPress '0' to exit.\n";
+    file_err:
+        if (_getch() != '0') goto  file_err;
     }
     else
     {
@@ -719,6 +728,14 @@ not_null:
 }
 void Interactive_dialog_mode()//інтерактивний діалоговий режим
 {
+    if (!save_text_file("copy_text.txt") || !save_binary_file("copy_binary.txt"))
+    {
+        my_cls();
+        cout << "Error saving copy file!...\n";
+        cout << "Press '0' to continue.\n";
+    not_null_copy:
+        if (_getch() != '0') goto not_null_copy;
+    }
     my_cls();
     cout << "Select the opening mode:\n1)Text mode.\n2)Binary mode.\n";
  file_mode: 
@@ -798,15 +815,7 @@ menu:
             cout << "Press '0' to continue.\n";
         not_null_file:
             if (_getch() != '0') goto not_null_file;
-        }
-        if (!save_text_file("copy_text.txt") || !save_binary_file("copy_binary.txt"))
-        {
-            my_cls();
-            cout << "Error saving copy file!...\n";
-            cout << "Press '0' to continue.\n";
-        not_null_copy:
-            if (_getch() != '0') goto not_null_copy;
-        }    
+        }  
         clean_arr();
     }
         break;
