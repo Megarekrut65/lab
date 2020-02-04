@@ -1,7 +1,4 @@
-﻿// Lab1.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
-#include <iostream>
+﻿#include <iostream>
 #include <Windows.h>
 #include <conio.h>
 #include <ctime>
@@ -51,10 +48,10 @@ struct info_monster
 {
     int id;
     string name;
-    unsigned int xp;//1-50000
-    int damage;//1-1000
-    float chance ;//0-1 
-    string type_of_attack;//збільшити пошкодження, повторити атаку,вилікувати себе, паралізувати супротивника; 
+    unsigned int xp;
+    int damage;
+    double chance ; 
+    string type_of_attack;
     my_time time_info;
     info_monster()
     {
@@ -66,7 +63,7 @@ struct info_monster
         this->time_info = my_time(0,0,0,0,0,1970);
         this->id = -1;
     }
-    info_monster(string name, unsigned int xp, int damage, float chance, string type_of_attack,my_time time_info = my_time(0, 0, 0, 0, 0, 1970), int id = -1)
+    info_monster(string name, unsigned int xp, int damage, double chance, string type_of_attack,my_time time_info = my_time(0, 0, 0, 0, 0, 1970), int id = -1)
     {   
         this->name = name;
         this->xp = xp;
@@ -86,8 +83,8 @@ struct info_monster
     }
 };
 
-string bin_file = "binary.bin", txt_file = "text.txt";
-vector<info_monster> all_monsters;//місце де зберігаються всі монстри
+string bin_file = "binary.bin", txt_file = "text.txt";//назви файлів
+vector<info_monster> all_monsters;//місце де зберігаються дані про всіх монстрів
 
 void clean_arr()//очищує масив
 {
@@ -104,7 +101,6 @@ bool create_text_file(string path)
     std::ifstream file(path);
     if (!file.is_open())
     {
-
         file.close();
         std::ofstream file_create(path);
         file_create.close();
@@ -121,8 +117,8 @@ void open_text_file(string path)//переносить інформацію з �
         cout << "File not found!...\n";
         cout << "New file created!\n";
         cout << "\nPress '0' to exit.\n";
-    not_null:
-        if (_getch() != '0') goto not_null;
+    not_zero:
+        if (_getch() != '0') goto not_zero;
     }
     else
     {
@@ -131,7 +127,7 @@ void open_text_file(string path)//переносить інформацію з �
         {
             string name = "", type_of_attack = "";
             unsigned int id = 0, xp = 0, damage = 0;
-            float chance = 2;
+            double chance = 2;
             int hour = 0, min = 0, sec = 0, day = 0, month = 0, year = 0;
             file >> id;
             getline(file, name);
@@ -203,8 +199,8 @@ void open_binary_file(string path)//переносить інформацію з
         cout << "File not found!...\n";
         cout << "New file created!\n";
         cout << "\nPress '0' to exit.\n";
-    not_null_b:
-        if (_getch() != '0') goto not_null_b;
+    not_zero:
+        if (_getch() != '0') goto not_zero;
     }
     else
     {
@@ -240,9 +236,7 @@ void open_binary_file(string path)//переносить інформацію з
             delete[] buffer_type;
         }
         file.close();
-    }
-       
-    
+    }  
 }
 bool save_binary_file(string path)//переносить інформацію з масиву в бінарний файл
 {
@@ -302,25 +296,20 @@ void delete_file(const char* path)//видаляє файл
 {
     std::remove(path);
 }
-int stringtoint(char* string_months)//переводить місяць з string в int
+int stringtoint(char* char_months)//переводить місяць з char[] в int
 {
-    int int_months = 0;
     char all_months[12][4] = { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
-    for (int i = 0; i < 12; i++)
+    for (unsigned int i = 0; i < 12; i++)
     {
         int k = 0;
-        if (string_months[0] == all_months[i][0]) k++;
-        if (string_months[0] == all_months[i][0]) k++;
-        if (string_months[0] == all_months[i][0]) k++;
-        if (k == 3)
-        {
-            int_months = i + 1;
-            break;
-        }
+        if (char_months[0] == all_months[i][0]) k++;
+        if (char_months[1] == all_months[i][1]) k++;
+        if (char_months[2] == all_months[i][2]) k++;
+        if (k == 3) return (i + 1);
     }
-    return int_months;
+    return -1;
 }
-void write_time(my_time t)//вииводить на екран час
+void write_time(my_time t)//виводить час на екран
 {
     cout << "Creation time and date: ";
     if (t.hour / 10 == 0) cout << "0" << t.hour << ":";
@@ -350,12 +339,13 @@ my_time set_time(char time_char[])//переводить дату з рядка 
     hour = (time_char[11] - '0') * 10 + (time_char[12] - '0');
     min = (time_char[14] - '0') * 10 + (time_char[15] - '0');
     sec = (time_char[17] - '0') * 10 + (time_char[18] - '0');
+    delete[] string_months;
     return my_time(hour,min,sec,day,month,year);
 }
-int set_id()//створює унікальний код
+int set_id()//створює унікальний id
 {
     srand(time(0));
-    long int id_monster = (rand() % 9000 + 1000);
+    int id_monster = (rand() % 9000 + 1000);
     bool flag = true;
     while (flag)
     {
@@ -366,7 +356,7 @@ int set_id()//створює унікальний код
             {
                 flag = true;
                 srand(id_monster);
-                id_monster = (rand() % 90000 + 10000);
+                id_monster = (rand() % 9000 + 1000);
                 break;
             }
         }
@@ -379,7 +369,7 @@ void add_new_monster()//створює нового монстра
     cout << "Create your own monster!\n";
     string name,type_of_attack;
     unsigned int xp, damage;
-    float chance;
+    double chance;
     cout << "Enter a monster name: ";
     getline(cin,name);
     if (name.size() == 0) getline(cin,name);
@@ -421,7 +411,7 @@ void add_new_monster()//створює нового монстра
     while (true)
     {
         cout << "Enter the monster's chance to launch a special attack (0.00 - 1.00): ";
-        float temp_chance = 0;
+        double temp_chance = 0;
         cin >> temp_chance;
         if ((temp_chance < 0) || (temp_chance > 1))
         {
@@ -463,10 +453,10 @@ types_attack:
         cout << "Error saving file!...\n";
     }
     cout << "\nPress '0' to continue.\n";
-not_null:
-    if (_getch() != '0') goto not_null;
+not_zero:
+    if (_getch() != '0') goto not_zero;
 }
-void write_monsters(std::vector<int> monsters_nombers)//виводить дані монстра на еран
+void write_monsters(std::vector<int> monsters_nombers)//виводить дані монстрів на еран
 {
     cout << "Monster(s) found:\n\n";
     for (unsigned int i = 0; i < monsters_nombers.size(); i++)
@@ -480,6 +470,17 @@ void write_monsters(std::vector<int> monsters_nombers)//виводить дан�
         cout << "Type of special monster attack: " << all_monsters[monsters_nombers[i]].type_of_attack << "." << endl;
         write_time(all_monsters[monsters_nombers[i]].time_info);
     }
+}
+void write_monster(int i)//виводить дані монстра на еран
+{
+    cout << "Monster found:\n\n";
+    cout << "ID: " << all_monsters[i].id << ".\n";
+    cout << "Name: " << all_monsters[i].name << ".\n";
+    cout << "XP: " << all_monsters[i].xp << ".\n";
+    cout << "Damage: " << all_monsters[i].damage << ".\n";
+    cout << "Chance to launch a special attack: " << all_monsters[i].chance << ".\n";
+    cout << "Type of special monster attack: " << all_monsters[i].type_of_attack << "." << endl;
+    write_time(all_monsters[i].time_info);
 }
 int find_id()//шукає монстра по id
 {
@@ -503,111 +504,105 @@ int find_id()//шукає монстра по id
 }
 void edit_monster()
 {
-    int id = find_id();
+    int number = find_id();
     my_cls();
-    vector <int> monster(1);
-    monster[0] = id;
-    if (id != -1)
+    if (number != -1)
     {
     edit:
         my_cls();
-        write_monsters(monster);
+        write_monster(number);
         cout << "\nSelect the option you want to edit:\n";
         cout << "1)Name.\n2)XP.\n3)Damage.\n4)Chance to launch a special attack.\n5)Type of special monster attack.\n0)Exit." <<endl;
-    other_keys:
         switch (_getch())
         {
             case '1':
             {
                 my_cls();
-                write_monsters(monster);
+                write_monster(number);
                 cout << "\nEnter a new Name of monster: ";
                 string new_name;
                 getline(cin, new_name);
                 if(new_name.size() == 0) getline(cin, new_name);
-                all_monsters[id].name = new_name;
+                all_monsters[number].name = new_name;
                 goto edit;
             }
             break;
             case '2':
             {
                 my_cls();
-                write_monsters(monster);
+                write_monster(number);
                 cout << "\nEnter a new XP of monster: ";
                 unsigned int new_xp;
                 cin >> new_xp;
-                if ((new_xp >= 1) && (new_xp <= 50000)) all_monsters[id].xp = new_xp;       
+                if ((new_xp >= 1) && (new_xp <= 50000)) all_monsters[number].xp = new_xp;
                 goto edit;
             }
             break;
             case '3':
             {
                 my_cls();
-                write_monsters(monster);
+                write_monster(number);
                 cout << "\nEnter a new Damage of monster: ";
                 int new_damage;
                 cin >> new_damage;
-                if ((new_damage >= 1) && (new_damage <= 1000)) all_monsters[id].damage = new_damage;
+                if ((new_damage >= 1) && (new_damage <= 1000)) all_monsters[number].damage = new_damage;
                 goto edit;
             }
             break;
             case '4':
             {
                 my_cls();
-                write_monsters(monster);
+                write_monster(number);
                 cout << "\nEnter a new Chance of monster: ";
-                float new_chance;
+                double new_chance;
                 cin >> new_chance;
-                if ((new_chance >= 0) && (new_chance <= 1)) all_monsters[id].chance = new_chance;         
+                if ((new_chance >= 0) && (new_chance <= 1)) all_monsters[number].chance = new_chance;
                 goto edit;
             }
             break;
             case '5':
             {
                 my_cls();
-                write_monsters(monster);
+                write_monster(number);
                 cout << "\nChoose one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
                     << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-                string new_types;
+                string new_type;
             types_attack:
                 switch (_getch())
                 {
-                case'1': new_types = "Increase damage";
+                case'1': new_type = "Increase damage";
                     break;
-                case'2': new_types = "Repeat the attack";
+                case'2': new_type = "Repeat the attack";
                     break;
-                case '3': new_types = "Cure yourself";
+                case '3': new_type = "Cure yourself";
                     break;
-                case'4': new_types = "Paralyze the enemy";
+                case'4': new_type = "Paralyze the enemy";
                     break;
                 default: goto types_attack;
                 }
-                all_monsters[id].type_of_attack = new_types;
+                all_monsters[number].type_of_attack = new_type;
                 goto edit;
             }
             break;
             case '0':
-            {
-                my_cls();
-            }
             break;
-            default: goto other_keys;
+            default: goto edit;
         }
         if (!save_text_file(txt_file) || !save_binary_file(bin_file))
         {
             my_cls();
             cout << "Error saving file!...\n";
-        }
-        cout << "\nPress '0' to exit.\n";
-    file_err:
-        if (_getch() != '0') goto  file_err;
+            cout << "\nPress '0' to exit.\n";
+        file_err:
+            if (_getch() != '0') goto  file_err;
+        }     
     }
     else
     {
         cout << "Monster not found!\n";
         cout << "\nPress '0' to exit.\n";
-    not_null:
-        if (_getch() != '0') goto not_null;
+    not_found:
+        if (_getch() != '0') goto not_found;
     }
 }
 void delete_monster()//видаляє монстра з вказаним ід
@@ -626,8 +621,8 @@ void delete_monster()//видаляє монстра з вказаним ід
     }
     else cout << "Monster not found!\n";
     cout << "\nPress '0' to exit.\n";
-not_null:
-    if (_getch() != '0') goto not_null;
+not_zero:
+    if (_getch() != '0') goto not_zero;
       
 }
 void write_all_monsters()//видає на екран дані всіх монстрів
@@ -658,7 +653,6 @@ types_attack:
     case '4': one_types_attack = "Paralyze the enemy";
         break;
     default: goto types_attack;
-        break;
     }
     cout << "Enter the maximum date and time the monster was created.\n";
     int hour, min, sec, day, month, year;
@@ -738,14 +732,15 @@ types_attack:
     if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
     else write_monsters(nombers_monsters);
     cout << "\nPress '0' to exit.\n";
-not_null:
-    if (_getch() != '0') goto not_null;
+not_zero:
+    if (_getch() != '0') goto not_zero;
 }
-void find_xp_damage()//пошук монстар по рівню життя і атаці
+void find_xp_damage()//пошук монстар по рівню життя і атаки
 {
     my_cls();
     cout << "Enter minimum health level of monster(1-50000): ";
-    unsigned int min_xp = 1, max_damage = 1000;
+    unsigned int min_xp = 1;
+    int max_damage = 1000;
     cin >> min_xp;
     cout << "Enter the maximum attack level of monster(1-1000): ";
     cin >> max_damage;
@@ -758,8 +753,8 @@ void find_xp_damage()//пошук монстар по рівню життя і �
     if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
     else write_monsters(nombers_monsters);
     cout << "\nPress '0' to exit.\n";
-not_null:
-    if (_getch() != '0') goto not_null;
+not_zero:
+    if (_getch() != '0') goto not_zero;
 }
 void find_name()//пошук монстра по імені
 {
@@ -790,8 +785,7 @@ void find_name()//пошук монстра по імені
                 {
                     j_save++;
                     k = 0;
-                    j = j_save;
-                    j--;
+                    j = j_save - 1;
                 }
             }
             if (k == fragment_size) nombers_monsters.push_back(i);
@@ -800,8 +794,8 @@ void find_name()//пошук монстра по імені
     if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
     else write_monsters(nombers_monsters);
     cout << "\nPress '0' to exit.\n";
-not_null:
-    if (_getch() != '0') goto not_null;
+not_zero:
+    if (_getch() != '0') goto not_zero;
 }
 void Interactive_dialog_mode()//інтерактивний діалоговий режим
 {
@@ -810,8 +804,8 @@ void Interactive_dialog_mode()//інтерактивний діалоговий 
         my_cls();
         cout << "Error saving copy file!...\n";
         cout << "Press '0' to continue.\n";
-    not_null_copy:
-        if (_getch() != '0') goto not_null_copy;
+    err_copy:
+        if (_getch() != '0') goto err_copy;
     }
     my_cls();
     cout << "Select the opening mode:\n1)Text mode.\n2)Binary mode.\n";
@@ -824,16 +818,15 @@ void Interactive_dialog_mode()//інтерактивний діалоговий 
             break;
         default: goto file_mode;
     }
-next:
+menu:
     my_cls();
     cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
-menu:
     switch (_getch())
     {
     case '1':
     {
         add_new_monster();
-        goto next;
+        goto menu;
     }
     break;
     case '2':
@@ -841,46 +834,46 @@ menu:
         my_cls();
         cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
             << "3)Search by type of special monster attack and date.\n4)Show all the monsters.\n";
-    found_monstr:
+    found_monster:
         switch (_getch())
         {
         case '1':
         {
             find_name();
-            goto next;
+            goto menu;
         }
         break;
         case '2':
         {
             find_xp_damage();
-            goto next;
+            goto menu;
         }
         break;
         case '3':
         {
             find_types_time();
-            goto next;
+            goto menu;
         }
         break;
         case '4':
         {
             write_all_monsters();
-            goto next;
+            goto menu;
         }
         break;
-        default: goto found_monstr;
+        default: goto found_monster;
         }
     }
     break;
     case '3':
     {
         edit_monster();
-        goto next;
+        goto menu;
     }
     case '4':
     {
         delete_monster();
-        goto next;
+        goto menu;
     }
     break;
     case '0': 
@@ -890,8 +883,8 @@ menu:
             my_cls();
             cout << "Error saving file!...\n";
             cout << "Press '0' to continue.\n";
-        not_null_file:
-            if (_getch() != '0') goto not_null_file;
+        err_file:
+            if (_getch() != '0') goto err_file;
         }  
         if (all_monsters.size() == 0)
         {
@@ -906,626 +899,427 @@ menu:
     default: goto menu;
     }   
 }
-void demo_cls(int n)
+bool demo_cls(int n)//очищення екрану та затримка для демонстраційного режиму
 {
     Sleep(n);
     my_cls();
-    cout << "Demo mode (DON'T PRESS ANYTHING!):\n\n";
+    cout << "Demo mode (press any key to exit).\n\n";
+    if (_kbhit()) return true;
+    return false;
 }
 void demo_mode()//демонстраційний режим
 {
-    int n = 1800;
-    srand(time(0));
-    int id = set_id();
-    unsigned int demo_xp = (rand() % 50000 + 1);
-    srand(time(0));
-    int demo_damage = (rand() % 1000 + 1);
-    srand(time(0));
-    float demo_chance = 0.01*(rand() % 100 + 1);
-    string demo_type = "Increase damage";
-    time_t seconds = time(NULL);
-    char c[26];
-    ctime_s(c, 26, &seconds);
-    my_time t = set_time(c);
-    my_cls();
-    cout << "Enter playback speed(normal = 1800): ";
-    cin >> n;
-    demo_cls(0);
-    cout << "Select the application mode:\n1)Interactive dialog mode.\n2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
-    demo_cls(n);
-    cout << "Select the application mode:\n1)Interactive dialog mode. <- press\n2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
-    //file mode
-    demo_cls(n);
-    cout << "Select the opening mode:\n1)Text mode.\n2)Binary mode.\n";
-    demo_cls(n);
-    cout << "Select the opening mode:\n1)Text mode. <- press\n2)Binary mode.\n";
-    //add monster
-    demo_cls(n);
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
-    demo_cls(n);
-    cout << "Menu:\n1)Add a new monster. <- press\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
-    demo_cls(n);
-    cout << "Create your own monster!\nEnter a monster name: \n";
-    demo_cls(n);
-    cout << "Create your own monster!\nEnter a monster name: <- write a name and press <Enter>\n";
-    demo_cls(n);
-    cout << "Create your own monster!\nEnter a monster name: Name1\n";
-    cout << "Enter the number of monster health units (1-50000): \n";
-    demo_cls(n);
-    cout << "Create your own monster!\nEnter a monster name: Name1\n";
-    cout << "Enter the number of monster health units (1-50000): <- write a xp and press <Enter>\n";
-    demo_cls(n);
-    cout << "Create your own monster!\nEnter a monster name: Name1\n";
-    cout << "Enter the number of monster health units (1-50000): " << demo_xp << endl;
-    cout << "Enter the number of monster attack units (1-1000): \n";
-    demo_cls(n);
-    cout << "Create your own monster!\nEnter a monster name: Name1\n";
-    cout << "Enter the number of monster health units (1-50000): " << demo_xp << endl;
-    cout << "Enter the number of monster attack units (1-1000): <- write a damage and press <Enter>\n";
-    demo_cls(n);
-    cout << "Create your own monster!\nEnter a monster name: Name1\n";
-    cout << "Enter the number of monster health units (1-50000): " << demo_xp << endl;
-    cout << "Enter the number of monster attack units (1-1000): " << demo_damage << endl;
-    cout << "Enter the monster's chance to launch a special attack (0.00 - 1.00): \n";
-    demo_cls(n);
-    cout << "Create your own monster!\nEnter a monster name: Name1\n";
-    cout << "Enter the number of monster health units (1-50000): " << demo_xp << endl;
-    cout << "Enter the number of monster attack units (1-1000): " << demo_damage << endl;
-    cout << "Enter the monster's chance to launch a special attack (0.00 - 1.00): <- write a chance and press <Enter>\n";
-    demo_cls(n);
-    cout << "Create your own monster!\nEnter a monster name: Name1\n";
-    cout << "Enter the number of monster health units (1-50000): " << demo_xp << endl;
-    cout << "Enter the number of monster attack units (1-1000): " << demo_damage << endl;
-    cout << "Enter the monster's chance to launch a special attack (0.00 - 1.00): " << demo_chance << endl;
-    cout << "Choose one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    demo_cls(n);
-    cout << "Create your own monster!\nEnter a monster name: Name1\n";
-    cout << "Enter the number of monster health units (1-50000): " << demo_xp << endl;
-    cout << "Enter the number of monster attack units (1-1000): " << demo_damage << endl;
-    cout << "Enter the monster's chance to launch a special attack (0.00 - 1.00): " << demo_chance << endl;
-    cout << "Choose one of the possible types of special monster attack:\n1)Increase damage. <- press\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    demo_cls(n);  
-    cout << "New monster created!\nHis personal ID: " << id << endl;
-    write_time(t);
-    cout << "\nPress '0' to continue.\n";
-    demo_cls(n);
-    cout << "New monster created!\nHis personal ID: " << id << endl;
-    write_time(t);
-    cout << "\nPress '0' to continue. <- press\n";
-    //find monster by name
-    demo_cls(2*n);
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
-    demo_cls(n);
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster. <- press\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
-    demo_cls(n);
-    cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
-        << "3)Search by type of special monster attack and date.\n4)Show all the monsters.\n";
-    demo_cls(n);
-    cout << "Select Monster Search Mode:\n1)Search by Name. <- press\n2)Search by xp and damage.\n"
-        << "3)Search by type of special monster attack and date.\n4)Show all the monsters.\n";
-    demo_cls(n);
-    cout << "Enter the full name or snippet of the monster name:\n";
-    demo_cls(n);
-    cout << "Enter the full name or snippet of the monster name:\n   <- write a snippet and press <Enter>";
-    demo_cls(n);
-    cout << "Enter the full name or snippet of the monster name:\name";
-    demo_cls(n);
-    cout << "Monster(s)found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " <<demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: "<<demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    write_time(t);
-    cout << "\nPress '0' to continue.\n";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    write_time(t);
-    cout << "\nPress '0' to continue. <- press\n";
-    demo_cls(2*n);
-    //find monster by xp and damage
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
-    demo_cls(n);
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster. <- press\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
-    demo_cls(n);
-    cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
-        << "3)Search by type of special monster attack and date.\n4)Show all the monsters.\n";
-    demo_cls(n);
-    cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage. <- press\n"
-        << "3)Search by type of special monster attack and date.\n4)Show all the monsters.\n";
-    demo_cls(n);
-    cout << "Enter minimum health level of monster(1-50000): \n";
-    demo_cls(n);
-    cout << "Enter minimum health level of monster(1-50000): <- write a min xp and press <Enter>\n";
-    demo_cls(n);
-    cout << "Enter minimum health level of monster(1-50000): " << demo_xp << endl;
-    cout << "Enter the maximum attack level of monster(1-1000): \n";
-    demo_cls(n);
-    cout << "Enter minimum health level of monster(1-50000): " << demo_xp << endl;
-    cout << "Enter the maximum attack level of monster(1-1000): <- write a max damage and press <Enter>\n";
-    demo_cls(n);
-    cout << "Enter minimum health level of monster(1-50000): " << demo_xp << endl;
-    cout << "Enter the maximum attack level of monster(1-1000): " << demo_damage << endl;
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    write_time(t);
-    cout << "\nPress '0' to continue.\n";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    write_time(t);
-    cout << "\nPress '0' to continue. <- press\n";
-    demo_cls(2 * n);
-    //find monster by type of special monster attack
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
-    demo_cls(n);
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster. <- press\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
-    demo_cls(n);
-    cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
-        << "3)Search by type of special monster attack and date.\n4)Show all the monsters.\n";
-    demo_cls(n);
-    cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
-        << "3)Search by type of special monster attack and date. <- press\n4)Show all the monsters.\n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage. <- press\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    cout << "Enter the maximum date and time the monster was created.\n";
-    cout << "Enter year(1970-....): \n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    cout << "Enter the maximum date and time the monster was created.\n";
-    cout << "Enter year(1970-....): <- write max year and press <Enter>\n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    cout << "Enter the maximum date and time the monster was created.\n";
-    cout << "Enter year(1970-....): 2030\n";
-    cout << "Enter month(1-12): \n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    cout << "Enter the maximum date and time the monster was created.\n";
-    cout << "Enter year(1970-....): 2030\n";
-    cout << "Enter month(1-12): <- write max month and press <Enter>\n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    cout << "Enter the maximum date and time the monster was created.\n";
-    cout << "Enter year(1970-....): 2030\n";
-    cout << "Enter month(1-12): 12\n";
-    cout << "Enter day(1-31): \n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    cout << "Enter the maximum date and time the monster was created.\n";
-    cout << "Enter year(1970-....): 2030\n";
-    cout << "Enter month(1-12): 12\n";
-    cout << "Enter day(1-31): <- write max day and press <Enter>\n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    cout << "Enter the maximum date and time the monster was created.\n";
-    cout << "Enter year(1970-....): 2030\n";
-    cout << "Enter month(1-12): 12\n";
-    cout << "Enter day(1-31): 31\n";
-    cout << "Enter hour(0-23): \n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    cout << "Enter the maximum date and time the monster was created.\n";
-    cout << "Enter year(1970-....): 2030\n";
-    cout << "Enter month(1-12): 12\n";
-    cout << "Enter day(1-31): 31\n";
-    cout << "Enter hour(0-23): <- write max hour and press <Enter>\n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    cout << "Enter the maximum date and time the monster was created.\n";
-    cout << "Enter year(1970-....): 2030\n";
-    cout << "Enter month(1-12): 12\n";
-    cout << "Enter day(1-31): 31\n";
-    cout << "Enter hour(0-23): 23\n";
-    cout << "Enter minute(0-59): \n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    cout << "Enter the maximum date and time the monster was created.\n";
-    cout << "Enter year(1970-....): 2030\n";
-    cout << "Enter month(1-12): 12\n";
-    cout << "Enter day(1-31): 31\n";
-    cout << "Enter hour(0-23): 23\n";
-    cout << "Enter minute(0-59): <- write max min and press <Enter>\n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    cout << "Enter the maximum date and time the monster was created.\n";
-    cout << "Enter year(1970-....): 2030\n";
-    cout << "Enter month(1-12): 12\n";
-    cout << "Enter day(1-31): 31\n";
-    cout << "Enter hour(0-23): 23\n";
-    cout << "Enter minute(0-59): 59\n";
-    cout << "Enter second(0-59): \n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    cout << "Enter the maximum date and time the monster was created.\n";
-    cout << "Enter year(1970-....): 2030\n";
-    cout << "Enter month(1-12): 12\n";
-    cout << "Enter day(1-31): 31\n";
-    cout << "Enter hour(0-23): 23\n";
-    cout << "Enter minute(0-59): 59\n";
-    cout << "Enter second(0-59): <- write max sec and press <Enter>\n";
-    demo_cls(n);
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    cout << "Enter the maximum date and time the monster was created.\n";
-    cout << "Enter year(1970-....): 2030\n";
-    cout << "Enter month(1-12): 12\n";
-    cout << "Enter day(1-31): 31\n";
-    cout << "Enter hour(0-23): 23\n";
-    cout << "Enter minute(0-59): 59\n";
-    cout << "Enter second(0-59): 59\n";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    write_time(t);
-    cout << "\nPress '0' to continue.\n";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    write_time(t);
-    cout << "\nPress '0' to continue. <- press\n";
-    demo_cls(2 * n);
-    //Show all the monsters
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
-    demo_cls(n);
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster. <- press\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
-    demo_cls(n);
-    cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
-        << "3)Search by type of special monster attack and date.\n4)Show all the monsters.\n";
-    demo_cls(n);
-    cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
-        << "3)Search by type of special monster attack and date.\n4)Show all the monsters. <- press\n";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    write_time(t);
-    cout << "\nPress '0' to continue.\n";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    write_time(t);
-    cout << "\nPress '0' to continue. <- press\n";
-    demo_cls(2 * n);
-    //edit monster
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
-    demo_cls(n);
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster. <- press\n4)Delete a monster.\n0)Back.\n";
-    demo_cls(n);
-    cout << "Enter id of monster: ";
-    demo_cls(n);
-    cout << "Enter id of monster: <- write the id and press <Enter>";
-    demo_cls(n);
-    cout << "Enter id of monster: " << id;
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nSelect the option you want to edit:\n";
-    cout << "1)Name.\n2)XP.\n3)Damage.\n4)Chance to launch a special attack.\n5)Type of special monster attack.\n0)Exit." << endl;
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nSelect the option you want to edit:\n";
-    cout << "1)Name <- press.\n2)XP.\n3)Damage.\n4)Chance to launch a special attack.\n5)Type of special monster attack.\n0)Exit." << endl;
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nEnter a new Name of monster: ";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nEnter a new Name of monster: <- write a new Name and press <Enter>";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nEnter a new Name of monster: Name2";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name2.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nSelect the option you want to edit:\n";
-    cout << "1)Name.\n2)XP. <- press\n3)Damage.\n4)Chance to launch a special attack.\n5)Type of special monster attack.\n0)Exit." << endl;
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nEnter a new XP of monster: ";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nEnter a new XP of monster: <- write a new XP and press <Enter>";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: " << demo_xp << endl;
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nEnter a new XP of monster: 20000";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: 20000\n";
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nSelect the option you want to edit:\n";
-    cout << "1)Name.\n2)XP.\n3)Damage. <- press\n4)Chance to launch a special attack.\n5)Type of special monster attack.\n0)Exit." << endl;
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: 20000\n";
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nEnter a new Damage of monster: ";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: 20000\n";
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nEnter a new Damage of monster: <- write a new Damage and press <Enter>";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: 20000\n";
-    cout << "Damage: " << demo_damage << endl;
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nEnter a new Damage of monster: 100";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: 20000\n";
-    cout << "Damage: 100\n";
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nSelect the option you want to edit:\n";
-    cout << "1)Name.\n2)XP.\n3)Damage.\n4)Chance to launch a special attack. <- press\n5)Type of special monster attack.\n0)Exit." << endl;
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: 20000\n";
-    cout << "Damage: 100\n";
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nEnter a new Chance of monster: ";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: 20000\n";
-    cout << "Damage: 100\n";
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nEnter a new Chance of monster: <- write a new Chence and press <Enter>";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: 20000\n";
-    cout << "Damage: 100\n";
-    cout << "Chance to launch a special attack: " << demo_chance << endl;
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nEnter a new Chance of monster: 0.11";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: 20000\n";
-    cout << "Damage: 100\n";
-    cout << "Chance to launch a special attack: 0.11\n";
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "\nSelect the option you want to edit:\n";
-    cout << "1)Name.\n2)XP.\n3)Damage.\n4)Chance to launch a special attack.\n5)Type of special monster attack. <- press\n0)Exit." << endl;
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: 20000\n";
-    cout << "Damage: 100\n";
-    cout << "Chance to launch a special attack: 0.11\n";
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: 20000\n";
-    cout << "Damage: 100\n";
-    cout << "Chance to launch a special attack: 0.11\n";
-    cout << "Type of special monster attack: Increase damage." << endl;
-    cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack. <- press\n"
-        << "3)Cure yourself.\n4)Paralyze the enemy.\n";
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: 20000\n";
-    cout << "Damage: 100\n";
-    cout << "Chance to launch a special attack: 0.11\n";
-    cout << "Type of special monster attack: Repeat the attack." << endl;
-    cout << "\nSelect the option you want to edit:\n";
-    cout << "1)Name.\n2)XP.\n3)Damage.\n4)Chance to launch a special attack.\n5)Type of special monster attack.\n0)Exit." << endl;
-    demo_cls(n);
-    cout << "Monster(s) found:\n\n";
-    cout << "<" << 1 << ">\n";
-    cout << "ID: " << id << ".\n";
-    cout << "Name: Name1.\n";
-    cout << "XP: 20000\n";
-    cout << "Damage: 100\n";
-    cout << "Chance to launch a special attack: 0.11\n";
-    cout << "Type of special monster attack: Repeat the attack." << endl;
-    cout << "\nSelect the option you want to edit:\n";
-    cout << "1)Name.\n2)XP.\n3)Damage.\n4)Chance to launch a special attack.\n5)Type of special monster attack.\n0)Exit. <- press" << endl;
-    demo_cls(2*n);
-    //delete monster
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
-    demo_cls(n);
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster. <- press\n0)Back.\n";
-    demo_cls(n);
-    cout << "Enter id of monster: ";
-    demo_cls(n);
-    cout << "Enter id of monster: <- write the id and press <Enter>";
-    demo_cls(n);
-    cout << "Enter id of monster: " << id;
-    demo_cls(n);
-    cout << "The monster - removed!\n";
-    cout << "\nPress '0' to continue.\n";
-    demo_cls(n);
-    cout << "The monster - removed!\n";
-    cout << "\nPress '0' to continue. <- press\n";
-    demo_cls(2*n);
-    //exit
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
-    demo_cls(n);
-    cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back. <- press\n";
-    demo_cls(n);
-    cout << "Select the application mode:\n1)Interactive dialog mode.\n2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
-    demo_cls(n);
-    cout << "Select the application mode:\n1)Interactive dialog mode.\n2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit. <- press\n";
-    demo_cls(n);
+    for (int j = 0; j < 1; j++)
+    {
+        int n = 1800;
+        srand(time(0));
+        int id = set_id();
+        unsigned int demo_xp = (rand() % 50000 + 1);
+        srand(time(0));
+        int demo_damage = (rand() % 1000 + 1);
+        srand(time(0));
+        double demo_chance = 0.01 * (rand() % 100 + 1);
+        string demo_type = "Increase damage";
+        my_cls();
+        cout << "Enter playback speed(normal = 1800): ";
+        cin >> n;
+        if (demo_cls(0)) continue;
+        cout << "Select the application mode:\n1)Interactive dialog mode.\n2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
+        if (demo_cls(n)) continue;
+        cout << "Select the application mode:\n1)Interactive dialog mode. <- press\n2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
+        //file mode
+        if (demo_cls(n)) continue;
+        cout << "Select the opening mode:\n1)Text mode.\n2)Binary mode.\n";
+        if (demo_cls(n)) continue;
+        cout << "Select the opening mode:\n1)Text mode. <- press\n2)Binary mode.\n";
+        //add monster
+        if (demo_cls(n)) continue;
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Menu:\n1)Add a new monster. <- press\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Create your own monster!\nEnter a monster name: \n";
+        if (demo_cls(n)) continue;
+        cout << "Create your own monster!\nEnter a monster name: <- write a name and press <Enter>\n";
+        if (demo_cls(n)) continue;
+        cout << "Create your own monster!\nEnter a monster name: Name1\n";
+        cout << "Enter the number of monster health units (1-50000): \n";
+        if (demo_cls(n)) continue;
+        cout << "Create your own monster!\nEnter a monster name: Name1\n";
+        cout << "Enter the number of monster health units (1-50000): <- write a xp and press <Enter>\n";
+        if (demo_cls(n)) continue;
+        cout << "Create your own monster!\nEnter a monster name: Name1\n";
+        cout << "Enter the number of monster health units (1-50000): " << demo_xp << endl;
+        cout << "Enter the number of monster attack units (1-1000): \n";
+        if (demo_cls(n)) continue;
+        cout << "Create your own monster!\nEnter a monster name: Name1\n";
+        cout << "Enter the number of monster health units (1-50000): " << demo_xp << endl;
+        cout << "Enter the number of monster attack units (1-1000): <- write a damage and press <Enter>\n";
+        if (demo_cls(n)) continue;
+        cout << "Create your own monster!\nEnter a monster name: Name1\n";
+        cout << "Enter the number of monster health units (1-50000): " << demo_xp << endl;
+        cout << "Enter the number of monster attack units (1-1000): " << demo_damage << endl;
+        cout << "Enter the monster's chance to launch a special attack (0.00 - 1.00): \n";
+        if (demo_cls(n)) continue;
+        cout << "Create your own monster!\nEnter a monster name: Name1\n";
+        cout << "Enter the number of monster health units (1-50000): " << demo_xp << endl;
+        cout << "Enter the number of monster attack units (1-1000): " << demo_damage << endl;
+        cout << "Enter the monster's chance to launch a special attack (0.00 - 1.00): <- write a chance and press <Enter>\n";
+        if (demo_cls(n)) continue;
+        cout << "Create your own monster!\nEnter a monster name: Name1\n";
+        cout << "Enter the number of monster health units (1-50000): " << demo_xp << endl;
+        cout << "Enter the number of monster attack units (1-1000): " << demo_damage << endl;
+        cout << "Enter the monster's chance to launch a special attack (0.00 - 1.00): " << demo_chance << endl;
+        cout << "Choose one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        if (demo_cls(n)) continue;
+        cout << "Create your own monster!\nEnter a monster name: Name1\n";
+        cout << "Enter the number of monster health units (1-50000): " << demo_xp << endl;
+        cout << "Enter the number of monster attack units (1-1000): " << demo_damage << endl;
+        cout << "Enter the monster's chance to launch a special attack (0.00 - 1.00): " << demo_chance << endl;
+        cout << "Choose one of the possible types of special monster attack:\n1)Increase damage. <- press\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        if (demo_cls(n)) continue;
+        cout << "New monster created!\nHis personal ID: " << id << endl;
+        time_t seconds = time(NULL);
+        char c[26];
+        ctime_s(c, 26, &seconds);
+        my_time t = set_time(c);
+        info_monster monster = info_monster("Name1", demo_xp, demo_damage, demo_chance, "Increase damage", t, id);
+        all_monsters.push_back(monster);
+        vector <int>number(1, 0);
+        write_time(t);
+        cout << "\nPress '0' to continue.\n";
+        if (demo_cls(n)) continue;
+        cout << "New monster created!\nHis personal ID: " << id << endl;
+        write_time(t);
+        cout << "\nPress '0' to continue. <- press\n";
+        //find monster by name
+        if (demo_cls(2*n)) continue;
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster. <- press\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
+            << "3)Search by type of special monster attack and date.\n4)Show all the monsters.\n";
+        if (demo_cls(n)) continue;
+        cout << "Select Monster Search Mode:\n1)Search by Name. <- press\n2)Search by xp and damage.\n"
+            << "3)Search by type of special monster attack and date.\n4)Show all the monsters.\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter the full name or snippet of the monster name:\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter the full name or snippet of the monster name:\n   <- write a snippet and press <Enter>";
+        if (demo_cls(n)) continue;
+        cout << "Enter the full name or snippet of the monster name:\name";
+        if (demo_cls(n)) continue;
+        write_monsters(number);
+        cout << "\nPress '0' to continue.\n";
+        if (demo_cls(n)) continue;
+        write_monsters(number);
+        cout << "\nPress '0' to continue. <- press\n";
+        if (demo_cls(2*n)) continue;
+        //find monster by xp and damage
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster. <- press\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
+            << "3)Search by type of special monster attack and date.\n4)Show all the monsters.\n";
+        if (demo_cls(n)) continue;
+        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage. <- press\n"
+            << "3)Search by type of special monster attack and date.\n4)Show all the monsters.\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter minimum health level of monster(1-50000): \n";
+        if (demo_cls(n)) continue;
+        cout << "Enter minimum health level of monster(1-50000): <- write a min xp and press <Enter>\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter minimum health level of monster(1-50000): " << demo_xp << endl;
+        cout << "Enter the maximum attack level of monster(1-1000): \n";
+        if (demo_cls(n)) continue;
+        cout << "Enter minimum health level of monster(1-50000): " << demo_xp << endl;
+        cout << "Enter the maximum attack level of monster(1-1000): <- write a max damage and press <Enter>\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter minimum health level of monster(1-50000): " << demo_xp << endl;
+        cout << "Enter the maximum attack level of monster(1-1000): " << demo_damage << endl;
+        if (demo_cls(n)) continue;
+        write_monsters(number);
+        cout << "\nPress '0' to continue.\n";
+        if (demo_cls(n)) continue;
+        write_monsters(number);
+        cout << "\nPress '0' to continue. <- press\n";
+        if (demo_cls(2*n)) continue;
+        //find monster by type of special monster attack
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster. <- press\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
+            << "3)Search by type of special monster attack and date.\n4)Show all the monsters.\n";
+        if (demo_cls(n)) continue;
+        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
+            << "3)Search by type of special monster attack and date. <- press\n4)Show all the monsters.\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage. <- press\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        cout << "Enter the maximum date and time the monster was created.\n";
+        cout << "Enter year(1970-....): \n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        cout << "Enter the maximum date and time the monster was created.\n";
+        cout << "Enter year(1970-....): <- write max year and press <Enter>\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        cout << "Enter the maximum date and time the monster was created.\n";
+        cout << "Enter year(1970-....): 2030\n";
+        cout << "Enter month(1-12): \n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        cout << "Enter the maximum date and time the monster was created.\n";
+        cout << "Enter year(1970-....): 2030\n";
+        cout << "Enter month(1-12): <- write max month and press <Enter>\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        cout << "Enter the maximum date and time the monster was created.\n";
+        cout << "Enter year(1970-....): 2030\n";
+        cout << "Enter month(1-12): 12\n";
+        cout << "Enter day(1-31): \n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        cout << "Enter the maximum date and time the monster was created.\n";
+        cout << "Enter year(1970-....): 2030\n";
+        cout << "Enter month(1-12): 12\n";
+        cout << "Enter day(1-31): <- write max day and press <Enter>\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        cout << "Enter the maximum date and time the monster was created.\n";
+        cout << "Enter year(1970-....): 2030\n";
+        cout << "Enter month(1-12): 12\n";
+        cout << "Enter day(1-31): 31\n";
+        cout << "Enter hour(0-23): \n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        cout << "Enter the maximum date and time the monster was created.\n";
+        cout << "Enter year(1970-....): 2030\n";
+        cout << "Enter month(1-12): 12\n";
+        cout << "Enter day(1-31): 31\n";
+        cout << "Enter hour(0-23): <- write max hour and press <Enter>\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        cout << "Enter the maximum date and time the monster was created.\n";
+        cout << "Enter year(1970-....): 2030\n";
+        cout << "Enter month(1-12): 12\n";
+        cout << "Enter day(1-31): 31\n";
+        cout << "Enter hour(0-23): 23\n";
+        cout << "Enter minute(0-59): \n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        cout << "Enter the maximum date and time the monster was created.\n";
+        cout << "Enter year(1970-....): 2030\n";
+        cout << "Enter month(1-12): 12\n";
+        cout << "Enter day(1-31): 31\n";
+        cout << "Enter hour(0-23): 23\n";
+        cout << "Enter minute(0-59): <- write max min and press <Enter>\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        cout << "Enter the maximum date and time the monster was created.\n";
+        cout << "Enter year(1970-....): 2030\n";
+        cout << "Enter month(1-12): 12\n";
+        cout << "Enter day(1-31): 31\n";
+        cout << "Enter hour(0-23): 23\n";
+        cout << "Enter minute(0-59): 59\n";
+        cout << "Enter second(0-59): \n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        cout << "Enter the maximum date and time the monster was created.\n";
+        cout << "Enter year(1970-....): 2030\n";
+        cout << "Enter month(1-12): 12\n";
+        cout << "Enter day(1-31): 31\n";
+        cout << "Enter hour(0-23): 23\n";
+        cout << "Enter minute(0-59): 59\n";
+        cout << "Enter second(0-59): <- write max sec and press <Enter>\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        cout << "Enter the maximum date and time the monster was created.\n";
+        cout << "Enter year(1970-....): 2030\n";
+        cout << "Enter month(1-12): 12\n";
+        cout << "Enter day(1-31): 31\n";
+        cout << "Enter hour(0-23): 23\n";
+        cout << "Enter minute(0-59): 59\n";
+        cout << "Enter second(0-59): 59\n";
+        if (demo_cls(n)) continue;
+        write_monsters(number);
+        cout << "\nPress '0' to continue.\n";
+        if (demo_cls(n)) continue;
+        write_monsters(number);
+        cout << "\nPress '0' to continue. <- press\n";
+        if (demo_cls(2*n)) continue;
+        //Show all the monsters
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster. <- press\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
+            << "3)Search by type of special monster attack and date.\n4)Show all the monsters.\n";
+        if (demo_cls(n)) continue;
+        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
+            << "3)Search by type of special monster attack and date.\n4)Show all the monsters. <- press\n";
+        if (demo_cls(n)) continue;
+        write_monsters(number);
+        cout << "\nPress '0' to continue.\n";
+        if (demo_cls(n)) continue;
+        write_monsters(number);
+        cout << "\nPress '0' to continue. <- press\n";
+        if (demo_cls(2*n)) continue;
+        //edit monster
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster. <- press\n4)Delete a monster.\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter id of monster: ";
+        if (demo_cls(n)) continue;
+        cout << "Enter id of monster: <- write the id and press <Enter>";
+        if (demo_cls(n)) continue;
+        cout << "Enter id of monster: " << id;
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nSelect the option you want to edit:\n";
+        cout << "1)Name.\n2)XP.\n3)Damage.\n4)Chance to launch a special attack.\n5)Type of special monster attack.\n0)Exit." << endl;
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nSelect the option you want to edit:\n";
+        cout << "1)Name <- press.\n2)XP.\n3)Damage.\n4)Chance to launch a special attack.\n5)Type of special monster attack.\n0)Exit." << endl;
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nEnter a new Name of monster: ";
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nEnter a new Name of monster: <- write a new Name and press <Enter>";
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nEnter a new Name of monster: Name2";
+        all_monsters[0].name = "Name2";
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nSelect the option you want to edit:\n";
+        cout << "1)Name.\n2)XP. <- press\n3)Damage.\n4)Chance to launch a special attack.\n5)Type of special monster attack.\n0)Exit." << endl;
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nEnter a new XP of monster: ";
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nEnter a new XP of monster: <- write a new XP and press <Enter>";
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nEnter a new XP of monster: 20000";
+        all_monsters[0].xp = 20000;
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nSelect the option you want to edit:\n";
+        cout << "1)Name.\n2)XP.\n3)Damage. <- press\n4)Chance to launch a special attack.\n5)Type of special monster attack.\n0)Exit." << endl;
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nEnter a new Damage of monster: ";
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nEnter a new Damage of monster: <- write a new Damage and press <Enter>";
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nEnter a new Damage of monster: 100";
+        all_monsters[0].damage = 100;
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nSelect the option you want to edit:\n";
+        cout << "1)Name.\n2)XP.\n3)Damage.\n4)Chance to launch a special attack. <- press\n5)Type of special monster attack.\n0)Exit." << endl;
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nEnter a new Chance of monster: ";
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nEnter a new Chance of monster: <- write a new Chence and press <Enter>";
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nEnter a new Chance of monster: 0.11";
+        all_monsters[0].chance = 0.11;
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nSelect the option you want to edit:\n";
+        cout << "1)Name.\n2)XP.\n3)Damage.\n4)Chance to launch a special attack.\n5)Type of special monster attack. <- press\n0)Exit." << endl;
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack. <- press\n"
+            << "3)Cure yourself.\n4)Paralyze the enemy.\n";
+        all_monsters[0].type_of_attack = "Repeat the attack";
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nSelect the option you want to edit:\n";
+        cout << "1)Name.\n2)XP.\n3)Damage.\n4)Chance to launch a special attack.\n5)Type of special monster attack.\n0)Exit." << endl;
+        if (demo_cls(n)) continue;
+        write_monster(0);
+        cout << "\nSelect the option you want to edit:\n";
+        cout << "1)Name.\n2)XP.\n3)Damage.\n4)Chance to launch a special attack.\n5)Type of special monster attack.\n0)Exit. <- press" << endl;
+        if (demo_cls(2*n)) continue;
+        //delete monster
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster. <- press\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Enter id of monster: ";
+        if (demo_cls(n)) continue;
+        cout << "Enter id of monster: <- write the id and press <Enter>";
+        if (demo_cls(n)) continue;
+        cout << "Enter id of monster: " << id;
+        all_monsters.erase(all_monsters.begin());
+        if (demo_cls(n)) continue;
+        cout << "The monster - removed!\n";
+        cout << "\nPress '0' to continue.\n";
+        if (demo_cls(n)) continue;
+        cout << "The monster - removed!\n";
+        cout << "\nPress '0' to continue. <- press\n";
+        if (demo_cls(n)) continue;
+        //exit
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back.\n";
+        if (demo_cls(n)) continue;
+        cout << "Menu:\n1)Add a new monster.\n2)Find an existing monster.\n3)Edit a monster.\n4)Delete a monster.\n0)Back. <- press\n";
+        if (demo_cls(n)) continue;
+        cout << "Select the application mode:\n1)Interactive dialog mode.\n2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
+        if (demo_cls(n)) continue;
+        cout << "Select the application mode:\n1)Interactive dialog mode.\n2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit. <- press\n";
+        my_cls();
+    }
+    cout << "Demo mode is over!" << endl;
+    Sleep(1500);
+}
+void benchmark_mode()
+{
+
 }
 int main()//no coments
 {
 next:
     my_cls();
     cout << "Select the application mode:\n1)Interactive dialog mode.\n2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
-mode:
     switch (_getch())
     {
     case '1':
@@ -1552,19 +1346,9 @@ mode:
         return 0;
     }
     break;
-    default: goto mode;
+    default: goto next;
     }
 
     return 0;
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
