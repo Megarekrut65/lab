@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <chrono>
 
 using std::cout;
 using std::cin;
@@ -44,6 +45,9 @@ my_time set_time(char[]);// -||-
 bool save_binary_file(string);// -||-
 bool save_text_file(string);// -||-
 void write_all_monsters();// -||-
+vector<int> find_types_time(string, my_time);
+vector<int> find_xp_damage(unsigned int, int);
+vector<int> find_name(string);
 struct info_monster
 {
     int id;
@@ -82,7 +86,12 @@ struct info_monster
         else this->id = id;
     }
 };
+struct result
+{
+    string operation_name;
+    vector <float> operation_time;
 
+};
 string bin_file = "binary.bin", txt_file = "text.txt";//назви файлів
 vector<info_monster> all_monsters;//місце де зберігаються дані про всіх монстрів
 
@@ -635,7 +644,7 @@ void write_all_monsters()//видає на екран дані всіх монс
 not_null:
     if (_getch() != '0') goto not_null;
 }
-void find_types_time()//пошук монстра по типу атки та часу створення
+void find_types_time_menu()//меню для пошуку
 {
     my_cls();
     cout << "Enter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n"
@@ -670,7 +679,17 @@ types_attack:
     cin >> sec;
     my_time find_time(hour, min, sec, day, month, year);
     my_cls();
-    std::vector <int> nombers_monsters;
+    std::vector <int> numbers;
+    numbers = find_types_time(one_types_attack, find_time);
+    if (numbers.size() == 0) cout << "Monster not found!\n";
+    else write_monsters(numbers);
+    cout << "\nPress '0' to exit.\n";
+not_zero:
+    if (_getch() != '0') goto not_zero;
+}
+vector <int> find_types_time(string one_types_attack,my_time find_time)//пошук монстра по типу атки та часу створення
+{  
+    std::vector <int> numbers_monsters;
     for (unsigned int i = 0; i < all_monsters.size(); i++)
     {
         if (one_types_attack == all_monsters[i].type_of_attack)
@@ -681,7 +700,7 @@ types_attack:
             {
                 if (monster_time.year < find_time.year)//2
                 {
-                    nombers_monsters.push_back(i);
+                    numbers_monsters.push_back(i);
                     continue;
                 }
                 if (monster_time.month > find_time.month) continue;//1
@@ -689,7 +708,7 @@ types_attack:
                 {
                     if (monster_time.month < find_time.month)//2
                     {
-                        nombers_monsters.push_back(i);
+                        numbers_monsters.push_back(i);
                         continue;
                     }
                     if (monster_time.day > find_time.day) continue;//1
@@ -697,7 +716,7 @@ types_attack:
                     {
                         if (monster_time.day < find_time.day)//2
                         {
-                            nombers_monsters.push_back(i);
+                            numbers_monsters.push_back(i);
                             continue;
                         }
                         if (monster_time.hour > find_time.hour) continue;//1
@@ -705,7 +724,7 @@ types_attack:
                         {
                             if (monster_time.hour < find_time.hour)//2
                             {
-                                nombers_monsters.push_back(i);
+                                numbers_monsters.push_back(i);
                                 continue;
                             }
                             if (monster_time.min > find_time.min) continue;//1
@@ -713,13 +732,13 @@ types_attack:
                             {
                                 if (monster_time.min < find_time.min)//2
                                 {
-                                    nombers_monsters.push_back(i);
+                                    numbers_monsters.push_back(i);
                                     continue;
                                 }
                                 if (monster_time.sec > find_time.sec) continue;//1 
                                 else
                                 {
-                                    if (monster_time.sec <= find_time.sec) nombers_monsters.push_back(i);//2
+                                    if (monster_time.sec <= find_time.sec) numbers_monsters.push_back(i);//2
                                 }
                             }
                         }
@@ -729,13 +748,10 @@ types_attack:
             }
         }
     }
-    if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
-    else write_monsters(nombers_monsters);
-    cout << "\nPress '0' to exit.\n";
-not_zero:
-    if (_getch() != '0') goto not_zero;
+   
+    return numbers_monsters;
 }
-void find_xp_damage()//пошук монстар по рівню життя і атаки
+void find_xp_damage_menu()//меню для пошуку
 {
     my_cls();
     cout << "Enter minimum health level of monster(1-50000): ";
@@ -745,27 +761,43 @@ void find_xp_damage()//пошук монстар по рівню життя і �
     cout << "Enter the maximum attack level of monster(1-1000): ";
     cin >> max_damage;
     my_cls();
-    std::vector <int> nombers_monsters;
-    for (unsigned int i = 0; i < all_monsters.size(); i++)
-    {
-        if ((min_xp <= all_monsters[i].xp) && (max_damage >= all_monsters[i].damage)) nombers_monsters.push_back(i);
-    }
-    if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
-    else write_monsters(nombers_monsters);
+    vector <int> numbers;
+    numbers = find_xp_damage(min_xp, max_damage);
+    if (numbers.size() == 0) cout << "Monster not found!\n";
+    else write_monsters(numbers);
     cout << "\nPress '0' to exit.\n";
 not_zero:
     if (_getch() != '0') goto not_zero;
 }
-void find_name()//пошук монстра по імені
+vector <int> find_xp_damage(unsigned int min_xp,int max_damage)//пошук монстар по рівню життя і атаки
+{
+    std::vector <int> numbers_monsters;
+    for (unsigned int i = 0; i < all_monsters.size(); i++)
+    {
+        if ((min_xp <= all_monsters[i].xp) && (max_damage >= all_monsters[i].damage)) numbers_monsters.push_back(i);
+    }   
+    return numbers_monsters;
+}
+void find_name_menu()//меню для пошуку
 {
     my_cls();
     cout << "Enter the full name or snippet of the monster name:\n";
     string fragment_name;
-    vector <int> nombers_monsters;
     getline(cin, fragment_name);
     if (fragment_name.size() == 0) getline(cin, fragment_name);
-    int fragment_size = fragment_name.size();
     my_cls();
+    vector <int> numbers;
+    numbers = find_name(fragment_name);
+    if (numbers.size() == 0) cout << "Monster not found!\n";
+    else write_monsters(numbers);
+    cout << "\nPress '0' to exit.\n";
+not_zero:
+    if (_getch() != '0') goto not_zero;
+}
+vector <int> find_name(string fragment_name)//пошук монстра по імені
+{
+    vector <int> numbers_monsters;
+    int fragment_size = fragment_name.size();
     for (unsigned int i = 0; i < all_monsters.size(); i++)
     {
         string s = all_monsters[i].name;
@@ -788,14 +820,10 @@ void find_name()//пошук монстра по імені
                     j = j_save - 1;
                 }
             }
-            if (k == fragment_size) nombers_monsters.push_back(i);
+            if (k == fragment_size) numbers_monsters.push_back(i);
         }
     }
-    if (nombers_monsters.size() == 0) cout << "Monster not found!\n";
-    else write_monsters(nombers_monsters);
-    cout << "\nPress '0' to exit.\n";
-not_zero:
-    if (_getch() != '0') goto not_zero;
+    return numbers_monsters;
 }
 void Interactive_dialog_mode()//інтерактивний діалоговий режим
 {
@@ -839,19 +867,19 @@ menu:
         {
         case '1':
         {
-            find_name();
+            find_name_menu();
             goto menu;
         }
         break;
         case '2':
         {
-            find_xp_damage();
+            find_xp_damage_menu();
             goto menu;
         }
         break;
         case '3':
         {
-            find_types_time();
+            find_types_time_menu();
             goto menu;
         }
         break;
@@ -1311,9 +1339,61 @@ void demo_mode()//демонстраційний режим
     cout << "Demo mode is over!" << endl;
     Sleep(1500);
 }
+info_monster monster_generator()
+{
+    srand(time(0));
+    int id = set_id();
+    string name;
+    int n = (rand() % 50 + 5), m = n;
+    char* buff = new char[n + 1];
+    for (int i = 0; i < n; i++)
+    {
+        srand(time(0) + m);
+        m += 10;
+        buff[i] = 'a' + (rand() % 26);
+    }
+    buff[n] = '\0';
+    name = buff;
+    unsigned int xp = (rand() % 50000 + 1);
+    int damage = (rand() % 1000 + 1);
+    double chance = 0.01 * (rand() % 100 + 1);
+    string type;
+    int k = (rand() % 4 + 1);
+    switch (k)
+    {
+    case 1: type = "Increase damage";
+        break;
+    case 2: type = "Repeat the attack";
+        break;
+    case 3: type = "Cure yourself";
+        break;
+    case 4: type = "Paralyze the enemy";
+        break;
+    }
+
+    return info_monster(name, xp, damage, chance, type, my_time(rand() % 24, rand() % 60, rand() % 60, rand() % 28 + 1, rand() % 12 + 1, rand() % 10 + 2020), id); 
+}
 void benchmark_mode()
 {
-
+    my_cls();
+    int n;
+    vector <float> result;
+    cout << "Enter N(1-...): ";
+    cin >> n;
+    auto the_start = std::chrono::high_resolution_clock::now();
+    auto the_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> duration = the_end - the_start;
+    while (duration.count <= 10)
+    {
+        for (int i = 0; i < n; i++) all_monsters.push_back(monster_generator());
+        save_text_file("benchmark_text.txt");
+        save_binary_file("benchmark_binary.bin");
+        open_text_file("benchmark_text.txt");
+        for (int i = 0; i < n; i++) write_monster(i);
+        open_binary_file("benchmark_binary.bin");
+        for (int i = 0; i < n; i++) write_monster(i);
+    }
+    clean_arr();
 }
 int main()//no coments
 {
@@ -1336,6 +1416,7 @@ next:
     break;
     case '3':
     {
+        benchmark_mode();
         goto next;
     }
     break;
