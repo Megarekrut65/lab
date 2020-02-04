@@ -68,7 +68,7 @@ struct info_monster
     }
 };
 
-string binary_file_name = "binary.txt", text_file_name = "text.txt";
+string binary_file_name = "binary.bin", text_file_name = "text.txt";
 vector<info_monster> all_monsters;//місце де зберігаються всі монстри
 
 void clean_arr()//очищує масив
@@ -162,12 +162,14 @@ void open_file(bool t_or_b)//переносить інформацію з фай
         else
         {
             std::ifstream file(binary_file_name, std::ios_base::binary);
-            info_monster monster = info_monster("0", 0, 0, 0, "0", my_time(0, 0, 0, 0, 0, 1980), 0);
+            info_monster monster = info_monster("0", 0, 0, 0, "0", my_time(0, 0, 0, 0, 0, 1980), 0);           
             while (!file.eof())
-            {        
-                file.read((char*)&monster, sizeof(monster));
-                if(monster.time_info.year!= 1980) all_monsters.push_back(monster);
-                monster.time_info.year = 1980;
+            {      
+                std::size_t size;
+                file.read((char*)&size, sizeof(size_t));
+                if (file.eof()) break;
+                file.read((char*)&monster, size);     
+                all_monsters.push_back(monster);      
             }
             file.close();
         }
@@ -212,7 +214,9 @@ bool save_binary_file(string path)//переносить інформацію з
     if (!file.is_open()) return false;
     for (unsigned int i = 0; i < all_monsters.size(); i++)
     {
-        file.write((char*)&all_monsters[i], sizeof(all_monsters[i]));
+        std::size_t size = sizeof(all_monsters[i]);
+        file.write((char*)&size, sizeof(size));
+        file.write((char*)&all_monsters[i], size);
     }
     file.close();
     return true;
@@ -221,7 +225,9 @@ bool add_in_binary_file(info_monster monster,string path)//додає інфор
 {
     std::ofstream file(path, std::ios_base::binary|std::ios_base::app);
     if (!file.is_open()) return false;
-    file.write((char*)&monster, sizeof(monster));
+    std::size_t size = sizeof(monster);
+    file.write((char*)&size, sizeof(size));
+    file.write((char*)&monster, size);
     file.close();
     return true;
 }
@@ -728,7 +734,7 @@ not_null:
 }
 void Interactive_dialog_mode()//інтерактивний діалоговий режим
 {
-    if (!save_text_file("copy_text.txt") || !save_binary_file("copy_binary.txt"))
+    if (!save_text_file("copy_text.txt") || !save_binary_file("copy_binary.bin"))
     {
         my_cls();
         cout << "Error saving copy file!...\n";
