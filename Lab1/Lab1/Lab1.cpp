@@ -23,7 +23,15 @@ struct my_time
     int day;
     int month;
     int year;
-    
+    my_time()
+    {
+        this->hour = 0;
+        this->min = 0;
+        this->sec = 0;
+        this->day = 0;
+        this->month = 0;
+        this->year = 1970;
+    }
     my_time(int hour, int min, int sec, int day, int month, int year)
     {
         this->hour = hour;
@@ -41,13 +49,23 @@ bool save_text_file(string);// -||-
 void write_all_monsters();// -||-
 struct info_monster
 {
-    int id ;
+    int id;
     string name;
     unsigned int xp;//1-50000
-    int damage ;//1-1000
-    float chance;//0-1 
+    int damage;//1-1000
+    float chance ;//0-1 
     string type_of_attack;//збільшити пошкодження, повторити атаку,вилікувати себе, паралізувати супротивника; 
-    my_time time_info =  my_time(0, 0, 0, 0, 0, 1970);
+    my_time time_info;
+    info_monster()
+    {
+        this->name = "NONE";
+        this->xp = 0;
+        this->damage = 0;
+        this->chance = 0;
+        this->type_of_attack = "NONE";
+        this->time_info = my_time(0,0,0,0,0,1970);
+        this->id = -1;
+    }
     info_monster(string name, unsigned int xp, int damage, float chance, string type_of_attack,my_time time_info = my_time(0, 0, 0, 0, 0, 1970), int id = -1)
     {   
         this->name = name;
@@ -68,7 +86,7 @@ struct info_monster
     }
 };
 
-string binary_file_name = "binary.bin", text_file_name = "text.txt";
+string bin_file = "binary.bin", txt_file = "text.txt";
 vector<info_monster> all_monsters;//місце де зберігаються всі монстри
 
 void clean_arr()//очищує масив
@@ -81,104 +99,59 @@ void my_cls()//очищує екран і виводить назву прогр
     system("CLS");
     cout << "<The Forest of Monsters>" << endl << endl;
 }
-bool create_text_file()
+bool create_text_file(string path)
 {
-    std::ifstream file(text_file_name);
+    std::ifstream file(path);
     if (!file.is_open())
     {
 
         file.close();
-        std::ofstream file_create(text_file_name);
+        std::ofstream file_create(path);
         file_create.close();
         return false;
     }
     file.close();
     return true;
 }
-bool create_binary_file()
+void open_text_file(string path)//переносить інформацію з текстового файла в масив
 {
-    std::ifstream file(binary_file_name);
-    if (!file.is_open())
+    if (!create_text_file(path))
     {
-
-        file.close();
-        std::ofstream file_create(binary_file_name,std::ios_base::binary);
-        file_create.close();
-        return false;
-    }
-    file.close();
-    return true;
-}
-void open_file(bool t_or_b)//переносить інформацію з файла в масив
-{
-    if (t_or_b)
-    {
-        if (!create_text_file())
-        {
-            my_cls();
-            cout << "File not found!...\n";
-            cout << "New file created!\n";  
-            cout << "\nPress '0' to exit.\n";
-            create_binary_file();
-        not_null_t:
-            if (_getch() != '0') goto not_null_t;
-        }
-        else
-        {
-            std::ifstream file(text_file_name);
-            while (!file.eof())
-            {
-                string name = "", type_of_attack = "";
-                unsigned int id = 0,xp = 0,damage = 0;
-                float chance = 2;
-                int hour = 0, min = 0, sec = 0, day = 0, month = 0, year = 0;
-                file >> id;
-                getline(file, name);
-                if (name.size() == 0) getline(file, name);
-                file >> xp;
-                file >> damage;
-                file >> chance;
-                getline(file, type_of_attack);
-                if(type_of_attack.size()==0) getline(file, type_of_attack);            
-                file >> hour >> min >> sec >> day >> month >> year;        
-                if (xp==0) break;
-                else all_monsters.push_back(info_monster(name, xp, damage, chance, type_of_attack, my_time(hour, min, sec, day, month, year), id));
-            }
-            file.close();
-        }  
+        my_cls();
+        cout << "File not found!...\n";
+        cout << "New file created!\n";
+        cout << "\nPress '0' to exit.\n";
+    not_null:
+        if (_getch() != '0') goto not_null;
     }
     else
     {
-        if (!create_binary_file())
+        std::ifstream file(path);
+        while (!file.eof())
         {
-            my_cls();
-            cout << "File not found!...\n";
-            cout << "New file created!\n";
-            create_text_file();
-            cout << "\nPress '0' to exit.\n";
-        not_null_b:
-            if (_getch() != '0') goto not_null_b;
+            string name = "", type_of_attack = "";
+            unsigned int id = 0, xp = 0, damage = 0;
+            float chance = 2;
+            int hour = 0, min = 0, sec = 0, day = 0, month = 0, year = 0;
+            file >> id;
+            getline(file, name);
+            if (name.size() == 0) getline(file, name);
+            file >> xp;
+            file >> damage;
+            file >> chance;
+            getline(file, type_of_attack);
+            if (type_of_attack.size() == 0) getline(file, type_of_attack);
+            file >> hour >> min >> sec >> day >> month >> year;
+            if (xp == 0) break;
+            else all_monsters.push_back(info_monster(name, xp, damage, chance, type_of_attack, my_time(hour, min, sec, day, month, year), id));
         }
-        else
-        {
-            std::ifstream file(binary_file_name, std::ios_base::binary);
-            info_monster monster = info_monster("0", 0, 0, 0, "0", my_time(0, 0, 0, 0, 0, 1980), 0);           
-            while (!file.eof())
-            {      
-                std::size_t size;
-                file.read((char*)&size, sizeof(size_t));
-                if (file.eof()) break;
-                file.read((char*)&monster, size);     
-                all_monsters.push_back(monster);      
-            }
-            file.close();
-        }
+        file.close();
     }
 }
 bool save_text_file(string path)//переносить інформацію з масиву в текстовий файл
 {
     std::ofstream file(path);
-    if(!file.is_open()) return false;
+    if (!file.is_open()) return false;
     for (unsigned int i = 0; i < all_monsters.size(); i++)
     {
         file << all_monsters[i].id << endl;
@@ -188,25 +161,88 @@ bool save_text_file(string path)//переносить інформацію з �
         file << all_monsters[i].chance << endl;
         file << all_monsters[i].type_of_attack << endl;
         file << all_monsters[i].time_info.hour << " " << all_monsters[i].time_info.min << " " << all_monsters[i].time_info.sec << " "
-             << all_monsters[i].time_info.day << " " << all_monsters[i].time_info.month << " " << all_monsters[i].time_info.year << endl;
+            << all_monsters[i].time_info.day << " " << all_monsters[i].time_info.month << " " << all_monsters[i].time_info.year << endl;
     }
     file.close();
     return true;
 }
-bool add_in_text_file(info_monster monster,string path)//додає інформацію в кінець текстового файлу
+bool add_in_text_file(info_monster monster, string path)//додає інформацію в кінець текстового файлу
 {
-    std::ofstream file(path,std::ios_base::app);
+    std::ofstream file(path, std::ios_base::app);
     if (!file.is_open()) return false;
-        file << monster.id << endl;
-        file << monster.name << endl;
-        file << monster.xp << endl;
-        file << monster.damage << endl;
-        file << monster.chance << endl;
-        file << monster.type_of_attack << endl;
-        file << monster.time_info.hour << " "  << monster.time_info.min << " " << monster.time_info.sec << " "
-            << monster.time_info.day << " " << monster.time_info.month << " " << monster.time_info.year << endl;
+    file << monster.id << endl;
+    file << monster.name << endl;
+    file << monster.xp << endl;
+    file << monster.damage << endl;
+    file << monster.chance << endl;
+    file << monster.type_of_attack << endl;
+    file << monster.time_info.hour << " " << monster.time_info.min << " " << monster.time_info.sec << " "
+        << monster.time_info.day << " " << monster.time_info.month << " " << monster.time_info.year << endl;
     file.close();
     return true;
+}
+bool create_binary_file(string path)
+{
+    std::ifstream file(path, std::ios_base::binary);
+    if (!file.is_open())
+    {
+
+        file.close();
+        std::ofstream file_create(path, std::ios_base::binary);
+        file_create.close();
+        return false;
+    }
+    file.close();
+    return true;
+}
+void open_binary_file(string path)//переносить інформацію з бінарного файла в масив
+{
+    if (!create_binary_file(path))
+    {
+        my_cls();
+        cout << "File not found!...\n";
+        cout << "New file created!\n";
+        cout << "\nPress '0' to exit.\n";
+    not_null_b:
+        if (_getch() != '0') goto not_null_b;
+    }
+    else
+    {
+        std::ifstream file(path, std::ios_base::binary);
+        info_monster monster;
+        while (!file.eof())
+        {
+            file.read((char*)&(monster.id), sizeof(monster.id));
+            if (file.eof()) break;
+            std::size_t size_name;
+            file.read((char*)&size_name, sizeof(size_name));
+            char* buffer_name = new char[size_name + 1];
+            file.read(buffer_name, size_name);
+            buffer_name[size_name] = '\0';
+            monster.name = buffer_name;
+            file.read((char*)&(monster.xp), sizeof(monster.xp));
+            file.read((char*)&(monster.damage), sizeof(monster.damage));
+            file.read((char*)&(monster.chance), sizeof(monster.chance));
+            std::size_t size_type;
+            file.read((char*)&size_type, sizeof(size_type));
+            char* buffer_type = new char[size_type + 1];
+            file.read(buffer_type, size_type);
+            buffer_type[size_type] = '\0';
+            monster.type_of_attack = buffer_type;
+            file.read((char*)&(monster.time_info.hour), sizeof(monster.time_info.hour));
+            file.read((char*)&(monster.time_info.min), sizeof(monster.time_info.min));
+            file.read((char*)&(monster.time_info.sec), sizeof(monster.time_info.sec));
+            file.read((char*)&(monster.time_info.day), sizeof(monster.time_info.day));
+            file.read((char*)&(monster.time_info.month), sizeof(monster.time_info.month));
+            file.read((char*)&(monster.time_info.year), sizeof(monster.time_info.year));
+            all_monsters.push_back(monster);
+            delete[] buffer_name;
+            delete[] buffer_type;
+        }
+        file.close();
+    }
+       
+    
 }
 bool save_binary_file(string path)//переносить інформацію з масиву в бінарний файл
 {
@@ -214,9 +250,24 @@ bool save_binary_file(string path)//переносить інформацію з
     if (!file.is_open()) return false;
     for (unsigned int i = 0; i < all_monsters.size(); i++)
     {
-        std::size_t size = sizeof(all_monsters[i]);
-        file.write((char*)&size, sizeof(size));
-        file.write((char*)&all_monsters[i], size);
+        file.write((char*)&(all_monsters[i].id), sizeof(all_monsters[i].id));
+        std::size_t size_name = all_monsters[i].name.size();
+        file.write((char*)&size_name, sizeof(size_name));
+        const char* buffer_name = all_monsters[i].name.c_str();
+        file.write(buffer_name, size_name);
+        file.write((char*)&(all_monsters[i].xp), sizeof(all_monsters[i].xp));
+        file.write((char*)&(all_monsters[i].damage), sizeof(all_monsters[i].damage));
+        file.write((char*)&(all_monsters[i].chance), sizeof(all_monsters[i].chance));
+        std::size_t size_type = all_monsters[i].type_of_attack.size();
+        file.write((char*)&size_type, sizeof(size_type));
+        const char* buffer_type = all_monsters[i].type_of_attack.c_str();
+        file.write(buffer_type, size_type);
+        file.write((char*)&(all_monsters[i].time_info.hour), sizeof(all_monsters[i].time_info.hour));
+        file.write((char*)&(all_monsters[i].time_info.min), sizeof(all_monsters[i].time_info.min));
+        file.write((char*)&(all_monsters[i].time_info.sec), sizeof(all_monsters[i].time_info.sec));
+        file.write((char*)&(all_monsters[i].time_info.day), sizeof(all_monsters[i].time_info.day));
+        file.write((char*)&(all_monsters[i].time_info.month), sizeof(all_monsters[i].time_info.month));
+        file.write((char*)&(all_monsters[i].time_info.year), sizeof(all_monsters[i].time_info.year));
     }
     file.close();
     return true;
@@ -226,10 +277,30 @@ bool add_in_binary_file(info_monster monster,string path)//додає інфор
     std::ofstream file(path, std::ios_base::binary|std::ios_base::app);
     if (!file.is_open()) return false;
     std::size_t size = sizeof(monster);
-    file.write((char*)&size, sizeof(size));
-    file.write((char*)&monster, size);
+    file.write((char*)&(monster.id), sizeof(monster.id));
+    std::size_t size_name = monster.name.size();
+    file.write((char*)&size_name, sizeof(size_name));
+    const char* buffer_name = monster.name.c_str();
+    file.write(buffer_name, size_name);
+    file.write((char*)&(monster.xp), sizeof(monster.xp));
+    file.write((char*)&(monster.damage), sizeof(monster.damage));
+    file.write((char*)&(monster.chance), sizeof(monster.chance));
+    std::size_t size_type = monster.type_of_attack.size();
+    file.write((char*)&size_type, sizeof(size_type));
+    const char* buffer_type = monster.type_of_attack.c_str();
+    file.write(buffer_type, size_type);
+    file.write((char*)&(monster.time_info.hour), sizeof(monster.time_info.hour));
+    file.write((char*)&(monster.time_info.min), sizeof(monster.time_info.min));
+    file.write((char*)&(monster.time_info.sec), sizeof(monster.time_info.sec));
+    file.write((char*)&(monster.time_info.day), sizeof(monster.time_info.day));
+    file.write((char*)&(monster.time_info.month), sizeof(monster.time_info.month));
+    file.write((char*)&(monster.time_info.year), sizeof(monster.time_info.year));
     file.close();
     return true;
+}
+void delete_file(const char* path)//видаляє файл
+{
+    std::remove(path);
 }
 int stringtoint(char* string_months)//переводить місяць з string в int
 {
@@ -386,7 +457,7 @@ types_attack:
     cout << "New monster created!\nHis personal ID: " << new_monster.id << endl;   
     write_time(new_monster.time_info);
     all_monsters.push_back(new_monster);
-    if (!add_in_text_file(new_monster, text_file_name)|| !add_in_binary_file(new_monster, binary_file_name))
+    if (!add_in_text_file(new_monster, txt_file)|| !add_in_binary_file(new_monster, bin_file))
     {
         my_cls();
         cout << "Error saving file!...\n";
@@ -522,7 +593,7 @@ void edit_monster()
             break;
             default: goto other_keys;
         }
-        if (!save_text_file(text_file_name) || !save_binary_file(binary_file_name))
+        if (!save_text_file(txt_file) || !save_binary_file(bin_file))
         {
             my_cls();
             cout << "Error saving file!...\n";
@@ -547,7 +618,7 @@ void delete_monster()//видаляє монстра з вказаним ід
     {
         all_monsters.erase(all_monsters.begin() + id);
         cout << "The monster - removed!\n";
-        if (!save_text_file(text_file_name) || !save_binary_file(binary_file_name))
+        if (!save_text_file(txt_file) || !save_binary_file(bin_file))
         {
             my_cls();
             cout << "Error saving file!...\n";
@@ -747,9 +818,9 @@ void Interactive_dialog_mode()//інтерактивний діалоговий 
  file_mode: 
     switch (_getch())
     {
-        case '1': open_file(true);
+        case '1': open_text_file(txt_file);
             break;
-        case '2': open_file(false);
+        case '2': open_binary_file(bin_file);
             break;
         default: goto file_mode;
     }
@@ -814,7 +885,7 @@ menu:
     break;
     case '0': 
     {
-        if (!save_text_file(text_file_name) || !save_binary_file(binary_file_name))
+        if (!save_text_file(txt_file) || !save_binary_file(bin_file))
         {
             my_cls();
             cout << "Error saving file!...\n";
@@ -822,6 +893,13 @@ menu:
         not_null_file:
             if (_getch() != '0') goto not_null_file;
         }  
+        if (all_monsters.size() == 0)
+        {
+            delete_file("text.txt");
+            delete_file("binary.bin");
+            delete_file("copy_text.txt");
+            delete_file("copy_binary.bin");
+        }
         clean_arr();
     }
         break;

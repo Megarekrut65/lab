@@ -1,42 +1,14 @@
-3609
-name1
-1
-1
-1
-Increase damage
-11 44 18 4 2 2020
-3632
-name2
-2
-2
-0.2
-Repeat the attack
-11 44 25 4 2 2020
-5695
-name3
-3
-3
-1
-Cure yourself
-11 54 57 4 2 2020
-5846
-1
-1
-1
-1
-Increase damage
-11 55 43 4 2 2020
-5859
-2
-2
-2
+2218
+Fullpos
+1001
+111
+0.8881
+Paralyze the enemy
+17 57 37 4 2 2020
+2267
+doloalqoodw,dow,cowc,wo,cow,cow,c
+10000
+1000
 1
 Repeat the attack
-11 55 47 4 2 2020
-5882
-3
-3
-1
-1
-Cure yourself
-11 55 54 4 2 2020
+17 57 52 4 2 2020
