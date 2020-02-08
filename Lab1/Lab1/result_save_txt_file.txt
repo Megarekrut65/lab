@@ -1,48 +1,28 @@
-N: 22
-Time: 0.0291521
-Size file:1958
+N: 30
+Time: 0.0311077
+Size file:2333
 
-N: 44
-Time: 0.0399953
-Size file:3916
+N: 70
+Time: 0.0481385
+Size file:5383
 
-N: 88
-Time: 0.0507133
-Size file:7832
+N: 150
+Time: 0.0862346
+Size file:12205
 
-N: 176
-Time: 0.0881748
-Size file:15664
+N: 310
+Time: 0.172293
+Size file:25985
 
-N: 352
-Time: 0.167231
-Size file:31328
+N: 630
+Time: 0.345626
+Size file:53695
 
-N: 704
-Time: 0.351369
-Size file:62656
+N: 1270
+Time: 0.595514
+Size file:107085
 
-N: 1408
-Time: 0.659683
-Size file:125312
-
-N: 2816
-Time: 1.30534
-Size file:250624
-
-N: 5632
-Time: 2.51745
-Size file:501248
-
-N: 11264
-Time: 4.87406
-Size file:1002496
-
-N: 22528
-Time: 9.72024
-Size file:2004992
-
-N: 45056
-Time: 19.5421
-Size file:4009984
+N: 2550
+Time: 1.19731
+Size file:208213
 

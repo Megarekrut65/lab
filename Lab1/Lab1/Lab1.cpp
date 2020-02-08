@@ -114,8 +114,9 @@ bool create_text_file(string path)
     file.close();
     return true;
 }
-void open_text_file(string path,vector<info_monster>&all_monsters)//переносить інформацію з текстового файла в масив
+vector<info_monster> open_text_file(string path)//переносить інформацію з текстового файла в масив
 {
+    vector<info_monster> all_monsters;
     if (!create_text_file(path))
     {
         my_cls();
@@ -148,6 +149,7 @@ void open_text_file(string path,vector<info_monster>&all_monsters)//перено
         }
         file.close();
     }
+    return all_monsters;
 }
 bool save_text_file(string path, vector<info_monster> all_monsters)//переносить інформацію з масиву в текстовий файл
 {
@@ -196,8 +198,9 @@ bool create_binary_file(string path)
     file.close();
     return true;
 }
-void open_binary_file(string path,vector<info_monster>& all_monsters)//переносить інформацію з бінарного файла в масив
+vector<info_monster> open_binary_file(string path)//переносить інформацію з бінарного файла в масив
 {
+    vector<info_monster> all_monsters;
     if (!create_binary_file(path))
     {
         my_cls();
@@ -242,6 +245,7 @@ void open_binary_file(string path,vector<info_monster>& all_monsters)//пере�
         }
         file.close();
     }  
+    return all_monsters;
 }
 bool save_binary_file(string path, vector<info_monster> all_monsters)//переносить інформацію з масиву в бінарний файл
 {
@@ -829,9 +833,9 @@ void Interactive_dialog_mode()//інтерактивний діалоговий 
  file_mode: 
     switch (_getch())
     {
-        case '1': open_text_file(txt_file,all_monsters);
+        case '1': all_monsters = open_text_file(txt_file);
             break;
-        case '2': open_binary_file(bin_file,all_monsters);
+        case '2': all_monsters = open_binary_file(bin_file);
             break;
         default: goto file_mode;
     }
@@ -1337,9 +1341,10 @@ void demo_mode()//демонстраційний режим
     cout << "Demo mode is over!" << endl;
     Sleep(1800);
 }
-void monster_generator(vector<info_monster> save_monsters)//створює монстра з рандомними параметрами
+info_monster monster_generator()//створює монстра з рандомними параметрами
 {
-    string name;
+    info_monster monster;
+    monster.id = rand() % 9000 + 1000;
     int n = (rand() % 30 + 5), m = n;
     char* buff = new char[n + 1];
     for (int i = 0; i < n; i++)
@@ -1349,24 +1354,24 @@ void monster_generator(vector<info_monster> save_monsters)//створює мо�
         buff[i] = 'a' + (rand() % 26);
     }
     buff[n] = '\0';
-    name = buff;
-    unsigned int xp = (rand() % 50000 + 1);
-    int damage = (rand() % 1000 + 1);
-    double chance = 0.01 * (rand() % 100 + 1);
-    string type;
+    monster.name = buff;
+    monster.xp = (rand() % 50000 + 1);
+    monster.damage = (rand() % 1000 + 1);
+    monster.chance = 0.01 * (rand() % 100 + 1);
     int k = (rand() % 4 + 1);
     switch (k)
     {
-    case 1: type = "Increase damage";
+    case 1: monster.type_of_attack = "Increase damage";
         break;
-    case 2: type = "Repeat the attack";
+    case 2: monster.type_of_attack = "Repeat the attack";
         break;
-    case 3: type = "Cure yourself";
+    case 3: monster.type_of_attack = "Cure yourself";
         break;
-    case 4: type = "Paralyze the enemy";
+    case 4: monster.type_of_attack = "Paralyze the enemy";
         break;
     }
-    save_monsters.push_back(info_monster(save_monsters,name, xp, damage, chance, type));
+    monster.time_info = my_time(rand() % 60, rand() % 60, rand() % 24, rand() % 29, rand() % 12 + 1, rand() % 100 + 2000);
+    return monster;
 }
 int size_file(string path)//вимірює розмір файла в байтах
 {
@@ -1413,10 +1418,12 @@ void benchmark_mode()// режим benchmark
     std::chrono::duration<float> duration;
     vector<info_monster> save_monsters;
     vector<info_monster> open_monsters;
-    int m = n, k = 2;
+    int m = n;
     while (true)
     {
-        for (int i = 0; i < m; i++) monster_generator(save_monsters);
+        cout << "begin\n";
+        for (int i = 0; i < m; i++) save_monsters.push_back(monster_generator());
+        cout << "1\n";
         int k = save_monsters.size();
         cout << "\n\n        <N = " << k << ">\n";
         the_start = std::chrono::high_resolution_clock::now();
@@ -1431,8 +1438,9 @@ void benchmark_mode()// режим benchmark
         cout << "Size of save txt = " << save_txt.size << endl;
         if (save_txt.time >= 10) break;
         //
+        cout << "2\n";
         the_start = std::chrono::high_resolution_clock::now();
-        open_text_file("benchmark_text.txt", open_monsters);
+        open_monsters = open_text_file("benchmark_text.txt");
         the_end = std::chrono::high_resolution_clock::now();
         duration = the_end - the_start;
         open_txt.number_n = k;
@@ -1440,6 +1448,7 @@ void benchmark_mode()// режим benchmark
         add_program_test("result_open_txt_file.txt", open_txt);
         cout << "Time of open txt = " << open_txt.time << endl;
         //
+        cout << "3\n";
         vector <int> number;
         the_start = std::chrono::high_resolution_clock::now();
         number = find_name(open_monsters[k - 1].name, open_monsters);
@@ -1450,6 +1459,7 @@ void benchmark_mode()// режим benchmark
         add_program_test("result_name_find.txt", name_find);
         cout << "Time of find by name = " << name_find.time << endl;
         //
+        cout << "4\n";
         the_start = std::chrono::high_resolution_clock::now();
         number = find_xp_damage(open_monsters[k - 1].xp, open_monsters[k - 1].damage, open_monsters);
         the_end = std::chrono::high_resolution_clock::now();
@@ -1459,6 +1469,7 @@ void benchmark_mode()// режим benchmark
         add_program_test("result_xp_damage_find.txt", xp_damage_find);
         cout << "Time of find by xp and damage = " << xp_damage_find.time << endl;
         //
+        cout << "5\n";
         the_start = std::chrono::high_resolution_clock::now();
         number = find_types_time(open_monsters[k - 1].type_of_attack, open_monsters[k - 1].time_info, open_monsters);
         the_end = std::chrono::high_resolution_clock::now();
@@ -1468,11 +1479,14 @@ void benchmark_mode()// режим benchmark
         add_program_test("result_time_type_find.txt", time_type_find);
         cout << "Time of find by types of attack and time = " << time_type_find.time << endl;
         open_monsters.clear();
+        m *=2;
+        cout << "end\n";
     }
     save_monsters.clear();
+    m = n;
     while(true)
     {
-        for (int j = 0; j < m; j++) (monster_generator(save_monsters));
+        for (int j = 0; j < m; j++) save_monsters.push_back(monster_generator());
         int k = save_monsters.size();
         cout << "\n\n        <N = " << k << ">\n";
         the_start = std::chrono::high_resolution_clock::now();
@@ -1488,7 +1502,7 @@ void benchmark_mode()// режим benchmark
         if (save_bin.time >= 10) break;
         //
         the_start = std::chrono::high_resolution_clock::now();
-        open_binary_file("benchmark_binary.bin",open_monsters);
+        open_monsters = open_binary_file("benchmark_binary.bin");
         the_end = std::chrono::high_resolution_clock::now();
         duration = the_end - the_start;
         open_bin.number_n = k;
@@ -1496,6 +1510,7 @@ void benchmark_mode()// режим benchmark
         add_program_test("result_open_binary_file.txt", open_bin);
         cout <<"Time open binary = " << open_bin.time << endl;
         open_monsters.clear();
+        m *= 2;
     }
     save_monsters.clear();
     cout << "\nResults of measurements of program in the following files:"
