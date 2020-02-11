@@ -132,13 +132,13 @@ void open_text_file(string path)//переносить інформацію з �
             file >> type;
             switch (type)
             {
-                case 1: type_of_attack = INCREASE;
+                case 0: type_of_attack = INCREASE;
                 break;
-                case 2: type_of_attack = REPEAT;
+                case 1: type_of_attack = REPEAT;
                 break;
-                case 3: type_of_attack = CURE;
+                case 2: type_of_attack = CURE;
                 break;
-                case 4: type_of_attack = PARALYZE;
+                case 3: type_of_attack = PARALYZE;
             }
             file >> time_info.tm_hour >> time_info.tm_min >> time_info.tm_sec 
                  >> time_info.tm_mday >> time_info.tm_mon >> time_info.tm_year;
@@ -219,7 +219,7 @@ void open_binary_file(string path)//переносить інформацію з
             file.read((char*)&(monster.hp), sizeof(monster.hp));
             file.read((char*)&(monster.damage), sizeof(monster.damage));
             file.read((char*)&(monster.chance), sizeof(monster.chance));
-            file.read((char*)&monster.type_of_attack, sizeof(monster.type_of_attack));       
+            file.read((char*)&(monster.type_of_attack), sizeof(monster.type_of_attack));       
             file.read((char*)&(monster.time_info.tm_hour), sizeof(monster.time_info.tm_hour));
             file.read((char*)&(monster.time_info.tm_min), sizeof(monster.time_info.tm_min));
             file.read((char*)&(monster.time_info.tm_sec), sizeof(monster.time_info.tm_sec));
@@ -247,7 +247,12 @@ bool save_binary_file(string path)//переносить інформацію з
         file.write((char*)&(all_monsters[i].damage), sizeof(all_monsters[i].damage));
         file.write((char*)&(all_monsters[i].chance), sizeof(all_monsters[i].chance));
         file.write((char*)&(all_monsters[i].type_of_attack), sizeof(all_monsters[i].type_of_attack));
-        file.write((char*)&(all_monsters[i].time_info), sizeof(all_monsters[i].time_info));
+        file.write((char*)&(all_monsters[i].time_info.tm_hour), sizeof(all_monsters[i].time_info.tm_hour));
+        file.write((char*)&(all_monsters[i].time_info.tm_min), sizeof(all_monsters[i].time_info.tm_min));
+        file.write((char*)&(all_monsters[i].time_info.tm_sec), sizeof(all_monsters[i].time_info.tm_sec));
+        file.write((char*)&(all_monsters[i].time_info.tm_mday), sizeof(all_monsters[i].time_info.tm_mday));
+        file.write((char*)&(all_monsters[i].time_info.tm_mon), sizeof(all_monsters[i].time_info.tm_mon));
+        file.write((char*)&(all_monsters[i].time_info.tm_year), sizeof(all_monsters[i].time_info.tm_year));
     }
     file.close();
     return true;
@@ -265,7 +270,12 @@ bool add_in_binary_file(info_monster monster, string path)//додає інфо�
     file.write((char*)&(monster.damage), sizeof(monster.damage));
     file.write((char*)&(monster.chance), sizeof(monster.chance));
     file.write((char*)&(monster.type_of_attack), sizeof(monster.type_of_attack));
-    file.write((char*)&(monster.time_info), sizeof(monster.time_info));
+    file.write((char*)&(monster.time_info.tm_hour), sizeof(monster.time_info.tm_hour));
+    file.write((char*)&(monster.time_info.tm_min), sizeof(monster.time_info.tm_min));
+    file.write((char*)&(monster.time_info.tm_sec), sizeof(monster.time_info.tm_sec));
+    file.write((char*)&(monster.time_info.tm_mday), sizeof(monster.time_info.tm_mday));
+    file.write((char*)&(monster.time_info.tm_mon), sizeof(monster.time_info.tm_mon));
+    file.write((char*)&(monster.time_info.tm_year), sizeof(monster.time_info.tm_year));
     file.close();
     return true;
 }
@@ -288,41 +298,41 @@ unsigned set_id()//створює унікальний id
     for (unsigned i = 0; i < all_monsters.size(); i++) if (new_id == all_monsters[i].id) new_id++;
     return new_id;
 }
-string read_name()
+string read_name(string sentence)
 {
     string name;
-    cout << "Enter a monster name: ";
+    cout << sentence;
     getline(cin, name);
     while (name.size() == 0) getline(cin, name);
     return name;
 }
-unsigned read_hp()
+unsigned read_hp(string sentence)
 {
     while (true)
     {
-        cout << "Enter the number of monster health units (1-50000): ";
+        cout << sentence;
         unsigned hp;
         cin >> hp;
         if ((hp < 1) || (hp > 50000)) cout << "\nData entered incorrectly!\n";
         else return hp;
     }
 }
-unsigned read_damage()
+unsigned read_damage(string sentence)
 {
     while (true)
     {
-        cout << "Enter the number of monster attack units (1-1000): ";
+        cout << sentence;
         unsigned damage ;
         cin >> damage;
         if ((damage < 1) || (damage > 1000)) cout << "\nData entered incorrectly!\n";
         else return damage;
     }
 }
-double read_chance()
+double read_chance(string sentence)
 {
     while (true)
     {
-        cout << "Enter the monster's chance to launch a special attack (0.00 - 1.00): ";
+        cout << sentence;
         string chance_string;
         getline(cin, chance_string);
         while (chance_string.size() == 0) getline(cin, chance_string);
@@ -330,7 +340,7 @@ double read_chance()
         for (unsigned i = 0; i < chance_string.size(); i++)
         {
             if (i == 1) i++;
-            chance += coefficient *(int(chance_string[i]) - '0');
+            chance += coefficient *(int(chance_string[i]) - 48);
             coefficient /= 10;
         }
         if ((chance < 0) || (chance > 1)) cout << "\nData entered incorrectly!\n";
@@ -362,9 +372,10 @@ void write_time(struct std::tm time_info)
 void add_new_monster()//створює нового монстра
 {
     cout << "Create your own monster!\n";
-    string name = read_name();
-    unsigned hp = read_hp(),damage = read_damage();
-    double chance = read_chance();
+    string name = read_name("Enter a monster name: ");
+    unsigned hp = read_hp("Enter the number of monster health units (1-50000): ");
+    unsigned damage = read_damage("Enter the number of monster attack units (1-1000): ");
+    double chance = read_chance("Enter the monster's chance to launch a special attack (0.00 - 1.00): ");
     types_of_attack type_of_attack = read_type();
     info_monster new_monster(name, hp, damage, chance, type_of_attack);
     cout << "New monster created!\nHis personal ID: " << new_monster.id << endl;
@@ -419,12 +430,10 @@ int find_id(unsigned monster_id)
 }
 void edit_monster()
 {
-    //my_cls();
     cout << "Enter id of monster: ";
     unsigned monster_id;
     cin >> monster_id;
     int number = find_id(monster_id);
-    //my_cls();
     if (number != -1)
     {
     edit:
@@ -492,14 +501,18 @@ void edit_monster()
                 switch (_getch())
                 {
                 case'1': new_type = INCREASE;
-                break;
+                    break;
                 case'2': new_type = REPEAT;
-                break;
+                    break;
                 case '3': new_type = CURE;
-                break;
+                    break;
                 case'4': new_type = PARALYZE;
-                break;
-                default: continue;
+                    break;
+                default: 
+                    {
+                        cout << "Press the correct key!\n";
+                        continue;
+                    }
                 }
                 break;
             }
@@ -687,6 +700,29 @@ vector <int> find_name(string fragment_name)//пошук монстра по і�
     }
     return numbers_monsters;
 }
+void monster_search()
+{
+    while (true)
+    {
+        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
+            << "3)Search by type of special monster attack and date." << endl;
+        switch (_getch())
+        {
+        case '1': find_name_menu();
+            break;
+        case '2': find_xp_damage_menu();
+            break;
+        case '3': find_types_time_menu();
+            break;
+        default:
+            {
+                cout << "Press the correct key!\n";
+                continue;
+            }
+        }
+        break;
+    }
+}
 void interactive_dialog_mode()
 {      
     while (true)
@@ -727,26 +763,7 @@ void interactive_dialog_mode()
             break;
         case '3':
         {        
-            while (true)
-            {
-                cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
-                    << "3)Search by type of special monster attack and date."<<endl;
-                switch (_getch())
-                {
-                case '1': find_name_menu();
-                    break;
-                case '2': find_xp_damage_menu();
-                    break;
-                case '3': find_types_time_menu();
-                    break;
-                default: 
-                    {
-                        cout << "Press the correct key!\n";
-                        continue;
-                    }
-                }
-                break;
-            }
+            monster_search();
             continue;
         }
             break;
@@ -777,7 +794,7 @@ void interactive_dialog_mode()
             break;
         default:
             {
-                cout << "Press the correct key!\n";
+                cout << "Press the correct key!"<<endl;
                 continue;
             }
         }
