@@ -56,7 +56,7 @@ struct info_monster
         this->hp = 0;
         this->damage = 0;
         this->chance = 0;
-        this->type_of_attack = INCREASE;
+        this->type_of_attack = types_of_attack::INCREASE;
         this->time_info;
         this->id = -1;
     }
@@ -152,7 +152,7 @@ bool save_text_file(string path)//переносить інформацію з �
 {
     std::ofstream file(path);
     if (!file.is_open()) return false;
-    for (unsigned int i = 0; i < all_monsters.size(); i++)
+    for (unsigned i = 0; i < all_monsters.size(); i++)
     {
         file << all_monsters[i].id << endl;
         file << all_monsters[i].name << endl;
@@ -236,7 +236,7 @@ bool save_binary_file(string path)//переносить інформацію з
 {
     std::ofstream file(path, std::ios_base::binary);
     if (!file.is_open()) return false;
-    for (unsigned int i = 0; i < all_monsters.size(); i++)
+    for (unsigned i = 0; i < all_monsters.size(); i++)
     {
         file.write((char*)&(all_monsters[i].id), sizeof(all_monsters[i].id));
         std::size_t size_name = all_monsters[i].name.size();
@@ -246,13 +246,8 @@ bool save_binary_file(string path)//переносить інформацію з
         file.write((char*)&(all_monsters[i].hp), sizeof(all_monsters[i].hp));
         file.write((char*)&(all_monsters[i].damage), sizeof(all_monsters[i].damage));
         file.write((char*)&(all_monsters[i].chance), sizeof(all_monsters[i].chance));
-        file.write((char*)all_monsters[i].type_of_attack, sizeof(all_monsters[i].type_of_attack));
-        file.write((char*)&(all_monsters[i].time_info.tm_hour), sizeof(all_monsters[i].time_info.tm_hour));
-        file.write((char*)&(all_monsters[i].time_info.tm_min), sizeof(all_monsters[i].time_info.tm_min));
-        file.write((char*)&(all_monsters[i].time_info.tm_sec), sizeof(all_monsters[i].time_info.tm_sec));
-        file.write((char*)&(all_monsters[i].time_info.tm_mday), sizeof(all_monsters[i].time_info.tm_mday));
-        file.write((char*)&(all_monsters[i].time_info.tm_mon), sizeof(all_monsters[i].time_info.tm_mon));
-        file.write((char*)&(all_monsters[i].time_info.tm_year), sizeof(all_monsters[i].time_info.tm_year));
+        file.write((char*)&(all_monsters[i].type_of_attack), sizeof(all_monsters[i].type_of_attack));
+        file.write((char*)&(all_monsters[i].time_info), sizeof(all_monsters[i].time_info));
     }
     file.close();
     return true;
@@ -269,13 +264,8 @@ bool add_in_binary_file(info_monster monster, string path)//додає інфо�
     file.write((char*)&(monster.hp), sizeof(monster.hp));
     file.write((char*)&(monster.damage), sizeof(monster.damage));
     file.write((char*)&(monster.chance), sizeof(monster.chance));
-    file.write((char*)monster.type_of_attack, sizeof(monster.type_of_attack));
-    file.write((char*)&(monster.time_info.tm_hour), sizeof(monster.time_info.tm_hour));
-    file.write((char*)&(monster.time_info.tm_min), sizeof(monster.time_info.tm_min));
-    file.write((char*)&(monster.time_info.tm_sec), sizeof(monster.time_info.tm_sec));
-    file.write((char*)&(monster.time_info.tm_mday), sizeof(monster.time_info.tm_mday));
-    file.write((char*)&(monster.time_info.tm_mon), sizeof(monster.time_info.tm_mon));
-    file.write((char*)&(monster.time_info.tm_year), sizeof(monster.time_info.tm_year));
+    file.write((char*)&(monster.type_of_attack), sizeof(monster.type_of_attack));
+    file.write((char*)&(monster.time_info), sizeof(monster.time_info));
     file.close();
     return true;
 }
@@ -389,12 +379,22 @@ void write_monster(int number)//виводить дані монстра на е
     cout << "XP: " << all_monsters[number].hp << ".\n";
     cout << "Damage: " << all_monsters[number].damage << ".\n";
     cout << "Chance to launch a special attack: " << all_monsters[number].chance << ".\n";
-    cout << "Type of special monster attack: " << all_monsters[number].type_of_attack << "." << endl;
+    cout << "Type of special monster attack: ";
+    switch (all_monsters[number].type_of_attack) 
+    {
+    case INCREASE: cout << "Increase damage.\n";
+        break;
+    case REPEAT: cout << "Repeat the attack.\n";
+        break;
+    case CURE: cout << "Cure yourself.\n";
+        break;
+    case PARALYZE: cout << "Paralyze the enemy.\n";
+    }
     write_time(all_monsters[number].time_info);
 }
 void write_monsters_menu(vector<int> numbers)
 {
-    cout << "Monster(s) found:\n\n";
+    cout << "\nMonster(s) found:\n\n";
     int n = 0;  
     for (unsigned i = 0; i < numbers.size(); i++)
     {
@@ -554,7 +554,7 @@ not_zero:
 }
 void write_all_monsters()//видає на екран дані всіх монстрів
 {
-    cout << "All monsters:";
+    cout << "All monsters:" <<endl;
     for (unsigned i = 0; i < all_monsters.size(); i++)
     {
         cout << "<" << i + 1 << ">\n";
@@ -688,8 +688,7 @@ vector <int> find_name(string fragment_name)//пошук монстра по і�
     return numbers_monsters;
 }
 void interactive_dialog_mode()
-{
-    if (!save_text_file("copy_text.txt") || !save_binary_file("copy_binary.bin")) cout << "Error saving copy file!...\n";      
+{      
     while (true)
     {       
         cout << "Select the opening mode:\n1)Text mode.\n2)Binary mode.\n";
@@ -707,15 +706,24 @@ void interactive_dialog_mode()
         }
         break;
     }
+    if (!save_text_file("copy_text.txt") || !save_binary_file("copy_binary.bin")) cout << "Error saving copy file!...\n";
     while (true)
     {
         cout << "Menu:\n1)Add a new monster.\n2)Show all the monsters.\n3)Find an existing monster.\n"
              <<"4)Edit a monster.\n5)Delete a monster.\n0)Back." << endl;
         switch (_getch())
         {
-        case '1': add_new_monster();
+        case '1': 
+        {
+            add_new_monster();
+            continue;
+        }
             break;
-        case'2': write_all_monsters();
+        case'2': 
+        {
+            write_all_monsters();
+            continue;
+        }
             break;
         case '3':
         {        
@@ -739,11 +747,20 @@ void interactive_dialog_mode()
                 }
                 break;
             }
+            continue;
         }
             break;
-        case '4': edit_monster();
+        case '4': 
+        {
+            edit_monster();
+            continue;
+        }
             break;
-        case '5': delete_monster();
+        case '5': 
+        {
+            delete_monster();
+            continue;
+        }
             break;
         case '0':
             {
@@ -756,7 +773,6 @@ void interactive_dialog_mode()
                     std::remove("copy_binary.bin");
                 }
                 all_monsters.clear();
-                break;
             }
             break;
         default:
@@ -765,6 +781,7 @@ void interactive_dialog_mode()
                 continue;
             }
         }
+        break;
     }
 }
 bool demo_cls(int n)//очищення екрану та затримка для демонстраційного режиму
