@@ -6,7 +6,7 @@
 #include <string>
 #include <fstream>
 #include <chrono>
-
+#include <algorithm>
 using std::cout;
 using std::cin;
 using std::endl;
@@ -419,11 +419,7 @@ unsigned set_id()//створює унікальний id
     unsigned new_id = 1000;
     int size = all_monsters.size();
     if (size == 0) return new_id;
-    else
-    {
-        new_id = all_monsters[size - 1].id + 1;
-        return new_id;
-    }
+    else return all_monsters[size - 1].id + 1;
 }
 int find_id(unsigned monster_id)
 {
@@ -543,13 +539,13 @@ void find_types_time_menu()
 }
 bool is_time(const int *find_time,const int* monster_time, int number = 0)
 {
-
+    if (number == 6) return false;
     if (monster_time[number] > find_time[number]) return false;
     else
     {
         if (number == 5) return true;
         if (monster_time[number] < find_time[number]) return true;
-        return is_time(find_time, monster_time, number++);
+        return is_time(find_time, monster_time, ++number);
     }
 }
 vector <int> find_types_time(types_of_attack one_types_attack, const int* find_time)//пошук монстра по типу атки та часу створення
@@ -566,7 +562,6 @@ vector <int> find_types_time(types_of_attack one_types_attack, const int* find_t
             monster_time[3] = all_monsters[i].time_info.tm_hour;
             monster_time[4] = all_monsters[i].time_info.tm_min;
             monster_time[5] = all_monsters[i].time_info.tm_sec;
-            for (int k = 0; k < 6; k++) cout << "t = " << monster_time[k] << endl;
             if (is_time(find_time, monster_time)) numbers_monsters.push_back(i);
             delete[]monster_time;
         }
@@ -576,12 +571,8 @@ vector <int> find_types_time(types_of_attack one_types_attack, const int* find_t
 }
 void find_xp_damage_menu()
 {
-    cout << "Enter minimum health level of monster(1-50000): ";
-    unsigned min_hp = 1;
-    int max_damage = 1000;
-    cin >> min_hp;
-    cout << "Enter the maximum attack level of monster(1-1000): ";
-    cin >> max_damage;
+    unsigned min_hp = read_hp("Enter minimum health level of monster(1-50000): ");
+    unsigned max_damage = read_damage("Enter the maximum attack level of monster(1-1000): ");
     write_monsters_menu(find_xp_damage(min_hp, max_damage));  
 }
 vector <int> find_xp_damage(unsigned min_hp, unsigned max_damage)//пошук монстар по рівню життя і атаки
@@ -611,6 +602,8 @@ vector <int> find_name(string fragment_name)//пошук монстра по і�
         int name_size = name.size();
         if (fragment_size <= name_size) 
         {
+            transform(name.begin(), name.end(), name.begin(), ::tolower);
+            transform(fragment_name.begin(), fragment_name.end(), fragment_name.begin(), ::tolower);
             for(unsigned j = 0; (j + fragment_size) <= name_size; j++)
             {
                 if (name.substr(j, fragment_size) == fragment_name)
