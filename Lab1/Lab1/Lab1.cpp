@@ -7,6 +7,7 @@
 #include <fstream>
 #include <chrono>
 #include <algorithm>
+
 using std::cout;
 using std::cin;
 using std::endl;
@@ -23,7 +24,6 @@ bool create_binary_file(string);
 void open_binary_file(string);
 bool save_binary_file(string);
 bool add_in_binary_file(info_monster, string);
-int string_to_int(char*);
 unsigned set_id();
 void add_new_monster();
 void write_monster(int);
@@ -279,19 +279,6 @@ bool add_in_binary_file(info_monster monster, string path)//додає інфо�
     file.close();
     return true;
 }
-int string_to_int(char* char_months)//переводить місяць з char[] в int
-{
-    char all_months[12][4] = { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
-    for (unsigned int i = 0; i < 12; i++)
-    {
-        int k = 0;
-        if (char_months[0] == all_months[i][0]) k++;
-        if (char_months[1] == all_months[i][1]) k++;
-        if (char_months[2] == all_months[i][2]) k++;
-        if (k == 3) return (i + 1);
-    }
-    return -1;
-}
 string read_name(string sentence)
 {
     string name;
@@ -330,20 +317,33 @@ double read_chance(string sentence)
         string chance_string;
         getline(cin, chance_string);
         while (chance_string.size() == 0) getline(cin, chance_string);
-        if ((chance_string.size() != 1) && (chance_string[1] != '.') && (chance_string[1] != ',')) cout << "\nData entered incorrectly!" << endl;
-        else
+        if (chance_string.size() > 1)
         {
-            double chance = 0, coefficient = 1;
-            for (unsigned i = 0; i < chance_string.size(); i++)
+            double chance = -1;
+            if (chance_string[1] == '.') chance = std::stof(chance_string.c_str());
+            if (chance_string[1] == ',')
             {
-                if (i == 1) i++;
-                chance += coefficient * (int(chance_string[i]) - 48);
-                coefficient /= 10;
+                string part = "";
+                part += chance_string.substr(0, 1);
+                part += ".";
+                part += chance_string.substr(2, chance_string.size() - 1);
+                chance = std::stof(part.c_str());
+            }               
+            if ((chance < 0) || (chance > 1))
+            {
+                cout << "\nData entered incorrectly!" << endl;
+                continue;
             }
-            if ((chance < 0) || (chance > 1)) cout << "\nData entered incorrectly!"<<endl;
-            else return chance;
-        }       
+            else return chance;         
+        }
+        return std::stof(chance_string.c_str());
     }
+    return -1;
+}
+void test()
+{
+    double part = read_chance("\nnu,go\n");
+    cout << part << endl;
 }
 types_of_attack read_type(string sentence)
 {
@@ -379,40 +379,6 @@ void add_new_monster()//створює нового монстра
     write_time(new_monster.time_info);
     all_monsters.push_back(new_monster);
     if (!add_in_text_file(new_monster, txt_file) || !add_in_binary_file(new_monster, bin_file)) cout << "\nError saving file!..." << endl;
-}
-void write_monster(int number)//виводить дані монстра на еран
-{
-    cout << "ID: " << all_monsters[number].id << ".\n";
-    cout << "Name: " << all_monsters[number].name << ".\n";
-    cout << "XP: " << all_monsters[number].hp << ".\n";
-    cout << "Damage: " << all_monsters[number].damage << ".\n";
-    cout << "Chance to launch a special attack: " << all_monsters[number].chance << ".\n";
-    cout << "Type of special monster attack: ";
-    switch (all_monsters[number].type_of_attack) 
-    {
-    case INCREASE: cout << "Increase damage.\n";
-        break;
-    case REPEAT: cout << "Repeat the attack.\n";
-        break;
-    case CURE: cout << "Cure yourself.\n";
-        break;
-    case PARALYZE: cout << "Paralyze the enemy.\n";
-    }
-    write_time(all_monsters[number].time_info);
-}
-void write_monsters_menu(vector<int> numbers)
-{
-    if (numbers.size() == 0) cout << "\nMonster(s) don`t found!" << endl;
-    else
-    {
-        cout << "\nMonster(s) found:" << endl;
-        int n = 0;
-        for (unsigned i = 0; i < numbers.size(); i++)
-        {
-            cout << "\n<" << ++n << ">" << endl;
-            write_monster(numbers[i]);
-        }
-    }   
 }
 unsigned set_id()//створює унікальний id
 {
@@ -509,6 +475,40 @@ void delete_monster()//видаляє монстра з вказаним ід
     }
     else cout << "\nMonster not found!" << endl;
 }
+void write_monster(int number)//виводить дані монстра на еран
+{
+    cout << "ID: " << all_monsters[number].id << ".\n";
+    cout << "Name: " << all_monsters[number].name << ".\n";
+    cout << "XP: " << all_monsters[number].hp << ".\n";
+    cout << "Damage: " << all_monsters[number].damage << ".\n";
+    cout << "Chance to launch a special attack: " << all_monsters[number].chance << ".\n";
+    cout << "Type of special monster attack: ";
+    switch (all_monsters[number].type_of_attack)
+    {
+    case INCREASE: cout << "Increase damage.\n";
+        break;
+    case REPEAT: cout << "Repeat the attack.\n";
+        break;
+    case CURE: cout << "Cure yourself.\n";
+        break;
+    case PARALYZE: cout << "Paralyze the enemy.\n";
+    }
+    write_time(all_monsters[number].time_info);
+}
+void write_monsters_menu(vector<int> numbers)
+{
+    if (numbers.size() == 0) cout << "\nMonster(s) don`t found!" << endl;
+    else
+    {
+        cout << "\nMonster(s) found:" << endl;
+        int n = 0;
+        for (unsigned i = 0; i < numbers.size(); i++)
+        {
+            cout << "\n<" << ++n << ">" << endl;
+            write_monster(numbers[i]);
+        }
+    }
+}
 void write_all_monsters()//видає на екран дані всіх монстрів
 {
     cout << "All monsters:" <<endl;
@@ -520,8 +520,9 @@ void write_all_monsters()//видає на екран дані всіх монс
 }
 void find_types_time_menu()
 {   
-    types_of_attack one_types_attack = read_type("\nEnter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n3)Cure yourself.\n4)Paralyze the enemy.\n");
-    cout << "Enter the maximum date and time the monster was created.\n";
+    string sentence = "\nEnter one of the possible types of special monster attack:\n1)Increase damage.\n2)Repeat the attack.\n3)Cure yourself.\n4)Paralyze the enemy.\n";
+    types_of_attack one_types_attack = read_type(sentence);
+    cout << "\nEnter the maximum date and time the monster was created: ";
     int* find_time = new int[6];
     cout << "Enter year(1970-....): ";
     cin >> find_time[0];
@@ -571,8 +572,8 @@ vector <int> find_types_time(types_of_attack one_types_attack, const int* find_t
 }
 void find_xp_damage_menu()
 {
-    unsigned min_hp = read_hp("Enter minimum health level of monster(1-50000): ");
-    unsigned max_damage = read_damage("Enter the maximum attack level of monster(1-1000): ");
+    unsigned min_hp = read_hp("\nEnter minimum health level of monster(1-50000): ");
+    unsigned max_damage = read_damage("\nEnter the maximum attack level of monster(1-1000): ");
     write_monsters_menu(find_xp_damage(min_hp, max_damage));  
 }
 vector <int> find_xp_damage(unsigned min_hp, unsigned max_damage)//пошук монстар по рівню життя і атаки
@@ -586,10 +587,7 @@ vector <int> find_xp_damage(unsigned min_hp, unsigned max_damage)//пошук м
 }
 void find_name_menu()
 {
-    cout << "Enter the full name or snippet of the monster name:\n";
-    string fragment_name;
-    getline(cin, fragment_name);
-    while(fragment_name.size() == 0) getline(cin, fragment_name);
+    string fragment_name = read_name("\nEnter the full name or snippet of the monster name: ");
     write_monsters_menu(find_name(fragment_name));
 }
 vector <int> find_name(string fragment_name)//пошук монстра по імені
@@ -604,7 +602,7 @@ vector <int> find_name(string fragment_name)//пошук монстра по і�
         {
             transform(name.begin(), name.end(), name.begin(), ::tolower);
             transform(fragment_name.begin(), fragment_name.end(), fragment_name.begin(), ::tolower);
-            for(unsigned j = 0; (j + fragment_size) <= name_size; j++)
+            for(int j = 0; (j + fragment_size) <= name_size; j++)
             {
                 if (name.substr(j, fragment_size) == fragment_name)
                 {
@@ -620,7 +618,7 @@ void monster_search()
 {
     while (true)
     {
-        cout << "Select Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
+        cout << "\nSelect Monster Search Mode:\n1)Search by Name.\n2)Search by xp and damage.\n"
             << "3)Search by type of special monster attack and date." << endl;
         switch (_getch())
         {
@@ -632,7 +630,7 @@ void monster_search()
             break;
         default:
             {
-                cout << "Press the correct key!\n";
+                cout << "\nPress the correct key!" << endl;
                 continue;
             }
         }
@@ -1182,9 +1180,8 @@ void add_program_test(string path, result date)
         file.close();
     }
 }
-void benchmark_mode()// режим benchmark
+void benchmark_mode()
 {
-    //my_cls();
     int n;
     result name_find, xp_damage_find, time_type_find, open_bin, open_txt, save_bin, save_txt;
     name_find.size = -1;
@@ -1297,12 +1294,13 @@ int main()
     cout << "<The Forest of Monsters>" << endl;
     while (true)
     {
-        cout << "\nSelect the application mode:\n1)Interactive dialog mode.\n2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
+        cout << "\nSelect the application mode:\n1)Interactive dialog mode.\n"
+             <<"2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
         switch (_getch())
         {
         case '1': interactive_dialog_mode();
             break;
-        case '2': //demo_mode();
+        case '2': test();//demo_mode();
             break;
         case '3': //benchmark_mode();
             break;
