@@ -103,7 +103,7 @@ struct measurement_result
     std::size_t size;
 };
 
-bool create_text_file(string path)
+bool create_text_file(const string& path)
 {
     std::ifstream file(path);
     if (!file.is_open())
@@ -117,7 +117,7 @@ bool create_text_file(string path)
 
     return true;
 }
-vector <info_monster> open_text_file(string path)//переносить інформацію з текстового файла в масив
+vector <info_monster> open_text_file(const string& path)//переносить інформацію з текстового файла в масив
 {
     vector <info_monster> all_monsters;
     if (!create_text_file(path))
@@ -161,7 +161,7 @@ vector <info_monster> open_text_file(string path)//переносить інфо
     }
     return all_monsters;
 }
-bool save_text_file(string path,const vector<info_monster>& all_monsters)//переносить інформацію з масиву в текстовий файл
+bool save_text_file(const string& path,const vector<info_monster>& all_monsters)//переносить інформацію з масиву в текстовий файл
 {
     std::ofstream file(path);
     if (!file.is_open()) return false;
@@ -212,7 +212,7 @@ bool add_in_text_file(info_monster monster, string path)//додає інфор�
     file.close();
     return true;
 }
-bool create_binary_file(string path)
+bool create_binary_file(const string& path)
 {
     std::ifstream file(path, std::ios_base::binary);
     if (!file.is_open())
@@ -226,7 +226,7 @@ bool create_binary_file(string path)
     file.close();
     return true;
 }
-vector <info_monster> open_binary_file(string path)//переносить інформацію з бінарного файла в масив
+vector <info_monster> open_binary_file(const string& path)//переносить інформацію з бінарного файла в масив
 {
     vector <info_monster> all_monsters;
     if (!create_binary_file(path))
@@ -265,7 +265,7 @@ vector <info_monster> open_binary_file(string path)//переносить інф
     }
     return all_monsters;
 }
-bool save_binary_file(string path, const vector<info_monster>& all_monsters)//переносить інформацію з масиву в бінарний файл
+bool save_binary_file(const string& path, const vector<info_monster>& all_monsters)//переносить інформацію з масиву в бінарний файл
 {
     std::ofstream file(path, std::ios_base::binary);
     if (!file.is_open()) return false;
@@ -290,7 +290,7 @@ bool save_binary_file(string path, const vector<info_monster>& all_monsters)//п
     file.close();
     return true;
 }
-bool add_in_binary_file(info_monster monster, string path)//додає інформацію в кінець текстового файлу
+bool add_in_binary_file(info_monster monster, const string& path)//додає інформацію в кінець текстового файлу
 {
     std::ofstream file(path, std::ios_base::binary | std::ios_base::app);
     if (!file.is_open()) return false;
@@ -328,7 +328,12 @@ unsigned read_hp(const string& sentence)
              << " number of monster health units (1-50000): ";
         unsigned hp;
         cin >> hp;
-        if ((hp < 1) || (hp > 50000)) cout << "\nData entered incorrectly!" << endl;
+        if ((hp < 1) || (hp > 50000)||(!cin.good()))
+        {
+            cin.clear();
+            cin.ignore(200, '\n');
+            cout << "\nData entered incorrectly!" << endl;
+        }
         else return hp;
     }
 }
@@ -340,9 +345,19 @@ unsigned read_damage(const string& sentence)
             << " number of monster attack units (1-1000): ";
         unsigned damage ;
         cin >> damage;
-        if ((damage < 1) || (damage > 1000)) cout << "\nData entered incorrectly!" << endl;
+        if ((damage < 1) || (damage > 1000)||(!cin.good()))
+        {
+            cin.clear();
+            cin.ignore(200, '\n');
+            cout << "\nData entered incorrectly!" << endl;
+        }
         else return damage;
     }
+}
+bool symbol_is_digit(const char& line)
+{
+    if((line - '0' >= 0)&&(line - '0' <= 9)) return true;
+    return false;
 }
 double read_chance(const string& sentence)
 {
@@ -353,17 +368,31 @@ double read_chance(const string& sentence)
         string chance_string;
         getline(cin, chance_string);
         while (chance_string.size() == 0) getline(cin, chance_string);
+        bool is_number = true;
+        for (int i = 0; i < chance_string.size(); i++)
+        {
+            if ((!symbol_is_digit(chance_string[i]))&&(i != 1)) //chance_string[1] == '.' or ','
+            {
+                is_number = false;
+                break;
+            }
+        }
+        if(!is_number)
+        {
+            cout << "\nData entered incorrectly!" << endl;
+            continue;
+        }
         if (chance_string.size() > 1)
         {
             double chance = -1;
-            if (chance_string[1] == '.') chance = std::stof(chance_string.c_str());
+            if (chance_string[1] == '.') chance = std::stof(chance_string);
             if (chance_string[1] == ',')
             {
                 string part = "";
                 part += chance_string.substr(0, 1);
                 part += ".";
                 part += chance_string.substr(2, chance_string.size() - 1);
-                chance = std::stof(part.c_str());
+                chance = std::stof(part);
             }               
             if ((chance < 0) || (chance > 1))
             {
@@ -372,7 +401,8 @@ double read_chance(const string& sentence)
             }
             else return chance;         
         }
-        return std::stof(chance_string.c_str());
+        return std::stof(chance_string);
+        
     }
     return -1;
 }
@@ -380,6 +410,7 @@ void test()
 {
     double part = read_chance("\nnu,go\n");
     cout << part << endl;
+   
 }
 types_of_attack read_type()
 {
@@ -1183,7 +1214,7 @@ void monster_generator(vector<info_monster>& all_monsters)//створює мо�
 {    
     srand(unsigned(time(0)));
     string name;
-    int n = (rand() % 30 + 5), m = n;
+    int n = (rand() % 30 + 5);
     char* buff = new char[n + 1];
     for (int i = 0; i < n; i++)
     {
@@ -1193,7 +1224,7 @@ void monster_generator(vector<info_monster>& all_monsters)//створює мо�
     name = buff;
     unsigned hp = (rand() % 50000 + 1);
     unsigned damage = (rand() % 1000 + 1);
-    double chance = 0.01 * double(rand() % 100);
+    double chance = 0.01 * double(rand() % 101);
     types_of_attack type = types_of_attack::INCREASE;
     int k = (rand() % 4 + 1);
     switch (k)
@@ -1378,8 +1409,10 @@ void benchmark_mode()
     {
         cout << "\nEnter the initial number of monsters(1-...): ";
         cin >> number_of_monsters;
-        if (number_of_monsters < 1)
+        if ((number_of_monsters < 1)||(!cin.good()))
         {
+            cin.clear();
+            cin.ignore(200, '\n');
             cout << "\nData entered incorrectly!" << endl;
             continue;
         }
