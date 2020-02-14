@@ -14,7 +14,13 @@ using std::endl;
 using std::string;
 using std::vector;
 
-enum types_of_attack{INCREASE,REPEAT,CURE,PARALYZE};
+enum class types_of_attack: int
+{
+    INCREASE = 1,
+    REPEAT,
+    CURE,
+    PARALYZE
+};
 struct info_monster;
 bool create_text_file(string);
 vector <info_monster> open_text_file(string);
@@ -94,7 +100,7 @@ struct measurement_result
 {
     int number_of_n;
     float time;
-    long size;
+    std::size_t size;
 };
 
 bool create_text_file(string path)
@@ -125,7 +131,7 @@ vector <info_monster> open_text_file(string path)//переносить інфо
         while (!file.eof())
         {
             string name;
-            types_of_attack type_of_attack = INCREASE;
+            types_of_attack type_of_attack = types_of_attack::INCREASE;
             unsigned id, hp = 0, damage, type;
             double chance;
             struct std::tm time_info;
@@ -138,13 +144,13 @@ vector <info_monster> open_text_file(string path)//переносить інфо
             file >> type;
             switch (type)
             {
-                case 0: type_of_attack = INCREASE;
+                case 1: type_of_attack = types_of_attack::INCREASE;
                 break;
-                case 1: type_of_attack = REPEAT;
+                case 2: type_of_attack = types_of_attack::REPEAT;
                 break;
-                case 2: type_of_attack = CURE;
+                case 3: type_of_attack = types_of_attack::CURE;
                 break;
-                case 3: type_of_attack = PARALYZE;
+                case 4: type_of_attack = types_of_attack::PARALYZE;
             }
             file >> time_info.tm_hour >> time_info.tm_min >> time_info.tm_sec 
                  >> time_info.tm_mday >> time_info.tm_mon >> time_info.tm_year;
@@ -166,7 +172,16 @@ bool save_text_file(string path,const vector<info_monster>& all_monsters)//пе�
         file << all_monsters[i].hp << endl;
         file << all_monsters[i].damage << endl;
         file << all_monsters[i].chance << endl;
-        file << all_monsters[i].type_of_attack << endl;
+        switch (all_monsters[i].type_of_attack)
+        {
+        case types_of_attack::INCREASE: file << 1 << endl;
+            break;
+        case types_of_attack::REPEAT: file << 2 << endl;
+            break;
+        case types_of_attack::CURE: file << 3 << endl;
+            break;
+        case types_of_attack::PARALYZE: file << 4 << endl;
+        }
         file << all_monsters[i].time_info.tm_hour << " " << all_monsters[i].time_info.tm_min << " " << all_monsters[i].time_info.tm_sec << " "
             << all_monsters[i].time_info.tm_mday << " " << all_monsters[i].time_info.tm_mon << " " << all_monsters[i].time_info.tm_year << endl;
     }
@@ -182,7 +197,16 @@ bool add_in_text_file(info_monster monster, string path)//додає інфор�
     file << monster.hp << endl;
     file << monster.damage << endl;
     file << monster.chance << endl;
-    file << monster.type_of_attack << endl;
+    switch (monster.type_of_attack)
+    {
+    case types_of_attack::INCREASE: file << 1 << endl;
+        break;
+    case types_of_attack::REPEAT: file << 2 << endl;
+        break;
+    case types_of_attack::CURE: file << 3 << endl;
+        break;
+    case types_of_attack::PARALYZE: file << 4 << endl;
+    }
     file << monster.time_info.tm_hour << " " << monster.time_info.tm_min << " " << monster.time_info.tm_sec << " "
         << monster.time_info.tm_mday << " " << monster.time_info.tm_mon << " " << monster.time_info.tm_year << endl;
     file.close();
@@ -365,10 +389,10 @@ types_of_attack read_type()
              << "2)Repeat the attack.\n3)Cure yourself.\n4)Paralyze the enemy.\n";
         switch (_getch())
         {
-        case '1': return INCREASE;
-        case '2': return REPEAT;
-        case '3': return CURE;
-        case '4': return PARALYZE;
+        case '1': return types_of_attack::INCREASE;
+        case '2': return types_of_attack::REPEAT;
+        case '3': return types_of_attack::CURE;
+        case '4': return types_of_attack::PARALYZE;
         default: cout << "\nPress the correct key!" << endl;
         }
     }
@@ -376,8 +400,8 @@ types_of_attack read_type()
 void write_time(struct std::tm time_info)
 {
     char buffer[80];
-    strftime(buffer, 80, "Creation time and date: %X  %d.%m.%Y\n", &time_info);
-    cout << buffer;
+    strftime(buffer, 80, "Creation time and date: %X  %d.%m.%Y", &time_info);
+    cout << buffer << endl;
 }
 void add_new_monster(vector<info_monster>& all_monsters)//створює нового монстра
 {
@@ -505,17 +529,17 @@ void write_monster(int number, const vector<info_monster>& all_monsters)//вив
     cout << "Name: " << all_monsters[number].name << ".\n";
     cout << "HP: " << all_monsters[number].hp << ".\n";
     cout << "Damage: " << all_monsters[number].damage << ".\n";
-    cout << "Chance to launch a special attack: " << all_monsters[number].chance << ".\n";
+    cout << "Chance to launch a special attack: " << all_monsters[number].chance << "." << endl;
     cout << "Type of special monster attack: ";
     switch (all_monsters[number].type_of_attack)
     {
-    case INCREASE: cout << "Increase damage.\n";
+    case types_of_attack::INCREASE: cout << "Increase damage." << endl;
         break;
-    case REPEAT: cout << "Repeat the attack.\n";
+    case types_of_attack::REPEAT: cout << "Repeat the attack." << endl;
         break;
-    case CURE: cout << "Cure yourself.\n";
+    case types_of_attack::CURE: cout << "Cure yourself." << endl;
         break;
-    case PARALYZE: cout << "Paralyze the enemy.\n";
+    case types_of_attack::PARALYZE: cout << "Paralyze the enemy." << endl;
     }
     write_time(all_monsters[number].time_info);
 }
@@ -1169,27 +1193,27 @@ void monster_generator(vector<info_monster>& all_monsters)//створює мо�
     name = buff;
     unsigned hp = (rand() % 50000 + 1);
     unsigned damage = (rand() % 1000 + 1);
-    double chance = 0.01 * (rand() % 100 + 1);
-    types_of_attack type = INCREASE;
+    double chance = 0.01 * double(rand() % 100);
+    types_of_attack type = types_of_attack::INCREASE;
     int k = (rand() % 4 + 1);
     switch (k)
     {
-    case 1: type = INCREASE;
+    case 1: type = types_of_attack::INCREASE;
         break;
-    case 2: type = REPEAT;
+    case 2: type = types_of_attack::REPEAT;
         break;
-    case 3: type = CURE;
+    case 3: type = types_of_attack::CURE;
         break;
-    case 4: type = PARALYZE;
+    case 4: type = types_of_attack::PARALYZE;
         break;
     }
     all_monsters.push_back(info_monster(name, hp, damage, chance, type, all_monsters));
 }
-long size_file(string path)//визначає розмір файла у байтах
+std::size_t size_file(string path)//визначає розмір файла у байтах
 {
     std::ifstream file(path);
     file.seekg(0, std::ios_base::end);
-    long sizef = file.tellg();
+    std::size_t sizef = size_t(file.tellg());
     file.close();
 
     return sizef;
@@ -1208,7 +1232,6 @@ float measurement_open_txt(vector<info_monster>& all_monsters)
     auto the_start = std::chrono::high_resolution_clock::now();
     auto the_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> duration;
-    open_txt.size = 0;
     open_txt.number_of_n = all_monsters.size();
     the_start = std::chrono::high_resolution_clock::now();
     all_monsters = open_text_file("benchmark_text.txt");
@@ -1377,7 +1400,6 @@ void benchmark_mode()
             monster_generator(all_monsters);
         }
         cout << "\n\nN = " << number_of_monsters << endl;
-        cout << "arr_size: " << all_monsters.size() << endl;
         for (unsigned j = 0; j < number_of_function; j++)
         {
             function_time = arr_pointers_to_functions[j](all_monsters);
@@ -1416,7 +1438,7 @@ int main()
             break;
         case'0': 
             {
-                cout << "\nExit...";
+                cout << "\nExit..." << endl;
                 return 0;
             }
             break;
