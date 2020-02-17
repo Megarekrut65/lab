@@ -253,12 +253,7 @@ vector <info_monster> open_binary_file(const string& path)//переносить
             file.read((char*)&(monster.damage), sizeof(monster.damage));
             file.read((char*)&(monster.chance), sizeof(monster.chance));
             file.read((char*)&(monster.type_of_attack), sizeof(monster.type_of_attack));       
-            file.read((char*)&(monster.time_info.tm_hour), sizeof(monster.time_info.tm_hour));
-            file.read((char*)&(monster.time_info.tm_min), sizeof(monster.time_info.tm_min));
-            file.read((char*)&(monster.time_info.tm_sec), sizeof(monster.time_info.tm_sec));
-            file.read((char*)&(monster.time_info.tm_mday), sizeof(monster.time_info.tm_mday));
-            file.read((char*)&(monster.time_info.tm_mon), sizeof(monster.time_info.tm_mon));
-            file.read((char*)&(monster.time_info.tm_year), sizeof(monster.time_info.tm_year));
+            file.read((char*)&(monster.time_info), sizeof(monster.time_info));
             all_monsters.push_back(monster);
             delete[] buffer_name;
         }
@@ -281,12 +276,7 @@ bool save_binary_file(const string& path, const vector<info_monster>& all_monste
         file.write((char*)&(all_monsters[i].damage), sizeof(all_monsters[i].damage));
         file.write((char*)&(all_monsters[i].chance), sizeof(all_monsters[i].chance));
         file.write((char*)&(all_monsters[i].type_of_attack), sizeof(all_monsters[i].type_of_attack));
-        file.write((char*)&(all_monsters[i].time_info.tm_hour), sizeof(all_monsters[i].time_info.tm_hour));
-        file.write((char*)&(all_monsters[i].time_info.tm_min), sizeof(all_monsters[i].time_info.tm_min));
-        file.write((char*)&(all_monsters[i].time_info.tm_sec), sizeof(all_monsters[i].time_info.tm_sec));
-        file.write((char*)&(all_monsters[i].time_info.tm_mday), sizeof(all_monsters[i].time_info.tm_mday));
-        file.write((char*)&(all_monsters[i].time_info.tm_mon), sizeof(all_monsters[i].time_info.tm_mon));
-        file.write((char*)&(all_monsters[i].time_info.tm_year), sizeof(all_monsters[i].time_info.tm_year));
+        file.write((char*)&(all_monsters[i].time_info), sizeof(all_monsters[i].time_info));       
     }
     file.close();
     return true;
@@ -304,12 +294,7 @@ bool add_in_binary_file(info_monster monster, const string& path)//додає і
     file.write((char*)&(monster.damage), sizeof(monster.damage));
     file.write((char*)&(monster.chance), sizeof(monster.chance));
     file.write((char*)&(monster.type_of_attack), sizeof(monster.type_of_attack));
-    file.write((char*)&(monster.time_info.tm_hour), sizeof(monster.time_info.tm_hour));
-    file.write((char*)&(monster.time_info.tm_min), sizeof(monster.time_info.tm_min));
-    file.write((char*)&(monster.time_info.tm_sec), sizeof(monster.time_info.tm_sec));
-    file.write((char*)&(monster.time_info.tm_mday), sizeof(monster.time_info.tm_mday));
-    file.write((char*)&(monster.time_info.tm_mon), sizeof(monster.time_info.tm_mon));
-    file.write((char*)&(monster.time_info.tm_year), sizeof(monster.time_info.tm_year));
+    file.write((char*)&(monster.time_info), sizeof(monster.time_info));
     file.close();
     return true;
 }
