@@ -22,31 +22,60 @@ enum class types_of_attack: int
     PARALYZE
 };
 struct info_monster;
+struct measurement_result;
 bool create_text_file(const string&);
 vector <info_monster> open_text_file(const string&);
-bool save_text_file(const string&);
+bool save_text_file(const string&, const vector<info_monster>&);
 bool add_in_text_file(info_monster, const string&);
 bool create_binary_file(const string&);
 vector <info_monster> open_binary_file(const string&);
-bool save_binary_file(const string&);
+bool save_binary_file(const string&, const vector<info_monster>&);
 bool add_in_binary_file(info_monster, const string&);
-unsigned set_id(const vector <info_monster>&);
-void add_new_monster(vector <info_monster>&);
-void write_monster(int, const vector <info_monster>&);
-void write_monsters_menu(vector<int>, const vector <info_monster>&);
-void write_all_monsters(const vector <info_monster>&);
-void edit_monster(vector <info_monster>&);
-void delete_monster(vector <info_monster>&);
-void find_types_time_menu(const vector <info_monster>&);
-void find_hp_damage_menu(const vector <info_monster>&);
-void find_name_menu(const vector <info_monster>&);
+string read_name(const string&);
+unsigned read_hp(const string&);
+unsigned read_damage(const string&);
+double line_is_number(string);
+double read_chance(const string&);
+types_of_attack read_type();
+void write_time(struct std::tm);
+void add_new_monster(vector<info_monster>&);
+unsigned set_id(const vector<info_monster>&);
+int find_id(unsigned, const vector<info_monster>&);
+void edit_monster(vector<info_monster>&);
+void delete_monster(vector<info_monster>&);
+void write_monster(int, const vector<info_monster>&);
+void write_monsters_menu(vector<int>, const vector<info_monster>&);
+void write_all_monsters(const vector<info_monster>&);
+void find_types_time_menu(const vector<info_monster>&);
 bool is_time(const int*, const int*, int);
-vector <int> find_types_time(types_of_attack, const int*, const vector <info_monster>&);
-vector <int> find_hp_damage(unsigned, unsigned, const vector <info_monster>&);
-vector <int> find_name(string, const vector <info_monster>&);
-int find_id(unsigned, const vector <info_monster>&);
+vector <int> find_types_time(types_of_attack, const int*, const vector<info_monster>&);
+void find_hp_damage_menu(const vector<info_monster>&);
+vector <int> find_hp_damage(unsigned, unsigned, const vector<info_monster>&);
+void find_name_menu(const vector<info_monster>&);
+vector <int> find_name(string, const vector<info_monster>&);
+void monster_search(const vector<info_monster>&);
 void interactive_dialog_mode();
+void demo_menu(int&);
+void demo_read_name(int&, const string&, const string&);
+void demo_read_hp(int&, const string&, const unsigned&);
+void demo_read_damage(int&, const string&, const unsigned&);
+void demo_read_chance(int&, const string&, const double&);
+void demo_read_type(int&, const short&);
+void demo_add_monster(int&, vector <info_monster>&);
+void demo_show_all_monsters(int&, const vector <info_monster>&);
+void demo_find_monsters(int&);
+void demo_find_name(int&, const vector<info_monster>&);
+void demo_find_hp_damage(int&, const vector<info_monster>&);
+void demo_find_types_time(int&, const vector<info_monster>&);
+void demo_read_id(int&, const vector<info_monster>&);
+void demo_edit_monsters_menu(int&, vector<info_monster>&);
+void demo_edit_monster(int&, vector<info_monster>&);
+void demo_delete_monster(int&, vector<info_monster>&);
+void demo_exit(int&);
+void demo_mode();
 void monster_generator(vector<info_monster>&);
+std::size_t size_file(const string&);
+void add_program_test(const string&, const measurement_result&, bool);
 float measurement_open_txt(vector<info_monster>&);
 float measurement_open_bin(vector<info_monster>&);
 float measurement_save_txt(vector<info_monster>&);
@@ -54,6 +83,9 @@ float measurement_save_bin(vector<info_monster>&);
 float measurement_name_find(vector<info_monster>&);
 float measurement_hp_damage_find(vector<info_monster>&);
 float measurement_time_type_find(vector<info_monster>&);
+void clear_result_files();
+void benchmark_mode();
+
 struct info_monster
 {
     unsigned id;
@@ -569,7 +601,7 @@ void find_types_time_menu(const vector<info_monster>& all_monsters)
     write_monsters_menu(find_types_time(one_types_attack, find_time,all_monsters),all_monsters);
     delete[] find_time;
 }
-bool is_time(const int *find_time,const int* monster_time, int number = 0)
+bool is_time(const int* find_time,const int* monster_time, int number = 0)
 {
     if (number == 6) return false;
     if (monster_time[number] > find_time[number]) return false;
@@ -1040,7 +1072,7 @@ void monster_generator(vector<info_monster>& all_monsters)//створює мо�
     all_monsters.push_back(info_monster(name, hp, damage, chance, type, all_monsters));
     delete[] buff;
 }
-std::size_t size_file(string path)//визначає розмір файла у байтах
+std::size_t size_file(const string& path)//визначає розмір файла у байтах
 {
     std::ifstream file(path);
     file.seekg(0, std::ios_base::end);
@@ -1190,7 +1222,7 @@ float measurement_time_type_find(vector<info_monster>& all_monsters)
 
     return time_type_find.time;
 }
-void clear_result_file()
+void clear_result_files()
 {
     string all_result_files[7] = { "result_save_txt_file.txt", "result_save_binary_file.txt",
         "result_open_txt_file.txt", "result_open_binary_file.txt", "result_name_find.txt", 
@@ -1203,7 +1235,7 @@ void clear_result_file()
 }
 void benchmark_mode()
 {
-    clear_result_file();
+    clear_result_files();
     unsigned number_of_monsters, number_of_monsters_for_progression = 1;
     while (true)
     {
