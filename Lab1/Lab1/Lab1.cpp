@@ -170,7 +170,7 @@ vector <info_monster> open_text_file(const string& path)//переносить �
             struct std::tm time_info;
             file >> id;
             getline(file, name);
-            if (name.size() == 0) getline(file, name);
+            while (name.size() == 0) getline(file, name);
             file >> hp;
             file >> damage;
             file >> chance;
@@ -456,6 +456,53 @@ int find_id(unsigned monster_id, const vector<info_monster>& all_monsters)
     if (number_monster_death != -1) return number_monster_death;
 
     return -1;
+}
+void save_txt_edit_monster(const string& path, const info_monster& monster)
+{
+    std::ifstream old_file(path);
+    std::ofstream new_file("new_"+path);
+    while (!old_file.eof())
+    {
+        unsigned id;
+        old_file >> id;
+        if (id == monster.id)
+        {
+            add_in_text_file(monster, "new_" + path);
+            for (int i = 0; i < 6; i++)
+            {
+                string line;
+                getline(old_file, line);
+            }
+        }
+        else
+        {
+            string name;
+            unsigned hp,damage,type;
+            double chance;
+            types_of_attack type_of_attack;
+            struct tm time_info;
+            getline(old_file, name);
+            while (name.size() == 0) getline(old_file, name);           
+            cin >> hp;
+            cin >> damage;
+            cin >> chance;
+            cin >> type;
+            switch (type)
+            {
+            case 1: type_of_attack = types_of_attack::INCREASE;
+                break;
+            case 2: type_of_attack = types_of_attack::REPEAT;
+                break;
+            case 3: type_of_attack = types_of_attack::CURE;
+                break;
+            case 4: type_of_attack = types_of_attack::PARALYZE;
+            }
+            old_file >> time_info.tm_hour >> time_info.tm_min >> time_info.tm_sec
+                >> time_info.tm_mday >> time_info.tm_mon >> time_info.tm_year;
+
+            add_in_text_file(info_monster(name,hp,damage,chance,type_of_attack,time_info,id), "new_" + path);
+        }       
+    }
 }
 void edit_monster(vector<info_monster>& all_monsters)
 {
