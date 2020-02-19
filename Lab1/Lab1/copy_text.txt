@@ -1,7 +1,21 @@
-1000
-name
-9
-1
-0.12
-3
-11 42 35 18 1 120
+id:1000
+name:Kolinko
+hp:1222
+damage:65
+chance:0.213
+type:4
+22 42 19 19 1 120
+id:1001
+name:norm?
+hp:3333
+damage:111
+chance:0.002
+type:2
+22 42 36 19 1 120
+id:1002
+name:LandPo
+hp:11122
+damage:1000
+chance:0.142
+type:3
+22 42 53 19 1 120

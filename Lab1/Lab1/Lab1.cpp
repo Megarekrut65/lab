@@ -41,7 +41,7 @@ void write_time(struct std::tm);
 void add_new_monster(vector<info_monster>&);
 unsigned set_id(const vector<info_monster>&);
 int find_id(unsigned, const vector<info_monster>&);
-vector<info_monster> edit_monster();
+void edit_monster(vector<info_monster>&);
 void delete_monster(vector<info_monster>&);
 void write_monster(int, const vector<info_monster>&);
 void write_monsters_menu(vector<int>, const vector<info_monster>&);
@@ -150,6 +150,15 @@ bool create_text_file(const string& path)
 
     return true;
 }
+void line_read(std::ifstream& file, string& line)
+{
+    getline(file, line);
+    while (line.size() == 0)
+    {
+        if (file.eof()) break;
+        getline(file, line);
+    }
+}
 vector <info_monster> open_text_file(const string& path)//переносить інформацію з текстового файла в масив
 {
     vector <info_monster> all_monsters;
@@ -163,18 +172,26 @@ vector <info_monster> open_text_file(const string& path)//переносить �
         std::ifstream file(path);
         while (!file.eof())
         {
+            string line;           
+            line_read(file, line);
+            if (line.size() == 0) break;
+            unsigned id;
+            id = stoi(line.substr(3));
             string name;
             types_of_attack type_of_attack = types_of_attack::INCREASE;
-            unsigned id, hp = 0, damage, type;
+            unsigned hp, damage, type;
             double chance;
             struct std::tm time_info;
-            file >> id;
-            getline(file, name);
-            if(name.size() == 0) getline(file, name);
-            file >> hp;
-            file >> damage;
-            file >> chance;
-            file >> type;
+            line_read(file, line);
+            name = line.substr(5);
+            line_read(file, line);
+            hp = stoi(line.substr(3));
+            line_read(file, line);
+            damage = stoi(line.substr(7));
+            line_read(file, line);
+            chance = stod(line.substr(7));
+            line_read(file, line);
+            type = stoi(line.substr(5));
             switch (type)
             {
                 case 1: type_of_attack = types_of_attack::INCREASE;
@@ -187,8 +204,7 @@ vector <info_monster> open_text_file(const string& path)//переносить �
             }
             file >> time_info.tm_hour >> time_info.tm_min >> time_info.tm_sec 
                  >> time_info.tm_mday >> time_info.tm_mon >> time_info.tm_year;
-            if (hp == 0) break;
-            else all_monsters.push_back(info_monster(name, hp, damage, chance, type_of_attack, time_info, id));
+            all_monsters.push_back(info_monster(name, hp, damage, chance, type_of_attack, time_info, id));
         }
         file.close();
     }
@@ -200,23 +216,25 @@ bool save_text_file(const string& path,const vector<info_monster>& all_monsters)
     if (!file.is_open()) return false;
     for (unsigned i = 0; i < all_monsters.size(); i++)
     {
-        file << all_monsters[i].id << endl;
-        file << all_monsters[i].name << endl;
-        file << all_monsters[i].hp << endl;
-        file << all_monsters[i].damage << endl;
-        file << all_monsters[i].chance << endl;
+        file << "id:" << all_monsters[i].id << endl;
+        file << "name:" << all_monsters[i].name << endl;
+        file << "hp:" << all_monsters[i].hp << endl;
+        file << "damage:" << all_monsters[i].damage << endl;
+        file << "chance:" << all_monsters[i].chance << endl;
         switch (all_monsters[i].type_of_attack)
         {
-        case types_of_attack::INCREASE: file << 1 << endl;
+        case types_of_attack::INCREASE: file <<"type:" << 1 << endl;
             break;
-        case types_of_attack::REPEAT: file << 2 << endl;
+        case types_of_attack::REPEAT: file << "type:" << 2 << endl;
             break;
-        case types_of_attack::CURE: file << 3 << endl;
+        case types_of_attack::CURE: file << "type:" << 3 << endl;
             break;
-        case types_of_attack::PARALYZE: file << 4 << endl;
+        case types_of_attack::PARALYZE: file << "type:" << 4 << endl;
         }
-        file << all_monsters[i].time_info.tm_hour << " " << all_monsters[i].time_info.tm_min << " " << all_monsters[i].time_info.tm_sec << " "
-            << all_monsters[i].time_info.tm_mday << " " << all_monsters[i].time_info.tm_mon << " " << all_monsters[i].time_info.tm_year << endl;
+        file << all_monsters[i].time_info.tm_hour << " " 
+             << all_monsters[i].time_info.tm_min << " " << all_monsters[i].time_info.tm_sec << " "
+             << all_monsters[i].time_info.tm_mday << " " << all_monsters[i].time_info.tm_mon << " " 
+             << all_monsters[i].time_info.tm_year << endl;
     }
     file.close();
     return true;
@@ -225,23 +243,24 @@ bool add_in_text_file(info_monster monster, const string& path)//додає ін
 {
     std::ofstream file(path, std::ios_base::app);
     if (!file.is_open()) return false;
-    file << monster.id << endl;
-    file << monster.name << endl;
-    file << monster.hp << endl;
-    file << monster.damage << endl;
-    file << monster.chance << endl;
+    file << "id:" << monster.id << endl;
+    file << "name:" << monster.name << endl;
+    file << "hp:" << monster.hp << endl;
+    file << "damage:" << monster.damage << endl;
+    file << "chance:" << monster.chance << endl;
     switch (monster.type_of_attack)
     {
-    case types_of_attack::INCREASE: file << 1 << endl;
+    case types_of_attack::INCREASE: file << "type:" << 1 << endl;
         break;
-    case types_of_attack::REPEAT: file << 2 << endl;
+    case types_of_attack::REPEAT: file << "type:" << 2 << endl;
         break;
-    case types_of_attack::CURE: file << 3 << endl;
+    case types_of_attack::CURE: file << "type:" << 3 << endl;
         break;
-    case types_of_attack::PARALYZE: file << 4 << endl;
+    case types_of_attack::PARALYZE: file << "type:" << 4 << endl;
     }
-    file << monster.time_info.tm_hour << " " << monster.time_info.tm_min << " " << monster.time_info.tm_sec << " "
-        << monster.time_info.tm_mday << " " << monster.time_info.tm_mon << " " << monster.time_info.tm_year << endl;
+    file << monster.time_info.tm_hour << " " << monster.time_info.tm_min << " " 
+        << monster.time_info.tm_sec << " " << monster.time_info.tm_mday << " " 
+        << monster.time_info.tm_mon << " " << monster.time_info.tm_year << endl;
     file.close();
     return true;
 }
@@ -457,64 +476,76 @@ int find_id(unsigned monster_id, const vector<info_monster>& all_monsters)
 
     return -1;
 }
-void open_txt_and_add_in_txt(std::ifstream& file, unsigned id,const string& path)
+namespace impl_edit
 {
-    string name;
-    unsigned hp, damage, type;
-    double chance;
-    types_of_attack type_of_attack = types_of_attack::INCREASE;;
-    struct tm time_info;
-    getline(file, name);
-    if (name.size() == 0) getline(file, name);
-    file >> hp;
-    file >> damage;
-    file >> chance;
-    file >> type;
-    switch (type)
+    void add_editable_monster_in_files(std::ifstream& file, unsigned id, const string& txt,const string& bin)
     {
-    case 1: type_of_attack = types_of_attack::INCREASE;
-        break;
-    case 2: type_of_attack = types_of_attack::REPEAT;
-        break;
-    case 3: type_of_attack = types_of_attack::CURE;
-        break;
-    case 4: type_of_attack = types_of_attack::PARALYZE;
-    }
-    file >> time_info.tm_hour >> time_info.tm_min >> time_info.tm_sec
-        >> time_info.tm_mday >> time_info.tm_mon >> time_info.tm_year;
-    add_in_text_file(info_monster(name, hp, damage, chance, type_of_attack, time_info, id), "new_" + path);
-}
-void save_txt_edit_monster(const string& path, const info_monster& monster)
-{
-    std::ifstream old_file(path);
-    while (!old_file.eof())
-    {
-        unsigned id;
-        old_file >> id;
-        if (!old_file.eof()) break;
-        if (id == monster.id)
+        string line;
+        string name;
+        types_of_attack type_of_attack = types_of_attack::INCREASE;
+        unsigned hp, damage, type;
+        double chance;
+        struct std::tm time_info;
+        line_read(file, line);
+        name = line.substr(5);
+        line_read(file, line);
+        hp = stoi(line.substr(3));
+        line_read(file, line);
+        damage = stoi(line.substr(7));
+        line_read(file, line);
+        chance = stod(line.substr(7));
+        line_read(file, line);
+        type = stoi(line.substr(5));
+        switch (type)
         {
-            add_in_text_file(monster, "new_" + path);
-            for (int i = 0; i < 6; i++)
-            {
-                string line;
-                getline(old_file, line);
-                if (line.size() == 0) getline(old_file, line);
-            }
+        case 1: type_of_attack = types_of_attack::INCREASE;
+            break;
+        case 2: type_of_attack = types_of_attack::REPEAT;
+            break;
+        case 3: type_of_attack = types_of_attack::CURE;
+            break;
+        case 4: type_of_attack = types_of_attack::PARALYZE;
         }
-        else
-        {
-            open_txt_and_add_in_txt(old_file, id, "new_" + path);
-        }       
+        file >> time_info.tm_hour >> time_info.tm_min >> time_info.tm_sec
+            >> time_info.tm_mday >> time_info.tm_mon >> time_info.tm_year;
+        add_in_text_file(info_monster(name, hp, damage, chance, type_of_attack, time_info, id), txt);
+        add_in_binary_file(info_monster(name, hp, damage, chance, type_of_attack, time_info, id),bin);
     }
-    old_file.close();
-    remove("text.txt");
-    rename("new_text.txt", "text.txt");
+    void save_edit_monster(const string& txt,const string& bin, info_monster monster)
+    {
+        std::ifstream old_file(txt);
+        while (!old_file.eof())
+        {           
+            string line;
+            bool monster_found = false;
+            line_read(old_file, line);
+            if (line.size()==0) break;
+            if (line.substr(0, 2) == "id")
+            {
+                unsigned id = stoi(line.substr(3));
+                if ((!monster_found) && (id == monster.id))
+                {
+                    monster_found = true;
+                    add_in_text_file(monster, "new_"+txt);
+                    add_in_binary_file(monster, "new_"+bin);
+                }
+                else
+                {
+                    add_editable_monster_in_files(old_file, id, "new_"+txt, "new_"+bin);
+                }
+            }          
+        }
+        old_file.close();
+        remove("text.txt");
+        remove("binary.bin");
+        if ((rename("new_text.txt", "text.txt") != 0)|| (rename("new_binary.bin", "binary.bin") != 0))
+        {
+            cout << "\nError saving editable monster" << endl;
+        }
+    }
 }
-vector<info_monster> edit_monster()
-{
-    vector<info_monster> all_monsters;
-    all_monsters = open_text_file("text.txt");
+void edit_monster(vector<info_monster>& all_monsters)
+{   
     cout << "\nEnter id of monster: ";
     unsigned monster_id;
     cin >> monster_id;
@@ -570,10 +601,9 @@ vector<info_monster> edit_monster()
             }
             break;
         }
-        save_txt_edit_monster("text.txt", all_monsters[number]);
+        impl_edit::save_edit_monster("text.txt", "binary.bin", all_monsters[number]);
     }
     else cout << "\nMonster not found!" << endl;
-    return all_monsters;
 }
 void delete_monster(vector<info_monster>& all_monsters)//видаляє монстра з вказаним ід
 {
@@ -628,7 +658,11 @@ void write_monsters_menu(vector<int> numbers, const vector<info_monster>& all_mo
 }
 void write_all_monsters(const vector<info_monster>& all_monsters)//видає на екран дані всіх монстрів
 {
-    cout << "\nAll monsters:" <<endl;
+    if (all_monsters.size() == 0)
+    {
+        cout << "\nNo monsters saved!" << endl;
+    }
+    else cout << "\nAll monsters:" <<endl;
     for (unsigned i = 0; i < all_monsters.size(); i++)
     {
         cout << "\n<" << i + 1 << ">\n";
@@ -774,10 +808,6 @@ void interactive_dialog_mode()
         }
         break;
     }
-    if (!save_text_file("copy_text.txt", all_monsters) || !save_binary_file("copy_binary.bin", all_monsters))
-    {
-        cout << "\nError saving copy file!..." << endl;
-    }
     while (true)
     {
         cout << "\nMenu:\n1)Add a new monster.\n2)Show all the monsters.\n3)Find an existing monster.\n"
@@ -804,7 +834,7 @@ void interactive_dialog_mode()
             break;
         case '4': 
         {
-            all_monsters = edit_monster();
+            edit_monster(all_monsters);
             continue;
         }
             break;
@@ -816,9 +846,9 @@ void interactive_dialog_mode()
             break;
         case '0':
             {
-                if (!save_text_file("text.txt", all_monsters) || !save_binary_file("binary.bin", all_monsters))
+                if (!save_text_file("copy_text.txt", all_monsters) || !save_binary_file("copy_binary.bin", all_monsters))
                 {
-                    cout << "\nError saving file!..." << endl;
+                    cout << "\nError saving copy file!..." << endl;
                 }
                 if (all_monsters.size() == 0)
                 {
