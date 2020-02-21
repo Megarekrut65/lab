@@ -1,68 +1,72 @@
+N: 5
+Time: 0.013221
+Size file:430
+
 N: 10
-Time: 0.014295
-Size file:980
+Time: 0.00976334
+Size file:860
 
 N: 20
-Time: 0.0162141
-Size file:1440
+Time: 0.00879836
+Size file:1720
 
 N: 40
-Time: 0.0204904
-Size file:2880
+Time: 0.00825043
+Size file:3440
 
 N: 80
-Time: 0.0148019
-Size file:5760
+Time: 0.0110677
+Size file:6880
 
 N: 160
-Time: 0.0209632
-Size file:11520
+Time: 0.00997251
+Size file:13760
 
 N: 320
-Time: 0.0225923
-Size file:23040
+Time: 0.0104511
+Size file:27520
 
 N: 640
-Time: 0.0210621
-Size file:48000
+Time: 0.0145067
+Size file:56960
 
 N: 1280
-Time: 0.033465
-Size file:97134
+Time: 0.025919
+Size file:113920
 
 N: 2560
-Time: 0.0566341
-Size file:207360
+Time: 0.0413555
+Size file:238080
 
 N: 5120
-Time: 0.0873331
-Size file:450560
-
-N: 7680
-Time: 0.111684
-Size file:545280
+Time: 0.0608469
+Size file:353280
 
 N: 10240
-Time: 0.142448
-Size file:931840
-
-N: 12800
-Time: 0.174866
-Size file:1145109
+Time: 0.0881152
+Size file:808960
 
 N: 15360
-Time: 0.197851
-Size file:1428480
-
-N: 17920
-Time: 0.230328
-Size file:1330887
+Time: 0.12965
+Size file:1505280
 
 N: 20480
-Time: 0.229756
-Size file:1809056
+Time: 0.185792
+Size file:1599772
 
-N: 23040
-Time: 0.25724
-Size file:1860117
+N: 25600
+Time: 0.202229
+Size file:2054592
+
+N: 30720
+Time: 0.22721
+Size file:2362410
+
+N: 35840
+Time: 0.276181
+Size file:3427195
+
+N: 40960
+Time: 0.271759
+Size file:3038974
 
