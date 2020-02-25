@@ -51,6 +51,11 @@ struct List_Node
     Point point;
     List_Node* next;
     List_Node* prev;
+    List_Node()
+    {
+        next = nullptr;
+        prev = nullptr;
+    }
 };
 struct Fixed_list
 {
@@ -83,7 +88,11 @@ struct Fixed_list
     }
     void clear()
     {
-        if (is_list) delete[] points;
+        if (is_list)
+        {
+            delete[] points;
+            Fixed_list();
+        }
     }
     void append(Point point)
     {
@@ -95,7 +104,7 @@ struct Fixed_list
         points[size] = point;
         size++;
     }
-    void insert(Point point, unsigned index)
+    void insert(unsigned index, Point point)
     {
         if (!is_index(index)) return;
         for (std::size_t i = size; i > index; i--)
@@ -114,11 +123,11 @@ struct Fixed_list
         }
         size--;
     }
-    void get(unsigned index)//print point
+    bool get(unsigned index, Point& point)//print point
     {
-        if (!is_index(index)) return;
-        cout << "\nThe point:" << endl;
-        points[index].write_point();
+        if (!is_index(index)) return false;
+        point = points[index];
+        return true;
     }
     void set(unsigned index, Point point)//edit point
     {
@@ -158,9 +167,9 @@ struct Dynamic_list
     }
     void insert(unsigned index, Point point)
     {
+        if (!is_index(index)) return;
         std::size_t size = points.size();
         points.push_back(Point());
-        if (!is_index(index)) return;
         for (std::size_t i = size; i > index; i--)
         {
             points[i] = points[i - 1];
@@ -169,19 +178,15 @@ struct Dynamic_list
     }
     void remove(unsigned index)
     {
+        if (!is_index(index)) return;
         std::size_t size = points.size();
-        if ((index > (size - 1)) || (index < 0))
-        {
-            cout << "\nThere isn`t item with the index!" << endl;
-            return;
-        }
         points.erase(points.begin() + index);
     }
-    void get(unsigned index)
+    bool get(unsigned index, Point& point)
     {
-        if (!is_index(index)) return;
-        cout << "\nThe point:" << endl;
-        points[index].write_point();
+        if (!is_index(index)) return false;
+        point = points[index];
+        return true;
     }
     void set(unsigned index, Point point)
     {
@@ -219,60 +224,141 @@ struct Linked_list
     {
         if (!is_list) return;
         List_Node* current_node = head->next;
+        head = nullptr;
         for (; current_node; current_node = current_node->next)
         {
             current_node->prev->next = nullptr;
+            delete current_node->prev;
             current_node->prev = nullptr;
         }
+        delete tail;
+        tail = nullptr;
         Linked_list();
     }
     void append(Point point)
     {
-        List_Node* node = new List_Node;
-        node->point = point;
-        node->prev = tail;
-        node->next = nullptr;
+        List_Node* new_node = new List_Node;
+        new_node->point = point;
+        new_node->prev = tail;
+        new_node->next = nullptr;
         if (tail)
         {
-            tail->next = node;
-            tail = node;
+            tail->next = new_node;
+            tail = new_node;
         }
         else
         {
-            tail = node;
-            head = node;
+            tail = new_node;
+            head = new_node;
         }
         size++;
     }
 private:
-    void add_head()
+    void add_head(Point point)
     {
-
+        List_Node* new_node = new List_Node;
+        new_node->point = point;
+        new_node->prev = nullptr;
+        new_node->next = head;
+        head->prev = new_node;
+        head = new_node;
     }
-    void add_middle()
+    void add_middle(unsigned index, Point point)
     {
-
+        List_Node* new_node = new List_Node;
+        List_Node* current_node = head->next;
+        new_node->point = point;
+        for (std::size_t i = 1; i < size; i++, current_node = current_node->next)
+        {           
+            if (i == index)
+            {
+                new_node->next = current_node;
+                new_node->prev = current_node->prev;
+                current_node->prev->next = new_node;
+                current_node->prev = new_node;              
+                break;
+            }
+        }
     }
-    void add_tail()
+    void delete_head()
     {
-
+        head = head->next;
+        delete head->prev;
+        head->prev = nullptr;
+        size--;
+    }
+    void delete_middle(unsigned index)
+    {
+        List_Node* current_node = head->next;
+        for (std::size_t i = 1; i < size; i++, current_node = current_node->next)
+        {
+            if (i == index)
+            {
+                current_node->prev->next = current_node->next;
+                current_node->next->prev = current_node->prev;
+                delete current_node;
+                current_node = nullptr;
+                break;
+            }
+        }
+        size--;
+    }
+    void delete_tail()
+    {
+        tail = tail->prev;
+        delete tail->next;
+        tail->next = nullptr;
+        size--;
     }
 public:
     void insert(unsigned index, Point point)
     {
-       
+        if (!is_index(index)) return;
+        if (index == 0) add_head(point);
+        else add_middle(index, point);
+        size++;
     }
     void remove(unsigned index)
     {
-        
+        if (!is_index(index)) return;
+        if (index == 0)
+        {
+            delete_head();
+            return;
+        }
+        if (index == (size - 1))
+        {
+            delete_tail();
+            return;
+        }
+        delete_middle(index);     
     }
-    void get(unsigned index)
+    bool get(unsigned index, Point& point)
     {
-        
+        if (!is_index(index)) return false;
+        List_Node* current_node = head;
+        for (std::size_t i = 0; i < size; i++, current_node = current_node->next)
+        {
+            if (i == index)
+            {
+                point = current_node->point;
+                return true;
+            }
+        } 
+        return false;
     }
     void set(unsigned index, Point point)
     {
-       
+        if (!is_index(index)) return;
+        List_Node* current_node = head;
+        for (std::size_t i = 0; i < size; i++, current_node = current_node->next)
+        {
+            if (i == index)
+            {
+                current_node->point = point;
+                break;
+            }
+        }
     }
 };
 implementation_approach choice_of_approach()
@@ -304,6 +390,9 @@ Fixed_list create_empty_list()
 }
 void interactive_dialog_mode()
 {
+    Fixed_list fixed;
+    Dynamic_list dynamic;
+    Linked_list linked;
     while (true)
     {
         cout << "\nMenu:\n1)Create a blank list.\n2)Adding an item to the end of the list.\n"
@@ -371,44 +460,71 @@ void  benchmark_mode()
 
 }
 int n = 0;
-void wrtite_test(Fixed_list& list)
+void write_test(const Fixed_list& list)
 {
     cout << n++ << endl;
     for (std::size_t i = 0; i < list.size; i++)
     {
-        cout << i << ". ";
+        list.points[i].write_point();
+    }
+    cout << endl << endl;
+}
+void write_test(const Linked_list& list)
+{
+    cout << n++ << endl;
+    for (List_Node* node = list.head; node; node = node->next) node->point.write_point();
+    cout << endl << endl;
+};
+void write_test(Dynamic_list list)
+{
+    cout << n++ << endl;
+    std::size_t size = list.points.size();
+    for (std::size_t i = 0; i < size; i++)
+    {
         list.points[i].write_point();
     }
     cout << endl << endl;
 }
 void test()
 {
-    Fixed_list list;
-    list.create(10);
+    Dynamic_list list;
+    list.create();
     list.append(Point(0, 0, 0));
+    write_test(list);//0
     list.append(Point(1, 1, 1));
     list.append(Point(2, 2, 2));
-    wrtite_test(list);
-    list.insert(Point(-3, -3, -3), 1);   
-    wrtite_test(list);
+    write_test(list);//1
+    list.insert(2,Point(-3, -3, -3));   
+    write_test(list);//2
     list.remove(0);
-    wrtite_test(list);
+    write_test(list);//3
     list.remove(2);
-    wrtite_test(list);
+    write_test(list);//4
     list.remove(6);
-    wrtite_test(list);
+    write_test(list);//5
     list.append(Point(4, 4, 4));
-    wrtite_test(list);
-    list.insert(Point(-5, -5, -5), 5);
-    wrtite_test(list);
-    list.insert(Point(-6, -6, -6), 0);
-    wrtite_test(list);
+    write_test(list);//6
+    list.set(2, Point(11, 11, 11));
+    write_test(list);//7
+    list.insert(5,Point(-5, -5, -5));
+    write_test(list);//8
+    list.insert(0,Point(-6, -6, -6));
+    write_test(list);//9
     list.append(Point(7, 7, 7));
-    wrtite_test(list);
+    write_test(list);//10
+    double x = 0, y = 1, z = 2;
+    std::size_t size = list.points.size();
+    for (std::size_t i = 0; i < size; i++) list.set(i,Point(x++,y++,z++));
+    for (std::size_t i = 0; i < 10; i++)
+    {
+        Point p;
+        if(list.get(i,p)) p.write_point();      
+    }
+
 }
 int main()
 {
-    /*while (true)
+    while (true)
     {
         cout << "\nSelect the application mode:\n1)Interactive dialog mode.\n"
             << "2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
@@ -428,8 +544,8 @@ int main()
         break;
         default: cout << "\nPress the correct key!" << endl;
         }
-    }*/
+    }
 
-    test();
+    //test();
     return 0;
 }
