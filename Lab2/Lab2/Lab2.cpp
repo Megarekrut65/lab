@@ -4,6 +4,7 @@
 using std::cin;
 using std::cout;
 using std::endl;
+struct List_Node;
 enum class implementation_approach{ FIXED, DYNAMIC, LINKED};
 
 struct Point
@@ -45,61 +46,233 @@ struct Point
              << " z= " << this->z << endl;
     }
 };
+struct List_Node
+{
+    Point point;
+    List_Node* next;
+    List_Node* prev;
+};
 struct Fixed_list
 {
     Point* points;
     std::size_t size;
     std::size_t max_size;
-    Fixed_list(std::size_t max_size)
+    bool is_list;
+    Fixed_list()
     {
-        this->points = new Point[max_size];
-        this->size = 0;
+        points = nullptr;
+        size = 0;
+        max_size = 0;
+        is_list = false;
+    }
+    bool is_index(unsigned index)
+    {
+        if (index > (size - 1))
+        {
+            cout << "\nThere isn`t item with the index!" << endl;
+            return false;
+        }
+        return true;
+    }
+    void create(std::size_t max_size)
+    {
+        points = new Point[max_size];
+        size = 0;
         this->max_size = max_size;
+        is_list = true;
+    }
+    void clear()
+    {
+        if (is_list) delete[] points;
     }
     void append(Point point)
     {
-        if (this->size == this->max_size)
+        if (size == max_size)
         {
             cout << "\nThe list is overflowing!";
             return;
         }
-        this->points[this->size] = point;
-        this->size++;
+        points[size] = point;
+        size++;
     }
     void insert(Point point, unsigned index)
     {
-        if ((index > (this->size - 1))|| (index < 0))
-        {
-            cout << "\nThere isn`t item with the index!" << endl;
-            return;
-        }
+        if (!is_index(index)) return;
         for (std::size_t i = size; i > index; i--)
         {
-            this->points[i] = this->points[i - 1];
+            points[i] = points[i - 1];
         }
-        this->points[index] = point;
-        this->size++;
+        points[index] = point;
+        size++;
     }
     void remove(unsigned index)
     {
-        if ((index > (this->size - 1)) || (index < 0))
+        if (!is_index(index)) return;
+        for (std::size_t i = index; i < (size + 1); i++)
+        {
+            points[i] = points[i + 1];
+        }
+        size--;
+    }
+    void get(unsigned index)//print point
+    {
+        if (!is_index(index)) return;
+        cout << "\nThe point:" << endl;
+        points[index].write_point();
+    }
+    void set(unsigned index, Point point)//edit point
+    {
+        if (!is_index(index)) return;
+        points[index] = point;
+    }
+};
+struct Dynamic_list
+{
+    std::vector <Point> points;
+    bool is_list;
+    Dynamic_list()
+    {
+        is_list = false;
+    }
+    bool is_index(unsigned index)
+    {
+        std::size_t size = points.size();
+        if (index > (size - 1))
+        {
+            cout << "\nThere isn`t item with the index!" << endl;
+            return false;
+        }
+        return true;
+    }
+    void create()
+    {
+        is_list = true;
+    }
+    void clear()
+    {
+        if (is_list) points.clear();
+    }
+    void append(Point point)
+    {
+        points.push_back(point);
+    }
+    void insert(unsigned index, Point point)
+    {
+        std::size_t size = points.size();
+        points.push_back(Point());
+        if (!is_index(index)) return;
+        for (std::size_t i = size; i > index; i--)
+        {
+            points[i] = points[i - 1];
+        }
+        points[index] = point;
+    }
+    void remove(unsigned index)
+    {
+        std::size_t size = points.size();
+        if ((index > (size - 1)) || (index < 0))
         {
             cout << "\nThere isn`t item with the index!" << endl;
             return;
         }
-        for (std::size_t i = index; i < (size + 1); i++)
-        {
-            this->points[i] = this->points[i + 1];
-        }
-        this->size--;
+        points.erase(points.begin() + index);
     }
     void get(unsigned index)
     {
-
+        if (!is_index(index)) return;
+        cout << "\nThe point:" << endl;
+        points[index].write_point();
     }
-    void set(unsigned index)
+    void set(unsigned index, Point point)
+    {
+        if (!is_index(index)) return;
+        points[index] = point;
+    }
+};
+struct Linked_list
+{
+    std::size_t size;
+    List_Node* head;
+    List_Node* tail;
+    bool is_list;
+    Linked_list()
+    {
+        size = 0;
+        head = nullptr;
+        tail = nullptr;
+        is_list = false;
+    }
+    bool is_index(unsigned index)
+    {
+        if (index > (size - 1))
+        {
+            cout << "\nThere isn`t item with the index!" << endl;
+            return false;
+        }
+        return true;
+    }
+    void create()
+    {
+        is_list = true;
+    }
+    void clear()
+    {
+        if (!is_list) return;
+        List_Node* current_node = head->next;
+        for (; current_node; current_node = current_node->next)
+        {
+            current_node->prev->next = nullptr;
+            current_node->prev = nullptr;
+        }
+        Linked_list();
+    }
+    void append(Point point)
+    {
+        List_Node* node = new List_Node;
+        node->point = point;
+        node->prev = tail;
+        node->next = nullptr;
+        if (tail)
+        {
+            tail->next = node;
+            tail = node;
+        }
+        else
+        {
+            tail = node;
+            head = node;
+        }
+        size++;
+    }
+private:
+    void add_head()
     {
 
+    }
+    void add_middle()
+    {
+
+    }
+    void add_tail()
+    {
+
+    }
+public:
+    void insert(unsigned index, Point point)
+    {
+       
+    }
+    void remove(unsigned index)
+    {
+        
+    }
+    void get(unsigned index)
+    {
+        
+    }
+    void set(unsigned index, Point point)
+    {
+       
     }
 };
 implementation_approach choice_of_approach()
@@ -122,10 +295,12 @@ implementation_approach choice_of_approach()
 }
 Fixed_list create_empty_list()
 {
+    Fixed_list list;
     cout << "\nEnter the maximum size of list: ";
     std::size_t max_size;
     cin >> max_size;
-    return Fixed_list(max_size);
+    list.create(max_size);
+    return list;
 }
 void interactive_dialog_mode()
 {
@@ -208,7 +383,8 @@ void wrtite_test(Fixed_list& list)
 }
 void test()
 {
-    Fixed_list list = Fixed_list(10);
+    Fixed_list list;
+    list.create(10);
     list.append(Point(0, 0, 0));
     list.append(Point(1, 1, 1));
     list.append(Point(2, 2, 2));
