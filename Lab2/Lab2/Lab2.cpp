@@ -1,12 +1,17 @@
 ﻿#include <iostream>
 #include <conio.h>
 #include <vector>
+#include <string>
 using std::cin;
 using std::cout;
 using std::endl;
 struct List_Node;
+enum class implementation_approach;
+void interactive_dialog_mode();
+implementation_approach choice_of_approach();
+double correct_read_double(const std::string&);
+unsigned correct_read_unsigned(const std::string&);
 enum class implementation_approach{ FIXED, DYNAMIC, LINKED};
-
 struct Point
 {
     double x;
@@ -14,9 +19,9 @@ struct Point
     double z;
     Point()
     {
-        this->x = 0;
-        this->y = 0;
-        this->z = 0;
+        x = 0;
+        y = 0;
+        z = 0;
     }
     Point(double x, double y, double z)
     {
@@ -26,24 +31,18 @@ struct Point
     }
     void read_point()
     {
-        cout << "\nEnter point!" << endl;
-        cout <<"\nEnter the first coordinate : ";
-        double x;
-        cin >> x;
+        cout << "\nEnter a point!" << endl;
+        double x = correct_read_double("the first coordinate");
+        double y = correct_read_double("the second coordinate");
+        double z = correct_read_double("the third coordinate");
         this->x = x;
-        cout << "\nEnter the second coordinate : ";
-        double y;
-        cin >> y;
         this->y = y;
-        cout << "\nEnter the third coordinate : ";
-        double z;
-        cin >> z;
         this->z = z;
     }
     void write_point()
     {
-        cout << "x= " << this->x << " y= " << this->y
-             << " z= " << this->z << endl;
+        cout << "x = " << x << " y = " << y
+             << " z = " << z << endl;
     }
 };
 struct List_Node
@@ -59,16 +58,18 @@ struct List_Node
 };
 struct Fixed_list
 {
+private:
     Point* points;
     std::size_t size;
     std::size_t max_size;
-    bool is_list;
+    bool created_list;
+public:
     Fixed_list()
     {
         points = nullptr;
         size = 0;
-        max_size = 0;
-        is_list = false;
+        max_size = 1;
+        created_list = false;
     }
     bool is_index(unsigned index)
     {
@@ -79,16 +80,31 @@ struct Fixed_list
         }
         return true;
     }
-    void create(std::size_t max_size)
+    bool is_list()
+    {
+        if (!created_list)
+        {
+            cout << "\nThe list not created!" << endl;
+            return false;
+        }
+        return true;
+    }
+    void add_max_size()
+    {
+        cout << "\nEnter the maximum size of list: ";
+        std::size_t max_size;
+        cin >> max_size;
+        this->max_size = max_size;
+    }
+    void create()
     {
         points = new Point[max_size];
         size = 0;
-        this->max_size = max_size;
-        is_list = true;
+        created_list = true;
     }
     void clear()
     {
-        if (is_list)
+        if (created_list)
         {
             delete[] points;
             Fixed_list();
@@ -123,25 +139,31 @@ struct Fixed_list
         }
         size--;
     }
-    bool get(unsigned index, Point& point)//print point
+    bool get(unsigned index, Point& point)
     {
         if (!is_index(index)) return false;
         point = points[index];
         return true;
     }
-    void set(unsigned index, Point point)//edit point
+    void set(unsigned index, Point point)
     {
         if (!is_index(index)) return;
         points[index] = point;
     }
+    std::size_t lenght()
+    {
+        return size;
+    }
 };
 struct Dynamic_list
 {
+private:
     std::vector <Point> points;
-    bool is_list;
+    bool created_list;
+public:
     Dynamic_list()
     {
-        is_list = false;
+        created_list = false;
     }
     bool is_index(unsigned index)
     {
@@ -153,13 +175,26 @@ struct Dynamic_list
         }
         return true;
     }
+    bool is_list()
+    {
+        if (!created_list)
+        {
+            cout << "\nThe list not created!" << endl;
+            return false;
+        }
+        return true;
+    }
     void create()
     {
-        is_list = true;
+        created_list = true;
     }
     void clear()
     {
-        if (is_list) points.clear();
+        if (created_list)
+        {
+            points.clear();
+            Dynamic_list();
+        }
     }
     void append(Point point)
     {
@@ -193,67 +228,18 @@ struct Dynamic_list
         if (!is_index(index)) return;
         points[index] = point;
     }
+    std::size_t lenght()
+    {
+        return points.size();
+    }
 };
 struct Linked_list
 {
+private:
     std::size_t size;
     List_Node* head;
     List_Node* tail;
-    bool is_list;
-    Linked_list()
-    {
-        size = 0;
-        head = nullptr;
-        tail = nullptr;
-        is_list = false;
-    }
-    bool is_index(unsigned index)
-    {
-        if (index > (size - 1))
-        {
-            cout << "\nThere isn`t item with the index!" << endl;
-            return false;
-        }
-        return true;
-    }
-    void create()
-    {
-        is_list = true;
-    }
-    void clear()
-    {
-        if (!is_list) return;
-        List_Node* current_node = head->next;
-        head = nullptr;
-        for (; current_node; current_node = current_node->next)
-        {
-            current_node->prev->next = nullptr;
-            delete current_node->prev;
-            current_node->prev = nullptr;
-        }
-        delete tail;
-        tail = nullptr;
-        Linked_list();
-    }
-    void append(Point point)
-    {
-        List_Node* new_node = new List_Node;
-        new_node->point = point;
-        new_node->prev = tail;
-        new_node->next = nullptr;
-        if (tail)
-        {
-            tail->next = new_node;
-            tail = new_node;
-        }
-        else
-        {
-            tail = new_node;
-            head = new_node;
-        }
-        size++;
-    }
-private:
+    bool created_list;
     void add_head(Point point)
     {
         List_Node* new_node = new List_Node;
@@ -269,13 +255,13 @@ private:
         List_Node* current_node = head->next;
         new_node->point = point;
         for (std::size_t i = 1; i < size; i++, current_node = current_node->next)
-        {           
+        {
             if (i == index)
             {
                 new_node->next = current_node;
                 new_node->prev = current_node->prev;
                 current_node->prev->next = new_node;
-                current_node->prev = new_node;              
+                current_node->prev = new_node;
                 break;
             }
         }
@@ -311,6 +297,68 @@ private:
         size--;
     }
 public:
+    Linked_list()
+    {
+        size = 0;
+        head = nullptr;
+        tail = nullptr;
+        created_list = false;
+    }
+    bool is_index(unsigned index)
+    {
+        if (index > (size - 1))
+        {
+            cout << "\nThere isn`t item with the index!" << endl;
+            return false;
+        }
+        return true;
+    }
+    bool is_list()
+    {
+        if (!created_list)
+        {
+            cout << "\nThe list not created!" << endl;
+            return false;
+        }
+        return true;
+    }
+    void create()
+    {
+        created_list = true;
+    }
+    void clear()
+    {
+        if (!created_list) return;
+        List_Node* current_node = head->next;
+        head = nullptr;
+        for (; current_node; current_node = current_node->next)
+        {
+            current_node->prev->next = nullptr;
+            delete current_node->prev;
+            current_node->prev = nullptr;
+        }
+        delete tail;
+        tail = nullptr;
+        Linked_list();
+    }
+    void append(Point point)
+    {
+        List_Node* new_node = new List_Node;
+        new_node->point = point;
+        new_node->prev = tail;
+        new_node->next = nullptr;
+        if (tail)
+        {
+            tail->next = new_node;
+            tail = new_node;
+        }
+        else
+        {
+            tail = new_node;
+            head = new_node;
+        }
+        size++;
+    }
     void insert(unsigned index, Point point)
     {
         if (!is_index(index)) return;
@@ -360,7 +408,126 @@ public:
             }
         }
     }
+    std::size_t lenght()
+    {
+        return size;
+    }
 };
+template<class T>
+void create_empty_list(T& list)
+{
+    if (!list.is_list())
+    {
+        list.create();
+        cout << "\nNew list created!" << endl;
+    }
+    else cout << "\nThe list has already been created!" << endl;   
+}
+template<class T>
+void add_to_end_of_list(T& list)
+{
+    if (!list.is_list()) return;
+    Point point;
+    point.read_point();
+    list.append(point);
+    cout << "\nThe point added to the list!" << endl;
+}
+template<class T>
+void add_to_list_by_index(T& list)
+{
+    if (!list.is_list()) return;
+    unsigned index = correct_read_unsigned("the index");
+    if (list.is_index(index))
+    {
+        Point point;
+        point.read_point();
+        list.insert(index, point);
+        cout << "\nThe point added to the list!" << endl;
+    }
+}
+template<class T>
+void delete_point_by_index(T& list)
+{
+    if (!list.is_list()) return;
+    unsigned index = correct_read_unsigned("the index");
+    if (list.is_index(index))
+    {
+        list.remove(index);
+        cout << "\nThe point removed!" << endl;
+    }
+}
+template<class T>
+void show_point_by_index(T& list)
+{
+    if (!list.is_list()) return;
+    unsigned index = correct_read_unsigned("the index");
+    Point point;
+    if (list.get(index, point))
+    {
+        point.write_point();
+    }
+}
+template<class T>
+void edit_point_by_index(T& list)
+{
+    if (!list.is_list()) return;
+    unsigned index = correct_read_unsigned("the index");   
+    if (list.is_index(index))
+    {
+        Point point;
+        point.read_point();
+        list.set(index, point);
+        cout << "\nThe point edited!" << endl;
+    }
+}
+template<class T>
+void show_list_length(T& list)
+{
+    if (!list.is_list()) return;
+    cout << "\nThe lenght of list: ";
+    cout << list.lenght() << endl;
+}
+template<class T>
+void clear_list(T& list)
+{
+    list.clear();
+}
+double correct_read_double(const std::string& sentence)
+{   
+    while (true)
+    {
+        cout << "\nEnter " << sentence << ": ";
+        std::string line;
+        getline(cin, line);
+        while (line.size() == 0) getline(cin, line);
+        char* p;
+        double number;
+        if (line.find(",") != std::string::npos)
+        {
+            line.replace(line.find(","), 1, ".");
+        }
+        number = strtod(line.c_str(), &p);
+        if (*p == 0) return number;
+        else cout << "\nThe data entered incorrectly!" << endl;
+    }
+}
+unsigned correct_read_unsigned(const std::string& sentence)
+{
+    while (true)
+    {
+        cout <<"\nEnter " << sentence << ": ";
+        std::string line;
+        getline(cin, line);
+        while (line.size() == 0) getline(cin, line);
+        unsigned number;
+        std::size_t p;
+        number = std::stoul(line.c_str(),&p);
+        cout << "\nnumber: " << number << endl;
+        cout << "\np: " << p << endl;
+        if(p != 0) return number;
+        cout << "\nThe data entered incorrectly!" << endl;
+    }
+}
 implementation_approach choice_of_approach()
 {
     while (true)
@@ -378,68 +545,128 @@ implementation_approach choice_of_approach()
         default: cout << "\nPress the correct key!" << endl;
         }
     }
-}
-Fixed_list create_empty_list()
-{
-    Fixed_list list;
-    cout << "\nEnter the maximum size of list: ";
-    std::size_t max_size;
-    cin >> max_size;
-    list.create(max_size);
-    return list;
+    return implementation_approach::FIXED;
 }
 void interactive_dialog_mode()
 {
+    implementation_approach approach = choice_of_approach();
     Fixed_list fixed;
     Dynamic_list dynamic;
     Linked_list linked;
     while (true)
     {
-        cout << "\nMenu:\n1)Create a blank list.\n2)Adding an item to the end of the list.\n"
-             << "3)Inserting an element before an element with an index.\n"
-             << "4)Delete an item by index.\n5)Access the item by index.\n"
-             << "6)Show list length.\n0)Back." << endl;
+        cout << "\nMenu:\n1)Create a blank list.\n2)Adding a point to the end of the list.\n"
+             << "3)Inserting a point before a point with the index.\n"
+             << "4)Delete a point by index.\n5)Show a point by index.\n"
+             << "6)Edit a point by index.\n7)Show list length.\n0)Back." << endl;
         switch (_getch())
         {
         case '1':
         {
-            
+            switch (approach)
+            {
+            case implementation_approach::FIXED:
+            {                
+                fixed.add_max_size();
+                create_empty_list(fixed);
+            }
+                break;
+            case implementation_approach::DYNAMIC: create_empty_list(dynamic);
+                break;
+            case implementation_approach::LINKED: create_empty_list(linked);
+            }
             continue;
         }
         break;
         case'2':
         {
-            
+            switch (approach)
+            {
+            case implementation_approach::FIXED: add_to_end_of_list(fixed);
+                break;
+            case implementation_approach::DYNAMIC: add_to_end_of_list(dynamic);
+                break;
+            case implementation_approach::LINKED: add_to_end_of_list(linked);
+            }                
             continue;
         }
         break;
         case '3':
         {
-            
+            switch (approach)
+            {
+            case implementation_approach::FIXED: add_to_list_by_index(fixed);
+                break;
+            case implementation_approach::DYNAMIC: add_to_list_by_index(dynamic);
+                break;
+            case implementation_approach::LINKED: add_to_list_by_index(linked);
+            }
             continue;
         }
         break;
         case '4':
         {
-          
+            switch (approach)
+            {
+            case implementation_approach::FIXED: delete_point_by_index(fixed);
+                break;
+            case implementation_approach::DYNAMIC: delete_point_by_index(dynamic);
+                break;
+            case implementation_approach::LINKED: delete_point_by_index(linked);
+            }
             continue;
         }
         break;
         case '5':
         {
-           
+            switch (approach)
+            {
+            case implementation_approach::FIXED: show_point_by_index(fixed);
+                break;
+            case implementation_approach::DYNAMIC: show_point_by_index(dynamic);
+                break;
+            case implementation_approach::LINKED: show_point_by_index(linked);
+            }
             continue;
         }
         break;
         case '6':
         {
-
+            switch (approach)
+            {
+            case implementation_approach::FIXED: edit_point_by_index(fixed);
+                break;
+            case implementation_approach::DYNAMIC: edit_point_by_index(dynamic);
+                break;
+            case implementation_approach::LINKED: edit_point_by_index(linked);
+            }
+            continue;
+        }
+        break;
+        case '7':
+        {
+            switch (approach)
+            {
+            case implementation_approach::FIXED: show_list_length(fixed);
+                break;
+            case implementation_approach::DYNAMIC: show_list_length(dynamic);
+                break;
+            case implementation_approach::LINKED: show_list_length(linked);
+            }
             continue;
         }
         break;
         case '0':
         {
-            
+            switch (approach)
+            {
+            case implementation_approach::FIXED: clear_list(fixed);
+            break;
+            case implementation_approach::DYNAMIC: clear_list(dynamic);
+                break;
+            case implementation_approach::LINKED: clear_list(linked);
+            }
+            cout << endl;
         }
         break;
         default:
@@ -459,74 +686,11 @@ void  benchmark_mode()
 {
 
 }
-int n = 0;
-void write_test(const Fixed_list& list)
-{
-    cout << n++ << endl;
-    for (std::size_t i = 0; i < list.size; i++)
-    {
-        list.points[i].write_point();
-    }
-    cout << endl << endl;
-}
-void write_test(const Linked_list& list)
-{
-    cout << n++ << endl;
-    for (List_Node* node = list.head; node; node = node->next) node->point.write_point();
-    cout << endl << endl;
-};
-void write_test(Dynamic_list list)
-{
-    cout << n++ << endl;
-    std::size_t size = list.points.size();
-    for (std::size_t i = 0; i < size; i++)
-    {
-        list.points[i].write_point();
-    }
-    cout << endl << endl;
-}
-void test()
-{
-    Dynamic_list list;
-    list.create();
-    list.append(Point(0, 0, 0));
-    write_test(list);//0
-    list.append(Point(1, 1, 1));
-    list.append(Point(2, 2, 2));
-    write_test(list);//1
-    list.insert(2,Point(-3, -3, -3));   
-    write_test(list);//2
-    list.remove(0);
-    write_test(list);//3
-    list.remove(2);
-    write_test(list);//4
-    list.remove(6);
-    write_test(list);//5
-    list.append(Point(4, 4, 4));
-    write_test(list);//6
-    list.set(2, Point(11, 11, 11));
-    write_test(list);//7
-    list.insert(5,Point(-5, -5, -5));
-    write_test(list);//8
-    list.insert(0,Point(-6, -6, -6));
-    write_test(list);//9
-    list.append(Point(7, 7, 7));
-    write_test(list);//10
-    double x = 0, y = 1, z = 2;
-    std::size_t size = list.points.size();
-    for (std::size_t i = 0; i < size; i++) list.set(i,Point(x++,y++,z++));
-    for (std::size_t i = 0; i < 10; i++)
-    {
-        Point p;
-        if(list.get(i,p)) p.write_point();      
-    }
-
-}
 int main()
 {
     while (true)
     {
-        cout << "\nSelect the application mode:\n1)Interactive dialog mode.\n"
+        cout << "Select the application mode:\n1)Interactive dialog mode.\n"
             << "2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
         switch (_getch())
         {
@@ -545,7 +709,6 @@ int main()
         default: cout << "\nPress the correct key!" << endl;
         }
     }
-
     //test();
     return 0;
 }
