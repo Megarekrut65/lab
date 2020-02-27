@@ -63,6 +63,13 @@ private:
     std::size_t size;
     std::size_t max_size;
     bool created_list;
+    void add_max_size()
+    {
+        cout << "\nEnter the maximum size of list: ";
+        std::size_t max_size;
+        cin >> max_size;
+        this->max_size = max_size;
+    }
 public:
     Fixed_list()
     {
@@ -73,7 +80,7 @@ public:
     }
     bool is_index(unsigned index)
     {
-        if (index > (size - 1))
+        if ((index + 1) > size)
         {
             cout << "\nThere isn`t item with the index!" << endl;
             return false;
@@ -88,16 +95,10 @@ public:
             return false;
         }
         return true;
-    }
-    void add_max_size()
-    {
-        cout << "\nEnter the maximum size of list: ";
-        std::size_t max_size;
-        cin >> max_size;
-        this->max_size = max_size;
-    }
+    }  
     void create()
     {
+        add_max_size();
         points = new Point[max_size];
         size = 0;
         created_list = true;
@@ -114,11 +115,12 @@ public:
     {
         if (size == max_size)
         {
-            cout << "\nThe list is overflowing!";
+            cout << "\nThe list is overflowing!" << endl;
             return;
         }
         points[size] = point;
         size++;
+        cout << "\nThe point added to the list!" << endl;
     }
     void insert(unsigned index, Point point)
     {
@@ -133,10 +135,10 @@ public:
     void remove(unsigned index)
     {
         if (!is_index(index)) return;
-        for (std::size_t i = index; i < (size + 1); i++)
+        for (std::size_t i = index; i < (size - 1); i++)
         {
             points[i] = points[i + 1];
-        }
+        }                  
         size--;
     }
     bool get(unsigned index, Point& point)
@@ -168,7 +170,7 @@ public:
     bool is_index(unsigned index)
     {
         std::size_t size = points.size();
-        if (index > (size - 1))
+        if ((index + 1) > size)
         {
             cout << "\nThere isn`t item with the index!" << endl;
             return false;
@@ -199,6 +201,7 @@ public:
     void append(Point point)
     {
         points.push_back(point);
+        cout << "\nThe point added to the list!" << endl;
     }
     void insert(unsigned index, Point point)
     {
@@ -214,7 +217,6 @@ public:
     void remove(unsigned index)
     {
         if (!is_index(index)) return;
-        std::size_t size = points.size();
         points.erase(points.begin() + index);
     }
     bool get(unsigned index, Point& point)
@@ -268,9 +270,18 @@ private:
     }
     void delete_head()
     {
-        head = head->next;
-        delete head->prev;
-        head->prev = nullptr;
+        if (head->next)
+        {
+            head = head->next;
+            delete head->prev;
+            head->prev = nullptr;
+        }
+        else
+        {
+            tail = nullptr;
+            delete head;
+            head = nullptr;
+        }
         size--;
     }
     void delete_middle(unsigned index)
@@ -306,7 +317,7 @@ public:
     }
     bool is_index(unsigned index)
     {
-        if (index > (size - 1))
+        if ((index + 1) > size)
         {
             cout << "\nThere isn`t item with the index!" << endl;
             return false;
@@ -358,6 +369,7 @@ public:
             head = new_node;
         }
         size++;
+        cout << "\nThe point added to the list!" << endl;
     }
     void insert(unsigned index, Point point)
     {
@@ -374,7 +386,7 @@ public:
             delete_head();
             return;
         }
-        if (index == (size - 1))
+        if ((index + 1) == size)
         {
             delete_tail();
             return;
@@ -429,8 +441,7 @@ void add_to_end_of_list(T& list)
     if (!list.is_list()) return;
     Point point;
     point.read_point();
-    list.append(point);
-    cout << "\nThe point added to the list!" << endl;
+    list.append(point);   
 }
 template<class T>
 void add_to_list_by_index(T& list)
@@ -516,16 +527,20 @@ unsigned correct_read_unsigned(const std::string& sentence)
     while (true)
     {
         cout <<"\nEnter " << sentence << ": ";
-        std::string line;
-        getline(cin, line);
-        while (line.size() == 0) getline(cin, line);
-        unsigned number;
-        std::size_t p;
-        number = std::stoul(line.c_str(),&p);
-        cout << "\nnumber: " << number << endl;
-        cout << "\np: " << p << endl;
-        if(p != 0) return number;
-        cout << "\nThe data entered incorrectly!" << endl;
+        int number;
+        cin >> number;
+        if ((!cin.good()) || (number < 0))
+        {        
+            cin.clear();
+            cin.ignore(200, '\n');
+            cout << "\nThe data entered incorrectly!" << endl;
+        }
+        else
+        {
+            cin.clear();
+            cin.ignore(200, '\n');
+            return unsigned(number);
+        }
     }
 }
 implementation_approach choice_of_approach()
@@ -565,11 +580,7 @@ void interactive_dialog_mode()
         {
             switch (approach)
             {
-            case implementation_approach::FIXED:
-            {                
-                fixed.add_max_size();
-                create_empty_list(fixed);
-            }
+            case implementation_approach::FIXED: create_empty_list(fixed);          
                 break;
             case implementation_approach::DYNAMIC: create_empty_list(dynamic);
                 break;
