@@ -2,6 +2,7 @@
 #include <conio.h>
 #include <vector>
 #include <string>
+#include <Windows.h>
 using std::cin;
 using std::cout;
 using std::endl;
@@ -62,14 +63,7 @@ private:
     Point* points;
     std::size_t size;
     std::size_t max_size;
-    bool created_list;
-    void add_max_size()
-    {
-        cout << "\nEnter the maximum size of list: ";
-        std::size_t max_size;
-        cin >> max_size;
-        this->max_size = max_size;
-    }
+    bool created_list;   
 public:
     Fixed_list()
     {
@@ -77,6 +71,10 @@ public:
         size = 0;
         max_size = 1;
         created_list = false;
+    }
+    void add_max_size(std::size_t max_size)
+    {
+        this->max_size = max_size;
     }
     bool is_index(unsigned index)
     {
@@ -98,7 +96,6 @@ public:
     }  
     void create()
     {
-        add_max_size();
         points = new Point[max_size];
         size = 0;
         created_list = true;
@@ -580,7 +577,14 @@ void interactive_dialog_mode()
         {
             switch (approach)
             {
-            case implementation_approach::FIXED: create_empty_list(fixed);          
+            case implementation_approach::FIXED: 
+            {
+                cout << "\nEnter the maximum size of list: ";
+                std::size_t max_size;
+                cin >> max_size;
+                fixed.add_max_size(max_size);
+                create_empty_list(fixed);
+            }
                 break;
             case implementation_approach::DYNAMIC: create_empty_list(dynamic);
                 break;
@@ -688,6 +692,146 @@ void interactive_dialog_mode()
         }
         break;
     }
+}
+void demo_menu(unsigned delay)
+{
+    cout << "\nMenu:\n1)Create a blank list.\n2)Adding a point to the end of the list.\n"
+        << "3)Inserting a point before a point with the index.\n"
+        << "4)Delete a point by index.\n5)Show a point by index.\n"
+        << "6)Edit a point by index.\n7)Show list length.\n0)Back." << endl;
+    Sleep(delay);
+}
+void demo_interactive_dialog(const unsigned& delay)
+{
+    cout << "Select the application mode:\n1)Interactive dialog mode.\n"
+        << "2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
+    Sleep(delay);
+    cout << "Select the application mode:\n1)Interactive dialog mode. <- press\n"
+        << "2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
+    Sleep(delay);
+}
+void demo_choice_of_approach(unsigned delay)
+{
+    cout << "\nChoose the approach to implement the data structure \"List\"" << endl
+        << "1)Based on a fixed size array.\n2)Based on a dynamic array.\n3)Based on a linked list." << endl;
+    Sleep(delay);
+    cout << "\nChoose the approach to implement the data structure \"List\"" << endl
+        << "1)Based on a fixed size array. <- press\n2)Based on a dynamic array.\n3)Based on a linked list." << endl;
+    Sleep(delay);
+}
+void demo_create_empty_list(unsigned delay, std::size_t max_size)
+{
+    demo_menu(delay);
+    cout << "\nMenu:\n1)Create a blank list. <- press\n2)Adding a point to the end of the list.\n"
+        << "3)Inserting a point before a point with the index.\n"
+        << "4)Delete a point by index.\n5)Show a point by index.\n"
+        << "6)Edit a point by index.\n7)Show list length.\n0)Back." << endl;
+    Sleep(delay);
+    cout << "\nEnter the maximum size of list: <- write the size and press <Enter>" << endl;
+    Sleep(delay);
+    cout << "\nEnter the maximum size of list: " << max_size << endl;
+    Sleep(delay);
+    cout << "\nThe list not created!" << endl;
+    cout << "\nNew list created!" << endl;
+    Sleep(delay);
+}
+void demo_write_coordinate(unsigned delay, Point point)
+{
+    cout << "\nEnter a point!" << endl;
+    cout << "Enter the first coordinate: <- write the coordinate and press <Enter>" << endl;
+    Sleep(delay);
+    cout << "Enter the first coordinate: " << point.x << endl;
+    Sleep(delay);
+    cout << "Enter the first coordinate: <- write the coordinate and press <Enter>" << endl;
+    Sleep(delay);
+    cout << "Enter the second coordinate: " << point.y << endl;
+    Sleep(delay);
+    cout << "Enter the first coordinate: <- write the coordinate and press <Enter>" << endl;
+    Sleep(delay);
+    cout << "Enter the third coordinate: " << point.z << endl;
+    Sleep(delay);
+}
+void demo_write_index(unsigned delay, unsigned index)
+{
+    cout << "Enter the index: <- write the index and press <Enter>" << endl;
+    Sleep(delay);
+    cout << "Enter the index: " << index << endl;
+    Sleep(delay);
+}
+void demo_add_to_end_of_list(unsigned delay, Fixed_list& list, Point point)
+{
+    demo_menu(delay);
+    cout << "\nMenu:\n1)Create a blank list.\n2)Adding a point to the end of the list. <- press\n"
+        << "3)Inserting a point before a point with the index.\n"
+        << "4)Delete a point by index.\n5)Show a point by index.\n"
+        << "6)Edit a point by index.\n7)Show list length.\n0)Back." << endl;
+    Sleep(delay);
+    demo_write_coordinate(delay, point);
+    list.append(point);
+    Sleep(delay);
+}
+void demo_add_to_list_by_index(unsigned delay, Fixed_list& list, unsigned index, Point point)
+{
+    demo_menu(delay);
+    cout << "\nMenu:\n1)Create a blank list.\n2)Adding a point to the end of the list.\n"
+        << "3)Inserting a point before a point with the index. <- press\n"
+        << "4)Delete a point by index.\n5)Show a point by index.\n"
+        << "6)Edit a point by index.\n7)Show list length.\n0)Back." << endl;
+    Sleep(delay);
+    demo_write_index(delay, index);
+    demo_write_coordinate(delay, point);
+    list.insert(index, point);
+    Sleep(delay);
+}
+void demo_delete_point_by_index(unsigned delay, Fixed_list& list, unsigned index)
+{
+    demo_menu(delay);
+    cout << "\nMenu:\n1)Create a blank list.\n2)Adding a point to the end of the list.\n"
+        << "3)Inserting a point before a point with the index.\n"
+        << "4)Delete a point by index. <- press\n5)Show a point by index.\n"
+        << "6)Edit a point by index.\n7)Show list length.\n0)Back." << endl;
+    Sleep(delay);
+    demo_write_index(delay, index);
+    list.remove(index);
+    Sleep(delay);
+}
+void demo_show_point_by_index(unsigned delay, Fixed_list& list, unsigned index)
+{
+    demo_menu(delay);
+    cout << "\nMenu:\n1)Create a blank list.\n2)Adding a point to the end of the list.\n"
+        << "3)Inserting a point before a point with the index.\n"
+        << "4)Delete a point by index.\n5)Show a point by index. <- press\n"
+        << "6)Edit a point by index.\n7)Show list length.\n0)Back." << endl;
+    Sleep(delay);
+    demo_write_index(delay, index);
+    Point point;
+    bool temp = list.get(index, point);
+    point.write_point();
+    Sleep(delay);
+}
+void demo_edit_point_by_index(unsigned delay, Fixed_list& list, unsigned index, Point point)
+{
+    demo_menu(delay);
+    cout << "\nMenu:\n1)Create a blank list.\n2)Adding a point to the end of the list.\n"
+        << "3)Inserting a point before a point with the index.\n"
+        << "4)Delete a point by index.\n5)Show a point by index.\n"
+        << "6)Edit a point by index. <- press\n7)Show list length.\n0)Back." << endl;
+    Sleep(delay);
+    demo_write_index(delay, index);
+    demo_write_coordinate(delay, point);
+    list.set(index, point);
+    Sleep(delay);
+}
+void demo_show_list_length(unsigned delay, Fixed_list& list)
+{
+    demo_menu(delay);
+    cout << "\nMenu:\n1)Create a blank list.\n2)Adding a point to the end of the list.\n"
+        << "3)Inserting a point before a point with the index.\n"
+        << "4)Delete a point by index.\n5)Show a point by index.\n"
+        << "6)Edit a point by index.\n7)Show list length. <- press\n0)Back." << endl;
+    Sleep(delay);
+    cout << "\nThe lenght of list: " <<  list.lenght() << endl;
+    Sleep(delay);
 }
 void demo_mode()
 {
