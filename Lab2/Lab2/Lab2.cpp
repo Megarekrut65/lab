@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 #include <Windows.h>
+#include <chrono>
+#include <fstream>
 using std::cin;
 using std::cout;
 using std::endl;
@@ -13,6 +15,12 @@ implementation_approach choice_of_approach();
 double correct_read_double(const std::string&);
 unsigned correct_read_unsigned(const std::string&);
 enum class implementation_approach{ FIXED, DYNAMIC, LINKED};
+struct measurement_result
+{    
+    unsigned number_of_points;
+    unsigned number_of_operations;
+    float time;
+};
 struct Point
 {
     double x;
@@ -64,19 +72,6 @@ private:
     std::size_t size;
     std::size_t max_size;
     bool created_list;   
-public:
-    Fixed_list()
-    {
-        points = nullptr;
-        size = 0;
-        max_size = 1;
-        created_list = false;
-    }
-    void add_max_size(std::size_t max_size)
-    {
-        if (created_list) return;
-        this->max_size = max_size;
-    }
     bool is_index(unsigned index)
     {
         if ((index + 1) > size)
@@ -94,21 +89,33 @@ public:
             return false;
         }
         return true;
-    }  
+    }
     bool is_space()
     {
         if (size == max_size)
-        {          
+        {
             cout << "\nThe list is overflowing!" << endl;
             return false;
         }
         return true;
     }
+public:
+    Fixed_list()
+    {
+        points = nullptr;
+        size = 0;
+        max_size = 1;
+        created_list = false;
+    }
+    void add_max_size(std::size_t max_size)
+    {
+        if (created_list) return;
+        this->max_size = max_size;
+    }  
     bool create()
     {
         if (created_list) return false;
         points = new Point[max_size];
-        size = 0;
         created_list = true;
         return true;
     }
@@ -117,7 +124,9 @@ public:
         if (created_list)
         {
             delete[] points;
-            Fixed_list();
+            points = nullptr;
+            size = 0;
+            created_list = false;
         }
     }
     bool append(Point point)
@@ -172,11 +181,6 @@ struct Dynamic_list
 private:
     std::vector <Point> points;
     bool created_list;
-public:
-    Dynamic_list()
-    {
-        created_list = false;
-    }
     bool is_index(unsigned index)
     {
         std::size_t size = points.size();
@@ -196,6 +200,11 @@ public:
         }
         return true;
     }
+public:
+    Dynamic_list()
+    {
+        created_list = false;
+    }   
     bool create()
     {
         if (created_list) return false;
@@ -325,14 +334,6 @@ private:
         tail->next = nullptr;
         size--;
     }
-public:
-    Linked_list()
-    {
-        size = 0;
-        head = nullptr;
-        tail = nullptr;
-        created_list = false;
-    }
     bool is_index(unsigned index)
     {
         if ((index + 1) > size)
@@ -351,9 +352,17 @@ public:
         }
         return true;
     }
+public:
+    Linked_list()
+    {       
+        size = 0;
+        head = nullptr;
+        tail = nullptr;
+        created_list = false;      
+    }  
     bool create()
     {
-        if (created_list) return false;
+        if (created_list) return false;      
         created_list = true;
         return true;
     }
@@ -370,7 +379,8 @@ public:
         }
         delete tail;
         tail = nullptr;
-        Linked_list();
+        size = 0;
+        created_list = false;
     }
     bool append(Point point)
     {
@@ -880,9 +890,247 @@ void demo_mode()
     cout << "\nThe end of the demo mode\n" << endl;
     Sleep(delay);
 }
+void clear_result_files(const std::string& approach)//function clears old result files
+{
+    std::string all_result_files[6] = { "result_append_" + approach + ".txt", "result_insert_" + approach + ".txt",
+        "result_remove_" + approach + ".txt", "result_get_" + approach + ".txt", "result_set_" + approach + ".txt",
+        "result_clear_" + approach + ".txt"};
+    for (unsigned i = 0; i < 6; i++)
+    {
+        std::ofstream clear_file(all_result_files[i]);
+        clear_file.close();
+    }
+}
+void add_relust_to_file(const std::string& path, measurement_result result)
+{
+    std::ofstream file(path, std::ios_base::app);
+    file << "The initial number of points: " << result.number_of_points << endl;
+    file << "Number of operations: " << result.number_of_operations << endl;
+    file << "Time: " << result.time << endl;
+    file.close();
+}
+void write_results(measurement_result result, const std::string& method)
+{
+    cout << "Number of points = " << result.number_of_points << "." << endl;  
+    cout << "Number of operations = " << result.number_of_operations << "." << endl;
+    cout << "Time of " + method + " points = " << result.time << " seconds." << endl;
+    cout << endl;
+}
+Point point_generetor()
+{
+    double x, y, z;
+    srand(unsigned(time(0)));
+    x = double(rand() % 10000);
+    y = x;
+    z = x;
+    return Point(x, y, z);
+}
+unsigned index_generator(std::size_t size)
+{
+    unsigned index;
+    srand(unsigned(time(0)));
+    index = unsigned(rand()%size);
+    return index;
+}
+template<class T>
+float measurement_append(T& list, const std::string& path, unsigned number_of_operations)
+{
+    measurement_result append;
+    auto the_start = std::chrono::high_resolution_clock::now();
+    auto the_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> duration; 
+    std::size_t size;
+    bool lenght = list.lenght(size);
+    append.number_of_operations = number_of_operations;    
+    append.number_of_points = size;
+    Point point = point_generetor();
+    the_start = std::chrono::high_resolution_clock::now();
+    for (unsigned j = 0; j < number_of_operations; j++)
+    {
+        bool temp = list.append(point);
+    }
+    the_end = std::chrono::high_resolution_clock::now();  
+    duration = the_end - the_start;
+    append.time = duration.count();
+    add_relust_to_file("result_append_" + path + ".txt", append);
+    lenght = list.lenght(size);
+    append.number_of_points = size;
+    write_results(append,"append");
+    return append.time;
+}
+template<class T>
+float measurement_insert(T& list, const std::string& path, unsigned number_of_operations)
+{
+    measurement_result insert;
+    auto the_start = std::chrono::high_resolution_clock::now();
+    auto the_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> duration;
+    std::size_t size;
+    bool lenght = list.lenght(size);
+    insert.number_of_operations = number_of_operations;  
+    insert.number_of_points = size;
+    Point point = point_generetor();
+    unsigned index = index_generator(size);
+    the_start = std::chrono::high_resolution_clock::now();
+    for (unsigned j = 0; j < number_of_operations; j++)
+    {
+        bool temp = list.insert(index, point);
+    }
+    the_end = std::chrono::high_resolution_clock::now();
+    duration = the_end - the_start;
+    insert.time = duration.count();
+    add_relust_to_file("result_insert_" + path + ".txt", insert);
+    lenght = list.lenght(size);
+    insert.number_of_points = size;
+    write_results(insert,"insert");
+
+    return insert.time;
+}
+template<class T>
+float measurement_remove(T& list, const std::string& path, unsigned number_of_operations)
+{
+    measurement_result remove;
+    auto the_start = std::chrono::high_resolution_clock::now();
+    auto the_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> duration;
+    std::size_t size;
+    bool lenght = list.lenght(size);
+    remove.number_of_operations = number_of_operations;
+    remove.number_of_points = size;
+    unsigned index = index_generator(size);
+    the_start = std::chrono::high_resolution_clock::now();
+    for (unsigned j = 0; j < number_of_operations; j++)
+    {
+        bool temp = list.remove(index);
+    } 
+    the_end = std::chrono::high_resolution_clock::now();
+    duration = the_end - the_start;
+    remove.time = duration.count();
+    add_relust_to_file("result_remove_" + path + ".txt", remove);
+    lenght = list.lenght(size);
+    remove.number_of_points = size;
+    write_results(remove,"remove");
+
+    return remove.time;
+}
+template<class T>
+float measurement_get(T& list, const std::string& path, unsigned number_of_operations)
+{
+    measurement_result get;
+    auto the_start = std::chrono::high_resolution_clock::now();
+    auto the_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> duration;
+    std::size_t size;
+    bool lenght = list.lenght(size);
+    get.number_of_operations = number_of_operations;
+    get.number_of_points = size;
+    Point point = point_generetor();
+    unsigned index = index_generator(size);
+    the_start = std::chrono::high_resolution_clock::now();
+    for (unsigned j = 0; j < number_of_operations; j++)
+    {
+        bool temp = list.get(index, point);
+    }
+    the_end = std::chrono::high_resolution_clock::now();
+    duration = the_end - the_start;
+    get.time = duration.count();
+    add_relust_to_file("result_get_" + path + ".txt", get);
+    write_results(get,"get");
+
+    return get.time;
+}
+template<class T>
+float measurement_set(T& list, const std::string& path, unsigned number_of_operations)
+{
+    measurement_result set;
+    auto the_start = std::chrono::high_resolution_clock::now();
+    auto the_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> duration;
+    std::size_t size;
+    bool lenght = list.lenght(size);
+    set.number_of_operations = number_of_operations;   
+    set.number_of_points = size;
+    Point point = point_generetor();
+    unsigned index = index_generator(size);
+    the_start = std::chrono::high_resolution_clock::now();
+    for (unsigned j = 0; j < number_of_operations; j++)
+    {
+        bool temp = list.set(index, point);
+    }     
+    the_end = std::chrono::high_resolution_clock::now();
+    duration = the_end - the_start;
+    set.time = duration.count();
+    add_relust_to_file("result_set_" + path + ".txt", set);
+    write_results(set,"set");
+
+    return set.time;
+}
+template<class T>
+float measurement_clear(T& list, const std::string& path, unsigned number_of_operations)
+{
+    measurement_result clear;
+    auto the_start = std::chrono::high_resolution_clock::now();
+    auto the_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> duration;
+    std::size_t size;
+    bool lenght = list.lenght(size);
+    clear.number_of_operations = number_of_operations;
+    clear.number_of_points = size;
+    the_start = std::chrono::high_resolution_clock::now();
+    list.clear();
+    the_end = std::chrono::high_resolution_clock::now();
+    duration = the_end - the_start;
+    clear.time = duration.count();
+    add_relust_to_file("result_clear_" + path + ".txt", clear);
+    write_results(clear,"clear");
+
+    return clear.time;
+}
+template<class T>
+void measurement_menu(T& list, const std::string& approach)
+{   
+    clear_result_files(approach);
+    unsigned number_of_points = 1;
+    unsigned number_of_operations = 1;
+    const unsigned number_of_methods = 6;
+    bool more_one_second = false;
+    float(*methods[number_of_methods])(T&, const std::string&, unsigned) = { 
+        measurement_append, measurement_insert, measurement_remove, measurement_get, 
+        measurement_set, measurement_clear };
+    while (true)
+    {
+        list.create();
+        cout << "The initial number of points:" << number_of_points << endl;
+        for (unsigned i = 0; i < number_of_points; i++) list.append(point_generetor());
+        for (unsigned j = 0; j < number_of_methods; j++)
+        {
+            float time;
+            time = methods[j](list, approach, number_of_operations);
+            if (time > 2) more_one_second = true;
+        }
+        cout << endl;
+        if (more_one_second) break;
+        number_of_points *= 2;
+        number_of_operations*=2;
+    }
+    cout << "\nResults of measurements of program in the following files:\n"
+        << "result_append_"+approach+".txt\nresult_insert_" + approach + ".txt\n"
+        << "result_remove_" + approach + ".txt\nresult_get_" + approach + ".txt\n"
+        << "result_set_" + approach + ".txt\nresult_clear_" + approach + ".txt" << endl;
+}
 void  benchmark_mode()
 {
-
+    Fixed_list fixed;
+    Dynamic_list dynamic;
+    Linked_list linked;
+    cout << "\nMeasurement result of Fixed list: " << endl;
+    fixed.add_max_size(10000000);
+    measurement_menu(fixed, "fixed");
+    cout << "\nMeasurement result of Dynamic list: " << endl;
+    measurement_menu(dynamic, "dynamic");
+    cout << "\nMeasurement result of Linked list: " << endl;
+    measurement_menu(linked, "linked");
+    cout << "\nThe end of measurements!" << endl;
 }
 int main()
 {
@@ -904,7 +1152,7 @@ int main()
             return 0;
         }
         break;
-        default: cout << "\nPress the correct key!" << endl;
+        default: cout << "\nPress the correct key!\n" << endl;
         }
     }
     //test();
