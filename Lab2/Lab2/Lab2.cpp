@@ -74,6 +74,7 @@ public:
     }
     void add_max_size(std::size_t max_size)
     {
+        if (created_list) return;
         this->max_size = max_size;
     }
     bool is_index(unsigned index)
@@ -94,11 +95,22 @@ public:
         }
         return true;
     }  
-    void create()
+    bool is_space()
     {
+        if (size == max_size)
+        {          
+            cout << "\nThe list is overflowing!" << endl;
+            return false;
+        }
+        return true;
+    }
+    bool create()
+    {
+        if (created_list) return false;
         points = new Point[max_size];
         size = 0;
         created_list = true;
+        return true;
     }
     void clear()
     {
@@ -108,56 +120,51 @@ public:
             Fixed_list();
         }
     }
-    void append(Point point)
+    bool append(Point point)
     {
-        if (size == max_size)
-        {
-            cout << "\nThe list is overflowing!" << endl;
-            return;
-        }
+        if((!is_list()) || (!is_space())) return false;        
         points[size] = point;
         size++;
-        cout << "\nThe point added to the list!" << endl;
+        return true;
     }
-    void insert(unsigned index, Point point)
+    bool insert(unsigned index, Point point)
     {
-        if (!is_index(index)) return;
-        if (size == max_size)
-        {
-            cout << "\nThe list is overflowing!" << endl;
-            return;
-        }
+        if ((!is_list()) || (!is_space()) || (!is_index(index))) return false;
         for (std::size_t i = size; i > index; i--)
         {
             points[i] = points[i - 1];
         }
         points[index] = point;
         size++;
-        cout << "\nThe point added to the list!" << endl;
+        return true;
     }
-    void remove(unsigned index)
+    bool remove(unsigned index)
     {
-        if (!is_index(index)) return;
+        if ((!is_list()) || (!is_index(index))) return false;
         for (std::size_t i = index; i < (size - 1); i++)
         {
             points[i] = points[i + 1];
         }                  
         size--;
+        return true;
     }
     bool get(unsigned index, Point& point)
     {
-        if (!is_index(index)) return false;
+        if ((!is_list()) || (!is_index(index))) return false;
         point = points[index];
         return true;
     }
-    void set(unsigned index, Point point)
+    bool set(unsigned index, Point point)
     {
-        if (!is_index(index)) return;
+        if ((!is_list()) || (!is_index(index))) return false;
         points[index] = point;
+        return true;
     }
-    std::size_t lenght()
+    bool lenght(std::size_t& size)
     {
-        return size;
+        if (!is_list()) return false;
+        size = this->size;
+        return true;
     }
 };
 struct Dynamic_list
@@ -189,9 +196,11 @@ public:
         }
         return true;
     }
-    void create()
+    bool create()
     {
+        if (created_list) return false;
         created_list = true;
+        return true;
     }
     void clear()
     {
@@ -201,14 +210,15 @@ public:
             Dynamic_list();
         }
     }
-    void append(Point point)
+    bool append(Point point)
     {
+        if (!is_list()) return false;
         points.push_back(point);
-        cout << "\nThe point added to the list!" << endl;
+        return true;
     }
-    void insert(unsigned index, Point point)
+    bool insert(unsigned index, Point point)
     {
-        if (!is_index(index)) return;
+        if ((!is_list()) || (!is_index(index))) return false;
         std::size_t size = points.size();
         points.push_back(Point());
         for (std::size_t i = size; i > index; i--)
@@ -216,27 +226,31 @@ public:
             points[i] = points[i - 1];
         }
         points[index] = point;
-        cout << "\nThe point added to the list!" << endl;
+        return true;
     }
-    void remove(unsigned index)
+    bool remove(unsigned index)
     {
-        if (!is_index(index)) return;
+        if ((!is_list()) || (!is_index(index))) return false;
         points.erase(points.begin() + index);
+        return true;
     }
     bool get(unsigned index, Point& point)
     {
-        if (!is_index(index)) return false;
+        if ((!is_list()) || (!is_index(index))) return false;
         point = points[index];
         return true;
     }
-    void set(unsigned index, Point point)
+    bool set(unsigned index, Point point)
     {
-        if (!is_index(index)) return;
+        if ((!is_list()) || (!is_index(index))) return false;
         points[index] = point;
+        return true;
     }
-    std::size_t lenght()
+     bool lenght(std::size_t& size)
     {
-        return points.size();
+         if (!is_list()) return false;
+         size = points.size();
+         return true;
     }
 };
 struct Linked_list
@@ -337,13 +351,15 @@ public:
         }
         return true;
     }
-    void create()
+    bool create()
     {
+        if (created_list) return false;
         created_list = true;
+        return true;
     }
     void clear()
     {
-        if (!created_list) return;
+        if ((!created_list)||(size == 0)) return;
         List_Node* current_node = head->next;
         head = nullptr;
         for (; current_node; current_node = current_node->next)
@@ -356,8 +372,9 @@ public:
         tail = nullptr;
         Linked_list();
     }
-    void append(Point point)
+    bool append(Point point)
     {
+        if (!is_list()) return false;
         List_Node* new_node = new List_Node;
         new_node->point = point;
         new_node->prev = tail;
@@ -373,34 +390,35 @@ public:
             head = new_node;
         }
         size++;
-        cout << "\nThe point added to the list!" << endl;
+        return true;
     }
-    void insert(unsigned index, Point point)
+    bool insert(unsigned index, Point point)
     {
-        if (!is_index(index)) return;
+        if ((!is_list()) || (!is_index(index))) return false;
         if (index == 0) add_head(point);
         else add_middle(index, point);
         size++;
-        cout << "\nThe point added to the list!" << endl;
+        return true;
     }
-    void remove(unsigned index)
+    bool remove(unsigned index)
     {
-        if (!is_index(index)) return;
+        if ((!is_list()) || (!is_index(index))) return false;
         if (index == 0)
         {
             delete_head();
-            return;
+            return true;
         }
         if ((index + 1) == size)
         {
             delete_tail();
-            return;
+            return true;
         }
         delete_middle(index);     
+        return true;
     }
     bool get(unsigned index, Point& point)
     {
-        if (!is_index(index)) return false;
+        if ((!is_list()) || (!is_index(index))) return false;
         List_Node* current_node = head;
         for (std::size_t i = 0; i < size; i++, current_node = current_node->next)
         {
@@ -412,69 +430,72 @@ public:
         } 
         return false;
     }
-    void set(unsigned index, Point point)
+    bool set(unsigned index, Point point)
     {
-        if (!is_index(index)) return;
+        if ((!is_list()) || (!is_index(index))) return false;
         List_Node* current_node = head;
         for (std::size_t i = 0; i < size; i++, current_node = current_node->next)
         {
             if (i == index)
             {
                 current_node->point = point;
-                break;
+                return true;
             }
         }
+        return false;
     }
-    std::size_t lenght()
+    bool lenght(std::size_t& size)
     {
-        return size;
+        if (!is_list()) return false;
+        size = this->size;
+        return true;
     }
 };
 template<class T>
 void create_empty_list(T& list)
 {
-    if (!list.is_list())
-    {
-        list.create();
+    if (list.create())
+    {      
         cout << "\nNew list created!" << endl;
     }
-    else cout << "\nThe list has already been created!" << endl;   
+    else
+    {
+        cout << "\nThe list has already been created!" << endl;
+    }
 }
 template<class T>
 void add_to_end_of_list(T& list)
 {
-    if (!list.is_list()) return;
     Point point;
     point.read_point();
-    list.append(point);   
+    if (list.append(point))
+    {
+        cout << "\nThe point added to the list!" << endl;
+    }   
 }
 template<class T>
 void add_to_list_by_index(T& list)
 {
-    if (!list.is_list()) return;
     unsigned index = correct_read_unsigned("the index");
-    if (list.is_index(index))
+    Point point;
+    point.read_point();
+    if (list.insert(index, point))
     {
-        Point point;
-        point.read_point();
-        list.insert(index, point);
+        cout << "\nThe point added to the list!" << endl;
     }
 }
 template<class T>
 void delete_point_by_index(T& list)
 {
-    if (!list.is_list()) return;
     unsigned index = correct_read_unsigned("the index");
-    if (list.is_index(index))
+    if (list.remove(index))
     {
-        list.remove(index);
         cout << "\nThe point removed!" << endl;
     }
 }
 template<class T>
 void show_point_by_index(T& list)
 {
-    if (!list.is_list()) return;
     unsigned index = correct_read_unsigned("the index");
     Point point;
     if (list.get(index, point))
@@ -485,22 +506,22 @@ void show_point_by_index(T& list)
 template<class T>
 void edit_point_by_index(T& list)
 {
-    if (!list.is_list()) return;
     unsigned index = correct_read_unsigned("the index");   
-    if (list.is_index(index))
+    Point point;
+    point.read_point();
+    if (list.set(index, point))
     {
-        Point point;
-        point.read_point();
-        list.set(index, point);
         cout << "\nThe point edited!" << endl;
     }
 }
 template<class T>
 void show_list_length(T& list)
 {
-    if (!list.is_list()) return;
-    cout << "\nThe lenght of list: ";
-    cout << list.lenght() << endl;
+    std::size_t size;
+    if (list.lenght(size))
+    {
+        cout << "\nThe lenght of list: " << size << endl;
+    }
 }
 template<class T>
 void clear_list(T& list)
@@ -763,7 +784,7 @@ void demo_add_to_end_of_list(unsigned delay, Fixed_list& list, Point point)
         << "6)Edit a point by index.\n7)Show list length.\n0)Back." << endl;
     Sleep(delay);
     demo_write_coordinate(delay, point);
-    list.append(point);
+    if(list.append(point)) cout << "\nThe point added to the list!" << endl;
     Sleep(delay);
 }
 void demo_add_to_list_by_index(unsigned delay, Fixed_list& list, unsigned index, Point point)
@@ -775,7 +796,7 @@ void demo_add_to_list_by_index(unsigned delay, Fixed_list& list, unsigned index,
     Sleep(delay);
     demo_write_index(delay, index);
     demo_write_coordinate(delay, point);
-    list.insert(index, point);
+    if(list.insert(index, point))  cout << "\nThe point added to the list!" << endl;
     Sleep(delay);
 }
 void demo_delete_point_by_index(unsigned delay, Fixed_list& list, unsigned index)
@@ -822,7 +843,8 @@ void demo_show_list_length(unsigned delay, Fixed_list& list)
         << "4)Delete a point by index.\n5)Show a point by index.\n"
         << "6)Edit a point by index.\n7)Show list length. <- press\n0)Back." << endl;
     Sleep(delay);
-    cout << "\nThe lenght of list: " <<  list.lenght() << endl;
+    std::size_t size;
+    if(list.lenght(size)) cout << "\nThe lenght of list: " << size << endl; 
     Sleep(delay);
 }
 void demo_exit(unsigned delay)
