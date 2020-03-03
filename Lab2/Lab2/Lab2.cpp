@@ -100,15 +100,6 @@ private:
         }
         return true;
     }
-    Fixed_list(Fixed_list list)
-    {
-        Point* new_points = new Point[max_size];
-        for (std::size_t i = 0; i < max_size; i++) new_points[i] = list.points[i];
-        this->size = list.size;
-        this->max_size = list.max_size;
-        this->points = new_points;
-        this->created_list = true;
-    }
 public:
     Fixed_list()
     {
@@ -116,6 +107,18 @@ public:
         size = 0;
         max_size = 1;
         created_list = false;
+    }
+    Point* give_points()
+    {
+        return points;
+    }
+    void add_points(const Point* points)
+    {
+        Point* new_points = new Point[max_size];
+        for (std::size_t i = 0; i < max_size; i++) new_points[i] = points[i];   
+        if(this->points) delete[] this->points;
+        this->points = new_points;
+        created_list = true;
     }
     void add_max_size(std::size_t max_size)
     {
@@ -214,7 +217,18 @@ public:
     Dynamic_list()
     {
         created_list = false;
-    }   
+    }
+    std::vector <Point> give_points()
+    {
+        return points;
+    }
+    void add_points(const std::vector <Point>& points)
+    {
+        if (this->points.size() > 0) this->points.clear();
+        this->points = points;
+        cout << "struct size : " << this->points.size() << endl;
+        created_list = true;
+    }
     bool create()
     {
         if (created_list) return false;
@@ -226,7 +240,7 @@ public:
         if (created_list)
         {
             points.clear();
-            Dynamic_list();
+            created_list = false;
         }
     }
     bool append(Point point)
@@ -370,6 +384,20 @@ public:
         tail = nullptr;
         created_list = false;      
     }  
+    List_Node* give_points()
+    {
+        return head;
+    }
+    void add_points(List_Node* head)
+    {
+        if (size > 0) clear();
+        if (!head) return;
+        for (List_Node* current = head; current; current = current->next)
+        {
+            append(current->point);
+        } 
+        created_list = true;
+    }
     bool create()
     {
         if (created_list) return false;      
@@ -378,7 +406,7 @@ public:
     }
     void clear()
     {
-        if ((!created_list)||(size == 0)) return;
+        if ((!created_list)||(!head)) return;
         List_Node* current_node = head->next;
         head = nullptr;
         for (; current_node; current_node = current_node->next)
@@ -921,7 +949,7 @@ void add_relust_to_file(const std::string& path, measurement_result result)
 void write_results(float time, const std::string& method)
 {
     cout << "Time of " + method + " points = " << time << " seconds." 
-         << endl << endl;
+         << endl;
 }
 Point point_generetor()
 {
@@ -937,6 +965,7 @@ unsigned index_generator(std::size_t size)
     unsigned index;
     srand(unsigned(time(0)));
     index = unsigned(rand()%size);
+    cout << "\nindex" << index << endl;;
     return index;
 }
 template<class T>
@@ -961,6 +990,7 @@ float measurement_append(T& list, const std::string& path, unsigned number_of_op
     append.time = duration.count();
     add_relust_to_file("result_append_" + path + ".txt", append);
     write_results(append.time,"append");
+
     return append.time;
 }
 template<class T>
@@ -971,12 +1001,12 @@ float measurement_insert(T& list, const std::string& path, unsigned number_of_op
     auto the_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> duration;
     std::size_t size;
-    bool lenght = list.lenght(size);
+    bool lenght = list.lenght(size);  
     insert.number_of_operations = number_of_operations;  
     insert.number_of_points = size;
     Point point = point_generetor();
     unsigned index = index_generator(size);
-    the_start = std::chrono::high_resolution_clock::now();
+    the_start = std::chrono::high_resolution_clock::now();  
     for (unsigned j = 0; j < number_of_operations; j++)
     {
         bool temp = list.insert(index, point);
@@ -986,7 +1016,6 @@ float measurement_insert(T& list, const std::string& path, unsigned number_of_op
     insert.time = duration.count();
     add_relust_to_file("result_insert_" + path + ".txt", insert);
     write_results(insert.time,"insert");
-
     return insert.time;
 }
 template<class T>
@@ -1000,11 +1029,12 @@ float measurement_remove(T& list, const std::string& path, unsigned number_of_op
     bool lenght = list.lenght(size);
     remove.number_of_operations = number_of_operations;
     remove.number_of_points = size;
-    unsigned index = index_generator(size);
+    unsigned index = size - 1;
     the_start = std::chrono::high_resolution_clock::now();
     for (unsigned j = 0; j < number_of_operations; j++)
     {
         bool temp = list.remove(index);
+        index--;
     } 
     the_end = std::chrono::high_resolution_clock::now();
     duration = the_end - the_start;
@@ -1091,33 +1121,51 @@ template<class T>
 void measurement_menu(T list, const std::string& approach)
 {   
     clear_result_files(approach);
-    unsigned number_of_points = 1;
-    unsigned number_of_operations = 1;
+    unsigned number_of_points = 1, copy_number_of_points = 1, save_number_of_points = 1;
+    unsigned number_of_operations = 1, copy_number_of_operations = 1;
+    unsigned coefficient = 2;
     const unsigned number_of_methods = 6;
     bool more_one_second = false;
+    bool more_ten_second = false;
     float(*methods[number_of_methods])(T&, const std::string&, unsigned) = { 
         measurement_append, measurement_insert, measurement_remove, measurement_get, 
         measurement_set, measurement_clear };
-    T copy_list = T(list);    
+    T copy_list = list;
+    copy_list.create();
     while (true)
-    {
-        copy_list.create();
-        for (unsigned i = 0; i < number_of_points; i++) copy_list.append(point_generetor());
+    {       
+        for (unsigned i = 0; i < (number_of_points - save_number_of_points); i++)
+        {
+            bool temp = copy_list.append(point_generetor());
+        }
+        save_number_of_points = number_of_points;
         list.create();      
-        cout << "The initial number of points:" << number_of_points << endl;  
+        cout << "\nThe initial number of points:" << number_of_points << endl;  
         cout << "The initial number of operations:" << number_of_operations << endl;
         for (unsigned j = 0; j < number_of_methods; j++)
         {
             float time;
-            list = copy_list;
+            list.add_points(copy_list.give_points());
             time = methods[j](list, approach, number_of_operations);
-            if (time > 2) more_one_second = true;
+            if (time > 1) more_one_second = true;
+            if(time > 10) more_ten_second = true;
         }
         cout << endl;
-        if (more_one_second) break;
-        number_of_points *= 2;
-        number_of_operations*=2;
+        if (more_ten_second) break;
+        if (more_one_second)
+        {
+            number_of_points = coefficient* copy_number_of_points;
+            number_of_operations = coefficient* copy_number_of_operations;
+        }
+        else
+        {
+            number_of_points *= 3;
+            number_of_operations *= 3;
+            copy_number_of_points = number_of_points;
+            copy_number_of_operations = number_of_operations;
+        }       
     }
+    copy_list.clear();
     cout << "\nResults of measurements of program in the following files:\n"
         << "result_append_"+approach+".txt\nresult_insert_" + approach + ".txt\n"
         << "result_remove_" + approach + ".txt\nresult_get_" + approach + ".txt\n"
@@ -1126,9 +1174,9 @@ void measurement_menu(T list, const std::string& approach)
 void  benchmark_mode()
 {
     Fixed_list fixed;
-    cout << "\nMeasurement result of Fixed list: " << endl;
+    /*cout << "\nMeasurement result of Fixed list: " << endl;
     fixed.add_max_size(10000000);
-    measurement_menu(fixed, "fixed");
+    measurement_menu(fixed, "fixed");*/
     Dynamic_list dynamic;
     cout << "\nMeasurement result of Dynamic list: " << endl;
     measurement_menu(dynamic, "dynamic");
