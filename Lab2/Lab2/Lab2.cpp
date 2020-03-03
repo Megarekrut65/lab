@@ -101,24 +101,25 @@ private:
         return true;
     }
 public:
+    Point* give_points()
+    {
+        return points;
+    }
+    void add_points(Point* points, std::size_t size)
+    {
+        Point* new_points = new Point[max_size];
+        for (std::size_t i = 0;i < size; i++) new_points[i] = points[i];
+        if (this->points) delete[] this->points;
+        this->points = new_points;
+        this->size = size;
+        created_list = true;
+    }
     Fixed_list()
     {
         points = nullptr;
         size = 0;
         max_size = 1;
         created_list = false;
-    }
-    Point* give_points()
-    {
-        return points;
-    }
-    void add_points(const Point* points)
-    {
-        Point* new_points = new Point[max_size];
-        for (std::size_t i = 0; i < max_size; i++) new_points[i] = points[i];   
-        if(this->points) delete[] this->points;
-        this->points = new_points;
-        created_list = true;
     }
     void add_max_size(std::size_t max_size)
     {
@@ -217,16 +218,15 @@ public:
     Dynamic_list()
     {
         created_list = false;
-    }
+    } 
     std::vector <Point> give_points()
     {
         return points;
     }
-    void add_points(const std::vector <Point>& points)
+    void add_points(const std::vector <Point>& points,std::size_t size)
     {
         if (this->points.size() > 0) this->points.clear();
         this->points = points;
-        cout << "struct size : " << this->points.size() << endl;
         created_list = true;
     }
     bool create()
@@ -388,15 +388,15 @@ public:
     {
         return head;
     }
-    void add_points(List_Node* head)
+    void add_points(List_Node* head, std::size_t size)
     {
         if (size > 0) clear();
+        created_list = true;
         if (!head) return;
         for (List_Node* current = head; current; current = current->next)
         {
             append(current->point);
-        } 
-        created_list = true;
+        }       
     }
     bool create()
     {
@@ -965,7 +965,6 @@ unsigned index_generator(std::size_t size)
     unsigned index;
     srand(unsigned(time(0)));
     index = unsigned(rand()%size);
-    cout << "\nindex" << index << endl;;
     return index;
 }
 template<class T>
@@ -981,7 +980,7 @@ float measurement_append(T& list, const std::string& path, unsigned number_of_op
     append.number_of_points = size;
     Point point = point_generetor();
     the_start = std::chrono::high_resolution_clock::now();
-    for (unsigned j = 0; j < number_of_operations; j++)
+    for (unsigned i = 0; i < number_of_operations; i++)
     {
         bool temp = list.append(point);
     }
@@ -1007,7 +1006,7 @@ float measurement_insert(T& list, const std::string& path, unsigned number_of_op
     Point point = point_generetor();
     unsigned index = index_generator(size);
     the_start = std::chrono::high_resolution_clock::now();  
-    for (unsigned j = 0; j < number_of_operations; j++)
+    for (unsigned i = 0; i < number_of_operations; i++)
     {
         bool temp = list.insert(index, point);
     }
@@ -1029,12 +1028,17 @@ float measurement_remove(T& list, const std::string& path, unsigned number_of_op
     bool lenght = list.lenght(size);
     remove.number_of_operations = number_of_operations;
     remove.number_of_points = size;
-    unsigned index = size - 1;
-    the_start = std::chrono::high_resolution_clock::now();
-    for (unsigned j = 0; j < number_of_operations; j++)
+    std::vector<unsigned> indexs;
+    for (unsigned k = 0; k < number_of_operations; k++)
     {
-        bool temp = list.remove(index);
-        index--;
+        indexs.push_back(index_generator(size));
+        size--;
+        if (size <= 0) break;
+    }
+    the_start = std::chrono::high_resolution_clock::now();
+    for (unsigned i = 0; i < number_of_operations; i++)
+    {
+        bool temp = list.remove(indexs[i]);
     } 
     the_end = std::chrono::high_resolution_clock::now();
     duration = the_end - the_start;
@@ -1058,7 +1062,7 @@ float measurement_get(T& list, const std::string& path, unsigned number_of_opera
     Point point = point_generetor();
     unsigned index = index_generator(size);
     the_start = std::chrono::high_resolution_clock::now();
-    for (unsigned j = 0; j < number_of_operations; j++)
+    for (unsigned i = 0; i < number_of_operations; i++)
     {
         bool temp = list.get(index, point);
     }
@@ -1084,7 +1088,7 @@ float measurement_set(T& list, const std::string& path, unsigned number_of_opera
     Point point = point_generetor();
     unsigned index = index_generator(size);
     the_start = std::chrono::high_resolution_clock::now();
-    for (unsigned j = 0; j < number_of_operations; j++)
+    for (unsigned i = 0; i < number_of_operations; i++)
     {
         bool temp = list.set(index, point);
     }     
@@ -1118,10 +1122,10 @@ float measurement_clear(T& list, const std::string& path, unsigned number_of_ope
     return clear.time;
 }
 template<class T>
-void measurement_menu(T list, const std::string& approach)
+void measurement_menu(T& list, const std::string& approach)
 {   
     clear_result_files(approach);
-    unsigned number_of_points = 1, copy_number_of_points = 1, save_number_of_points = 1;
+    unsigned number_of_points = 1, copy_number_of_points = 1, save_number_of_points = 0;
     unsigned number_of_operations = 1, copy_number_of_operations = 1;
     unsigned coefficient = 2;
     const unsigned number_of_methods = 6;
@@ -1131,24 +1135,25 @@ void measurement_menu(T list, const std::string& approach)
         measurement_append, measurement_insert, measurement_remove, measurement_get, 
         measurement_set, measurement_clear };
     T copy_list = list;
-    copy_list.create();
+    bool temp = copy_list.create();
     while (true)
-    {       
+    {     
+        
         for (unsigned i = 0; i < (number_of_points - save_number_of_points); i++)
         {
-            bool temp = copy_list.append(point_generetor());
+             temp = copy_list.append(point_generetor());
         }
-        save_number_of_points = number_of_points;
-        list.create();      
+        temp = list.create();
+        save_number_of_points = number_of_points;          
         cout << "\nThe initial number of points:" << number_of_points << endl;  
         cout << "The initial number of operations:" << number_of_operations << endl;
         for (unsigned j = 0; j < number_of_methods; j++)
         {
-            float time;
-            list.add_points(copy_list.give_points());
+            float time;            
+            list.add_points(copy_list.give_points(), number_of_points);
             time = methods[j](list, approach, number_of_operations);
             if (time > 1) more_one_second = true;
-            if(time > 10) more_ten_second = true;
+            if (time > 10) more_ten_second = true;
         }
         cout << endl;
         if (more_ten_second) break;
@@ -1156,11 +1161,12 @@ void measurement_menu(T list, const std::string& approach)
         {
             number_of_points = coefficient* copy_number_of_points;
             number_of_operations = coefficient* copy_number_of_operations;
+            coefficient++;
         }
         else
         {
-            number_of_points *= 3;
-            number_of_operations *= 3;
+            number_of_points *= 2;
+            number_of_operations *= 2;
             copy_number_of_points = number_of_points;
             copy_number_of_operations = number_of_operations;
         }       
@@ -1174,9 +1180,9 @@ void measurement_menu(T list, const std::string& approach)
 void  benchmark_mode()
 {
     Fixed_list fixed;
-    /*cout << "\nMeasurement result of Fixed list: " << endl;
+    cout << "\nMeasurement result of Fixed list: " << endl;
     fixed.add_max_size(10000000);
-    measurement_menu(fixed, "fixed");*/
+    measurement_menu(fixed, "fixed");
     Dynamic_list dynamic;
     cout << "\nMeasurement result of Dynamic list: " << endl;
     measurement_menu(dynamic, "dynamic");

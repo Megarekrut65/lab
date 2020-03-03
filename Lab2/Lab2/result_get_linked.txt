@@ -1,3 +1,48 @@
 The initial number of points: 1
 Number of operations: 1
+Time: 6.41e-07
+The initial number of points: 2
+Number of operations: 2
 Time: 1.283e-06
+The initial number of points: 4
+Number of operations: 4
+Time: 1.283e-06
+The initial number of points: 8
+Number of operations: 8
+Time: 3.208e-06
+The initial number of points: 16
+Number of operations: 16
+Time: 7.699e-06
+The initial number of points: 32
+Number of operations: 32
+Time: 6.416e-06
+The initial number of points: 64
+Number of operations: 64
+Time: 2.5023e-05
+The initial number of points: 128
+Number of operations: 128
+Time: 9.175e-05
+The initial number of points: 256
+Number of operations: 256
+Time: 0.000352884
+The initial number of points: 512
+Number of operations: 512
+Time: 0.00075389
+The initial number of points: 1024
+Number of operations: 1024
+Time: 0.00628006
+The initial number of points: 2048
+Number of operations: 2048
+Time: 0.0112326
+The initial number of points: 4096
+Number of operations: 4096
+Time: 0.0697274
+The initial number of points: 8192
+Number of operations: 8192
+Time: 0.648306
+The initial number of points: 16384
+Number of operations: 16384
+Time: 2.77403
+The initial number of points: 32768
+Number of operations: 32768
+Time: 11.6773
