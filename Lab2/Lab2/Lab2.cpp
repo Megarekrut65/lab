@@ -9,6 +9,7 @@ using std::cin;
 using std::cout;
 using std::endl;
 struct List_Node;
+struct Fixed_list;
 enum class implementation_approach;
 void interactive_dialog_mode();
 implementation_approach choice_of_approach();
@@ -98,6 +99,15 @@ private:
             return false;
         }
         return true;
+    }
+    Fixed_list(Fixed_list list)
+    {
+        Point* new_points = new Point[max_size];
+        for (std::size_t i = 0; i < max_size; i++) new_points[i] = list.points[i];
+        this->size = list.size;
+        this->max_size = list.max_size;
+        this->points = new_points;
+        this->created_list = true;
     }
 public:
     Fixed_list()
@@ -757,7 +767,6 @@ void demo_create_empty_list(unsigned delay, Fixed_list& list, std::size_t max_si
     Sleep(delay);
     cout << "\nEnter the maximum size of list: " << max_size << endl;
     Sleep(delay);
-    cout << "\nThe list not created!" << endl;
     list.add_max_size(max_size);
     list.create();
     cout << "\nNew list created!" << endl;
@@ -909,12 +918,10 @@ void add_relust_to_file(const std::string& path, measurement_result result)
     file << "Time: " << result.time << endl;
     file.close();
 }
-void write_results(measurement_result result, const std::string& method)
+void write_results(float time, const std::string& method)
 {
-    cout << "Number of points = " << result.number_of_points << "." << endl;  
-    cout << "Number of operations = " << result.number_of_operations << "." << endl;
-    cout << "Time of " + method + " points = " << result.time << " seconds." << endl;
-    cout << endl;
+    cout << "Time of " + method + " points = " << time << " seconds." 
+         << endl << endl;
 }
 Point point_generetor()
 {
@@ -953,9 +960,7 @@ float measurement_append(T& list, const std::string& path, unsigned number_of_op
     duration = the_end - the_start;
     append.time = duration.count();
     add_relust_to_file("result_append_" + path + ".txt", append);
-    lenght = list.lenght(size);
-    append.number_of_points = size;
-    write_results(append,"append");
+    write_results(append.time,"append");
     return append.time;
 }
 template<class T>
@@ -980,9 +985,7 @@ float measurement_insert(T& list, const std::string& path, unsigned number_of_op
     duration = the_end - the_start;
     insert.time = duration.count();
     add_relust_to_file("result_insert_" + path + ".txt", insert);
-    lenght = list.lenght(size);
-    insert.number_of_points = size;
-    write_results(insert,"insert");
+    write_results(insert.time,"insert");
 
     return insert.time;
 }
@@ -1007,9 +1010,7 @@ float measurement_remove(T& list, const std::string& path, unsigned number_of_op
     duration = the_end - the_start;
     remove.time = duration.count();
     add_relust_to_file("result_remove_" + path + ".txt", remove);
-    lenght = list.lenght(size);
-    remove.number_of_points = size;
-    write_results(remove,"remove");
+    write_results(remove.time,"remove");
 
     return remove.time;
 }
@@ -1035,7 +1036,7 @@ float measurement_get(T& list, const std::string& path, unsigned number_of_opera
     duration = the_end - the_start;
     get.time = duration.count();
     add_relust_to_file("result_get_" + path + ".txt", get);
-    write_results(get,"get");
+    write_results(get.time,"get");
 
     return get.time;
 }
@@ -1061,7 +1062,7 @@ float measurement_set(T& list, const std::string& path, unsigned number_of_opera
     duration = the_end - the_start;
     set.time = duration.count();
     add_relust_to_file("result_set_" + path + ".txt", set);
-    write_results(set,"set");
+    write_results(set.time,"set");
 
     return set.time;
 }
@@ -1082,12 +1083,12 @@ float measurement_clear(T& list, const std::string& path, unsigned number_of_ope
     duration = the_end - the_start;
     clear.time = duration.count();
     add_relust_to_file("result_clear_" + path + ".txt", clear);
-    write_results(clear,"clear");
+    write_results(clear.time,"clear");
 
     return clear.time;
 }
 template<class T>
-void measurement_menu(T& list, const std::string& approach)
+void measurement_menu(T list, const std::string& approach)
 {   
     clear_result_files(approach);
     unsigned number_of_points = 1;
@@ -1097,14 +1098,18 @@ void measurement_menu(T& list, const std::string& approach)
     float(*methods[number_of_methods])(T&, const std::string&, unsigned) = { 
         measurement_append, measurement_insert, measurement_remove, measurement_get, 
         measurement_set, measurement_clear };
+    T copy_list = T(list);    
     while (true)
     {
-        list.create();
-        cout << "The initial number of points:" << number_of_points << endl;
-        for (unsigned i = 0; i < number_of_points; i++) list.append(point_generetor());
+        copy_list.create();
+        for (unsigned i = 0; i < number_of_points; i++) copy_list.append(point_generetor());
+        list.create();      
+        cout << "The initial number of points:" << number_of_points << endl;  
+        cout << "The initial number of operations:" << number_of_operations << endl;
         for (unsigned j = 0; j < number_of_methods; j++)
         {
             float time;
+            list = copy_list;
             time = methods[j](list, approach, number_of_operations);
             if (time > 2) more_one_second = true;
         }
@@ -1121,13 +1126,13 @@ void measurement_menu(T& list, const std::string& approach)
 void  benchmark_mode()
 {
     Fixed_list fixed;
-    Dynamic_list dynamic;
-    Linked_list linked;
     cout << "\nMeasurement result of Fixed list: " << endl;
     fixed.add_max_size(10000000);
     measurement_menu(fixed, "fixed");
+    Dynamic_list dynamic;
     cout << "\nMeasurement result of Dynamic list: " << endl;
     measurement_menu(dynamic, "dynamic");
+    Linked_list linked;
     cout << "\nMeasurement result of Linked list: " << endl;
     measurement_menu(linked, "linked");
     cout << "\nThe end of measurements!" << endl;
