@@ -8,18 +8,81 @@
 using std::cin;
 using std::cout;
 using std::endl;
+struct measurement_result;
+struct Point;
 struct List_Node;
 struct Fixed_list;
+struct Dynamic_list;
+struct Linked_list;
 enum class implementation_approach;
-void interactive_dialog_mode();
-implementation_approach choice_of_approach();
+
+template<class T>
+void create_empty_list(T&);
+template<class T>
+void add_to_end_of_list(T&);
+template<class T>
+void add_to_list_by_index(T&);
+template<class T>
+void delete_point_by_index(T&);
+template<class T>
+void show_point_by_index(T&);
+template<class T>
+void edit_point_by_index(T&);
+template<class T>
+void show_list_length(T&);
+template<class T>
+void clear_list(T&);
 double correct_read_double(const std::string&);
 unsigned correct_read_unsigned(const std::string&);
+std::size_t correct_read_size(const std::string&);
+implementation_approach choice_of_approach();
+void interactive_create(const implementation_approach&, Fixed_list&, Dynamic_list&, Linked_list&);
+void interactive_append(const implementation_approach&, Fixed_list&, Dynamic_list&, Linked_list&);
+void interactive_insert(const implementation_approach&, Fixed_list&, Dynamic_list&, Linked_list&);
+void interactive_get(const implementation_approach&, Fixed_list&, Dynamic_list&, Linked_list&);
+void interactive_set(const implementation_approach&, Fixed_list&, Dynamic_list&, Linked_list&);
+void interactive_remove(const implementation_approach&, Fixed_list&, Dynamic_list&, Linked_list&);
+void interactive_length(const implementation_approach&, Fixed_list&, Dynamic_list&, Linked_list&);
+void interactive_back(const implementation_approach&, Fixed_list&, Dynamic_list&, Linked_list&);
+void interactive_dialog_mode();
+void demo_begin(unsigned);
+void demo_choice_of_approach(unsigned);
+void demo_create_empty_list(unsigned, Fixed_list&, std::size_t);
+void demo_write_coordinate(unsigned, Point);
+void demo_write_index(unsigned, std::size_t);
+void demo_add_to_end_of_list(unsigned, Fixed_list&, Point);
+void demo_add_to_list_by_index(unsigned, Fixed_list&, std::size_t, Point);
+void demo_delete_point_by_index(unsigned, Fixed_list&, std::size_t);
+void demo_show_point_by_index(unsigned, Fixed_list&, std::size_t);
+void demo_edit_point_by_index(unsigned, Fixed_list&, std::size_t, Point);
+void demo_show_list_length(unsigned, Fixed_list&);
+void demo_exit(unsigned);
+void demo_mode();
+void clear_result_files(const std::string&);
+void add_relust_to_file(const std::string&, measurement_result);
+void write_results(float, const std::string&);
+Point point_generetor();
+unsigned index_generator(std::size_t);
+template<class T>
+float measurement_append(T&, const std::string&, std::size_t);
+template<class T>
+float measurement_insert(T&, const std::string&, std::size_t);
+template<class T>
+float measurement_remove(T&, const std::string&, std::size_t);
+template<class T>
+float measurement_get(T&, const std::string&, std::size_t);
+template<class T>
+float measurement_set(T&, const std::string&, std::size_t);
+template<class T>
+float measurement_clear(T&, const std::string&, std::size_t);
+template<class T>
+void measurement_menu(T&, const std::string&);
+void  benchmark_mode();
 enum class implementation_approach{ FIXED, DYNAMIC, LINKED};
 struct measurement_result
 {    
-    unsigned number_of_points;
-    unsigned number_of_operations;
+    std::size_t number_of_points;
+    std::size_t number_of_operations;
     float time;
 };
 struct Point
@@ -73,7 +136,7 @@ private:
     std::size_t size;
     std::size_t max_size;
     bool created_list;   
-    bool is_index(unsigned index)
+    bool is_index(std::size_t index)
     {
         if ((index + 1) > size)
         {
@@ -105,10 +168,10 @@ public:
     {
         return points;
     }
-    void add_points(Point* points, std::size_t size)
+    void copy_points(Point* points, std::size_t size)
     {
         Point* new_points = new Point[max_size];
-        for (std::size_t i = 0;i < size; i++) new_points[i] = points[i];
+        for (std::size_t i = 0; i < size; i++) new_points[i] = points[i];
         if (this->points) delete[] this->points;
         this->points = new_points;
         this->size = size;
@@ -150,7 +213,7 @@ public:
         size++;
         return true;
     }
-    bool insert(unsigned index, Point point)
+    bool insert(std::size_t index, Point point)
     {
         if ((!is_list()) || (!is_space()) || (!is_index(index))) return false;
         for (std::size_t i = size; i > index; i--)
@@ -161,7 +224,7 @@ public:
         size++;
         return true;
     }
-    bool remove(unsigned index)
+    bool remove(std::size_t index)
     {
         if ((!is_list()) || (!is_index(index))) return false;
         for (std::size_t i = index; i < (size - 1); i++)
@@ -171,19 +234,19 @@ public:
         size--;
         return true;
     }
-    bool get(unsigned index, Point& point)
+    bool get(std::size_t index, Point& point)
     {
         if ((!is_list()) || (!is_index(index))) return false;
         point = points[index];
         return true;
     }
-    bool set(unsigned index, Point point)
+    bool set(std::size_t index, Point point)
     {
         if ((!is_list()) || (!is_index(index))) return false;
         points[index] = point;
         return true;
     }
-    bool lenght(std::size_t& size)
+    bool length(std::size_t& size)
     {
         if (!is_list()) return false;
         size = this->size;
@@ -195,7 +258,7 @@ struct Dynamic_list
 private:
     std::vector <Point> points;
     bool created_list;
-    bool is_index(unsigned index)
+    bool is_index(std::size_t index)
     {
         std::size_t size = points.size();
         if ((index + 1) > size)
@@ -223,7 +286,7 @@ public:
     {
         return points;
     }
-    void add_points(const std::vector <Point>& points,std::size_t size)
+    void copy_points(const std::vector <Point>& points,std::size_t size)
     {
         if (this->points.size() > 0) this->points.clear();
         this->points = points;
@@ -249,7 +312,7 @@ public:
         points.push_back(point);
         return true;
     }
-    bool insert(unsigned index, Point point)
+    bool insert(std::size_t index, Point point)
     {
         if ((!is_list()) || (!is_index(index))) return false;
         std::size_t size = points.size();
@@ -261,25 +324,25 @@ public:
         points[index] = point;
         return true;
     }
-    bool remove(unsigned index)
+    bool remove(std::size_t index)
     {
         if ((!is_list()) || (!is_index(index))) return false;
         points.erase(points.begin() + index);
         return true;
     }
-    bool get(unsigned index, Point& point)
+    bool get(std::size_t index, Point& point)
     {
         if ((!is_list()) || (!is_index(index))) return false;
         point = points[index];
         return true;
     }
-    bool set(unsigned index, Point point)
+    bool set(std::size_t index, Point point)
     {
         if ((!is_list()) || (!is_index(index))) return false;
         points[index] = point;
         return true;
     }
-     bool lenght(std::size_t& size)
+     bool length(std::size_t& size)
     {
          if (!is_list()) return false;
          size = points.size();
@@ -302,7 +365,7 @@ private:
         head->prev = new_node;
         head = new_node;
     }
-    void add_middle(unsigned index, Point point)
+    void add_middle(std::size_t index, Point point)
     {
         List_Node* new_node = new List_Node;
         List_Node* current_node = head->next;
@@ -335,7 +398,7 @@ private:
         }
         size--;
     }
-    void delete_middle(unsigned index)
+    void delete_middle(std::size_t index)
     {
         List_Node* current_node = head->next;
         for (std::size_t i = 1; i < size; i++, current_node = current_node->next)
@@ -358,7 +421,7 @@ private:
         tail->next = nullptr;
         size--;
     }
-    bool is_index(unsigned index)
+    bool is_index(std::size_t index)
     {
         if ((index + 1) > size)
         {
@@ -388,7 +451,7 @@ public:
     {
         return head;
     }
-    void add_points(List_Node* head, std::size_t size)
+    void copy_points(List_Node* head, std::size_t size)
     {
         if (size > 0) clear();
         created_list = true;
@@ -440,7 +503,7 @@ public:
         size++;
         return true;
     }
-    bool insert(unsigned index, Point point)
+    bool insert(std::size_t index, Point point)
     {
         if ((!is_list()) || (!is_index(index))) return false;
         if (index == 0) add_head(point);
@@ -448,7 +511,7 @@ public:
         size++;
         return true;
     }
-    bool remove(unsigned index)
+    bool remove(std::size_t index)
     {
         if ((!is_list()) || (!is_index(index))) return false;
         if (index == 0)
@@ -464,7 +527,7 @@ public:
         delete_middle(index);     
         return true;
     }
-    bool get(unsigned index, Point& point)
+    bool get(std::size_t index, Point& point)
     {
         if ((!is_list()) || (!is_index(index))) return false;
         List_Node* current_node = head;
@@ -478,7 +541,7 @@ public:
         } 
         return false;
     }
-    bool set(unsigned index, Point point)
+    bool set(std::size_t index, Point point)
     {
         if ((!is_list()) || (!is_index(index))) return false;
         List_Node* current_node = head;
@@ -492,7 +555,7 @@ public:
         }
         return false;
     }
-    bool lenght(std::size_t& size)
+    bool length(std::size_t& size)
     {
         if (!is_list()) return false;
         size = this->size;
@@ -524,7 +587,7 @@ void add_to_end_of_list(T& list)
 template<class T>
 void add_to_list_by_index(T& list)
 {
-    unsigned index = correct_read_unsigned("the index");
+    std::size_t index = correct_read_size("the index");
     Point point;
     point.read_point();
     if (list.insert(index, point))
@@ -535,7 +598,7 @@ void add_to_list_by_index(T& list)
 template<class T>
 void delete_point_by_index(T& list)
 {
-    unsigned index = correct_read_unsigned("the index");
+    std::size_t index = correct_read_size("the index");
     if (list.remove(index))
     {
         cout << "\nThe point removed!" << endl;
@@ -544,7 +607,7 @@ void delete_point_by_index(T& list)
 template<class T>
 void show_point_by_index(T& list)
 {
-    unsigned index = correct_read_unsigned("the index");
+    std::size_t index = correct_read_size("the index");
     Point point;
     if (list.get(index, point))
     {
@@ -554,7 +617,7 @@ void show_point_by_index(T& list)
 template<class T>
 void edit_point_by_index(T& list)
 {
-    unsigned index = correct_read_unsigned("the index");   
+    std::size_t index = correct_read_size("the index");
     Point point;
     point.read_point();
     if (list.set(index, point))
@@ -566,7 +629,7 @@ template<class T>
 void show_list_length(T& list)
 {
     std::size_t size;
-    if (list.lenght(size))
+    if (list.length(size))
     {
         cout << "\nThe lenght of list: " << size << endl;
     }
@@ -600,7 +663,7 @@ unsigned correct_read_unsigned(const std::string& sentence)
     while (true)
     {
         cout <<"\nEnter " << sentence << ": ";
-        int number;
+        long number;
         cin >> number;
         if ((!cin.good()) || (number < 0))
         {        
@@ -613,6 +676,27 @@ unsigned correct_read_unsigned(const std::string& sentence)
             cin.clear();
             cin.ignore(200, '\n');
             return unsigned(number);
+        }
+    }
+}
+std::size_t correct_read_size(const std::string& sentence)
+{
+    while (true)
+    {
+        cout << "\nEnter " << sentence << ": ";
+        std::size_t number;
+        cin >> number;
+        if ((!cin.good()) || (number < 0))//чого від'ємні числа не проходять?
+        {
+            cin.clear();
+            cin.ignore(200, '\n');
+            cout << "\nThe data entered incorrectly!" << endl;
+        }
+        else
+        {
+            cin.clear();
+            cin.ignore(200, '\n');
+            return number;
         }
     }
 }
@@ -635,6 +719,100 @@ implementation_approach choice_of_approach()
     }
     return implementation_approach::FIXED;
 }
+void interactive_create(const implementation_approach& approach, Fixed_list& fixed, Dynamic_list& dynamic, Linked_list& linked)
+{
+    switch (approach)
+    {
+    case implementation_approach::FIXED:
+    {
+        std::size_t max_size = correct_read_size("the maximum size of list");
+        fixed.add_max_size(max_size);
+        create_empty_list(fixed);
+    }
+    break;
+    case implementation_approach::DYNAMIC: create_empty_list(dynamic);
+        break;
+    case implementation_approach::LINKED: create_empty_list(linked);
+    }
+}
+void interactive_append(const implementation_approach& approach, Fixed_list& fixed, Dynamic_list& dynamic, Linked_list& linked)
+{
+    switch (approach)
+    {
+    case implementation_approach::FIXED: add_to_end_of_list(fixed);
+        break;
+    case implementation_approach::DYNAMIC: add_to_end_of_list(dynamic);
+        break;
+    case implementation_approach::LINKED: add_to_end_of_list(linked);
+    }
+}
+void interactive_insert(const implementation_approach& approach, Fixed_list& fixed, Dynamic_list& dynamic, Linked_list& linked)
+{
+    switch (approach)
+    {
+    case implementation_approach::FIXED: add_to_list_by_index(fixed);
+        break;
+    case implementation_approach::DYNAMIC: add_to_list_by_index(dynamic);
+        break;
+    case implementation_approach::LINKED: add_to_list_by_index(linked);
+    }
+}
+void interactive_remove(const implementation_approach& approach, Fixed_list& fixed, Dynamic_list& dynamic, Linked_list& linked)
+{
+    switch (approach)
+    {
+    case implementation_approach::FIXED: delete_point_by_index(fixed);
+        break;
+    case implementation_approach::DYNAMIC: delete_point_by_index(dynamic);
+        break;
+    case implementation_approach::LINKED: delete_point_by_index(linked);
+    }
+}
+void interactive_get(const implementation_approach& approach, Fixed_list& fixed, Dynamic_list& dynamic, Linked_list& linked)
+{
+    switch (approach)
+    {
+    case implementation_approach::FIXED: show_point_by_index(fixed);
+        break;
+    case implementation_approach::DYNAMIC: show_point_by_index(dynamic);
+        break;
+    case implementation_approach::LINKED: show_point_by_index(linked);
+    }
+}
+void interactive_set(const implementation_approach& approach, Fixed_list& fixed, Dynamic_list& dynamic, Linked_list& linked)
+{
+    switch (approach)
+    {
+    case implementation_approach::FIXED: edit_point_by_index(fixed);
+        break;
+    case implementation_approach::DYNAMIC: edit_point_by_index(dynamic);
+        break;
+    case implementation_approach::LINKED: edit_point_by_index(linked);
+    }
+}
+void interactive_length(const implementation_approach& approach, Fixed_list& fixed, Dynamic_list& dynamic, Linked_list& linked)
+{
+    switch (approach)
+    {
+    case implementation_approach::FIXED: show_list_length(fixed);
+        break;
+    case implementation_approach::DYNAMIC: show_list_length(dynamic);
+        break;
+    case implementation_approach::LINKED: show_list_length(linked);
+    }
+}
+void interactive_back(const implementation_approach& approach, Fixed_list& fixed, Dynamic_list& dynamic, Linked_list& linked)
+{
+    switch (approach)
+    {
+    case implementation_approach::FIXED: clear_list(fixed);
+        break;
+    case implementation_approach::DYNAMIC: clear_list(dynamic);
+        break;
+    case implementation_approach::LINKED: clear_list(linked);
+    }
+    cout << endl;
+}
 void interactive_dialog_mode()
 {
     implementation_approach approach = choice_of_approach();
@@ -651,113 +829,49 @@ void interactive_dialog_mode()
         {
         case '1':
         {
-            switch (approach)
-            {
-            case implementation_approach::FIXED: 
-            {
-                cout << "\nEnter the maximum size of list: ";
-                std::size_t max_size;
-                cin >> max_size;
-                fixed.add_max_size(max_size);
-                create_empty_list(fixed);
-            }
-                break;
-            case implementation_approach::DYNAMIC: create_empty_list(dynamic);
-                break;
-            case implementation_approach::LINKED: create_empty_list(linked);
-            }
+            interactive_create(approach, fixed, dynamic, linked);
             continue;
         }
         break;
         case'2':
         {
-            switch (approach)
-            {
-            case implementation_approach::FIXED: add_to_end_of_list(fixed);
-                break;
-            case implementation_approach::DYNAMIC: add_to_end_of_list(dynamic);
-                break;
-            case implementation_approach::LINKED: add_to_end_of_list(linked);
-            }                
+            interactive_append(approach, fixed, dynamic, linked);
             continue;
         }
         break;
         case '3':
         {
-            switch (approach)
-            {
-            case implementation_approach::FIXED: add_to_list_by_index(fixed);
-                break;
-            case implementation_approach::DYNAMIC: add_to_list_by_index(dynamic);
-                break;
-            case implementation_approach::LINKED: add_to_list_by_index(linked);
-            }
+            interactive_insert(approach, fixed, dynamic, linked);
             continue;
         }
         break;
         case '4':
         {
-            switch (approach)
-            {
-            case implementation_approach::FIXED: delete_point_by_index(fixed);
-                break;
-            case implementation_approach::DYNAMIC: delete_point_by_index(dynamic);
-                break;
-            case implementation_approach::LINKED: delete_point_by_index(linked);
-            }
+            interactive_remove(approach, fixed, dynamic, linked);
             continue;
         }
         break;
         case '5':
         {
-            switch (approach)
-            {
-            case implementation_approach::FIXED: show_point_by_index(fixed);
-                break;
-            case implementation_approach::DYNAMIC: show_point_by_index(dynamic);
-                break;
-            case implementation_approach::LINKED: show_point_by_index(linked);
-            }
+            interactive_get(approach, fixed, dynamic, linked);
             continue;
         }
         break;
         case '6':
         {
-            switch (approach)
-            {
-            case implementation_approach::FIXED: edit_point_by_index(fixed);
-                break;
-            case implementation_approach::DYNAMIC: edit_point_by_index(dynamic);
-                break;
-            case implementation_approach::LINKED: edit_point_by_index(linked);
-            }
+            interactive_set(approach, fixed, dynamic, linked);
             continue;
         }
         break;
         case '7':
         {
-            switch (approach)
-            {
-            case implementation_approach::FIXED: show_list_length(fixed);
-                break;
-            case implementation_approach::DYNAMIC: show_list_length(dynamic);
-                break;
-            case implementation_approach::LINKED: show_list_length(linked);
-            }
+            interactive_length(approach, fixed, dynamic, linked);
             continue;
         }
         break;
         case '0':
         {
-            switch (approach)
-            {
-            case implementation_approach::FIXED: clear_list(fixed);
-            break;
-            case implementation_approach::DYNAMIC: clear_list(dynamic);
-                break;
-            case implementation_approach::LINKED: clear_list(linked);
-            }
-            cout << endl;
+            interactive_back(approach, fixed, dynamic, linked);
         }
         break;
         default:
@@ -816,7 +930,7 @@ void demo_write_coordinate(unsigned delay, Point point)
     cout << "Enter the third coordinate: " << point.z << endl;
     Sleep(delay);
 }
-void demo_write_index(unsigned delay, unsigned index)
+void demo_write_index(unsigned delay, std::size_t index)
 {
     cout << "\nEnter the index: <- write the index and press <Enter>" << endl;
     Sleep(delay);
@@ -834,7 +948,7 @@ void demo_add_to_end_of_list(unsigned delay, Fixed_list& list, Point point)
     if(list.append(point)) cout << "\nThe point added to the list!" << endl;
     Sleep(delay);
 }
-void demo_add_to_list_by_index(unsigned delay, Fixed_list& list, unsigned index, Point point)
+void demo_add_to_list_by_index(unsigned delay, Fixed_list& list, std::size_t index, Point point)
 {
     cout << "\nMenu:\n1)Create a blank list.\n2)Adding a point to the end of the list.\n"
         << "3)Inserting a point before a point with the index. <- press\n"
@@ -846,7 +960,7 @@ void demo_add_to_list_by_index(unsigned delay, Fixed_list& list, unsigned index,
     if(list.insert(index, point))  cout << "\nThe point added to the list!" << endl;
     Sleep(delay);
 }
-void demo_delete_point_by_index(unsigned delay, Fixed_list& list, unsigned index)
+void demo_delete_point_by_index(unsigned delay, Fixed_list& list, std::size_t index)
 {
 
     cout << "\nMenu:\n1)Create a blank list.\n2)Adding a point to the end of the list.\n"
@@ -858,7 +972,7 @@ void demo_delete_point_by_index(unsigned delay, Fixed_list& list, unsigned index
     list.remove(index);
     Sleep(delay);
 }
-void demo_show_point_by_index(unsigned delay, Fixed_list& list, unsigned index)
+void demo_show_point_by_index(unsigned delay, Fixed_list& list, std::size_t index)
 {
     cout << "\nMenu:\n1)Create a blank list.\n2)Adding a point to the end of the list.\n"
         << "3)Inserting a point before a point with the index.\n"
@@ -871,7 +985,7 @@ void demo_show_point_by_index(unsigned delay, Fixed_list& list, unsigned index)
     point.write_point();
     Sleep(delay);
 }
-void demo_edit_point_by_index(unsigned delay, Fixed_list& list, unsigned index, Point point)
+void demo_edit_point_by_index(unsigned delay, Fixed_list& list, std::size_t index, Point point)
 {
     cout << "\nMenu:\n1)Create a blank list.\n2)Adding a point to the end of the list.\n"
         << "3)Inserting a point before a point with the index.\n"
@@ -891,7 +1005,7 @@ void demo_show_list_length(unsigned delay, Fixed_list& list)
         << "6)Edit a point by index.\n7)Show list length. <- press\n0)Back." << endl;
     Sleep(delay);
     std::size_t size;
-    if(list.lenght(size)) cout << "\nThe lenght of list: " << size << endl; 
+    if(list.length(size)) cout << "\nThe lenght of list: " << size << endl; 
     Sleep(delay);
 }
 void demo_exit(unsigned delay)
@@ -968,21 +1082,21 @@ unsigned index_generator(std::size_t size)
     return index;
 }
 template<class T>
-float measurement_append(T& list, const std::string& path, unsigned number_of_operations)
+float measurement_append(T& list, const std::string& path, std::size_t number_of_operations)
 {
     measurement_result append;
     auto the_start = std::chrono::high_resolution_clock::now();
     auto the_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> duration; 
     std::size_t size;
-    bool lenght = list.lenght(size);
+    bool temp = list.length(size);
     append.number_of_operations = number_of_operations;    
     append.number_of_points = size;
     Point point = point_generetor();
     the_start = std::chrono::high_resolution_clock::now();
-    for (unsigned i = 0; i < number_of_operations; i++)
+    for (std::size_t i = 0; i < number_of_operations; i++)
     {
-        bool temp = list.append(point);
+        temp = list.append(point);
     }
     the_end = std::chrono::high_resolution_clock::now();  
     duration = the_end - the_start;
@@ -993,22 +1107,22 @@ float measurement_append(T& list, const std::string& path, unsigned number_of_op
     return append.time;
 }
 template<class T>
-float measurement_insert(T& list, const std::string& path, unsigned number_of_operations)
+float measurement_insert(T& list, const std::string& path, std::size_t number_of_operations)
 {
     measurement_result insert;
     auto the_start = std::chrono::high_resolution_clock::now();
     auto the_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> duration;
     std::size_t size;
-    bool lenght = list.lenght(size);  
+    bool temp = list.length(size);
     insert.number_of_operations = number_of_operations;  
     insert.number_of_points = size;
     Point point = point_generetor();
     unsigned index = index_generator(size);
     the_start = std::chrono::high_resolution_clock::now();  
-    for (unsigned i = 0; i < number_of_operations; i++)
+    for (std::size_t i = 0; i < number_of_operations; i++)
     {
-        bool temp = list.insert(index, point);
+        temp = list.insert(index, point);
     }
     the_end = std::chrono::high_resolution_clock::now();
     duration = the_end - the_start;
@@ -1018,27 +1132,27 @@ float measurement_insert(T& list, const std::string& path, unsigned number_of_op
     return insert.time;
 }
 template<class T>
-float measurement_remove(T& list, const std::string& path, unsigned number_of_operations)
+float measurement_remove(T& list, const std::string& path, std::size_t number_of_operations)
 {
     measurement_result remove;
     auto the_start = std::chrono::high_resolution_clock::now();
     auto the_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> duration;
     std::size_t size;
-    bool lenght = list.lenght(size);
+    bool temp = list.length(size);
     remove.number_of_operations = number_of_operations;
     remove.number_of_points = size;
     std::vector<unsigned> indexs;
-    for (unsigned k = 0; k < number_of_operations; k++)
+    for (std::size_t k = 0; k < number_of_operations; k++)
     {
         indexs.push_back(index_generator(size));
         size--;
         if (size <= 0) break;
     }
     the_start = std::chrono::high_resolution_clock::now();
-    for (unsigned i = 0; i < number_of_operations; i++)
+    for (std::size_t i = 0; i < number_of_operations; i++)
     {
-        bool temp = list.remove(indexs[i]);
+        temp = list.remove(indexs[i]);
     } 
     the_end = std::chrono::high_resolution_clock::now();
     duration = the_end - the_start;
@@ -1049,22 +1163,22 @@ float measurement_remove(T& list, const std::string& path, unsigned number_of_op
     return remove.time;
 }
 template<class T>
-float measurement_get(T& list, const std::string& path, unsigned number_of_operations)
+float measurement_get(T& list, const std::string& path, std::size_t number_of_operations)
 {
     measurement_result get;
     auto the_start = std::chrono::high_resolution_clock::now();
     auto the_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> duration;
     std::size_t size;
-    bool lenght = list.lenght(size);
+    bool temp = list.length(size);
     get.number_of_operations = number_of_operations;
     get.number_of_points = size;
     Point point = point_generetor();
     unsigned index = index_generator(size);
     the_start = std::chrono::high_resolution_clock::now();
-    for (unsigned i = 0; i < number_of_operations; i++)
+    for (std::size_t i = 0; i < number_of_operations; i++)
     {
-        bool temp = list.get(index, point);
+        temp = list.get(index, point);
     }
     the_end = std::chrono::high_resolution_clock::now();
     duration = the_end - the_start;
@@ -1075,22 +1189,22 @@ float measurement_get(T& list, const std::string& path, unsigned number_of_opera
     return get.time;
 }
 template<class T>
-float measurement_set(T& list, const std::string& path, unsigned number_of_operations)
+float measurement_set(T& list, const std::string& path, std::size_t number_of_operations)
 {
     measurement_result set;
     auto the_start = std::chrono::high_resolution_clock::now();
     auto the_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> duration;
     std::size_t size;
-    bool lenght = list.lenght(size);
+    bool temp = list.length(size);
     set.number_of_operations = number_of_operations;   
     set.number_of_points = size;
     Point point = point_generetor();
     unsigned index = index_generator(size);
     the_start = std::chrono::high_resolution_clock::now();
-    for (unsigned i = 0; i < number_of_operations; i++)
+    for (std::size_t i = 0; i < number_of_operations; i++)
     {
-        bool temp = list.set(index, point);
+        temp = list.set(index, point);
     }     
     the_end = std::chrono::high_resolution_clock::now();
     duration = the_end - the_start;
@@ -1101,14 +1215,14 @@ float measurement_set(T& list, const std::string& path, unsigned number_of_opera
     return set.time;
 }
 template<class T>
-float measurement_clear(T& list, const std::string& path, unsigned number_of_operations)
+float measurement_clear(T& list, const std::string& path, std::size_t number_of_operations)
 {
     measurement_result clear;
     auto the_start = std::chrono::high_resolution_clock::now();
     auto the_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> duration;
     std::size_t size;
-    bool lenght = list.lenght(size);
+    bool temp = list.length(size);
     clear.number_of_operations = number_of_operations;
     clear.number_of_points = size;
     the_start = std::chrono::high_resolution_clock::now();
@@ -1125,53 +1239,68 @@ template<class T>
 void measurement_menu(T& list, const std::string& approach)
 {   
     clear_result_files(approach);
-    unsigned number_of_points = 1, copy_number_of_points = 1, save_number_of_points = 0;
-    unsigned number_of_operations = 1, copy_number_of_operations = 1;
-    unsigned coefficient = 2;
+    std::size_t the_end_of_numbers = 100001;
+    std::size_t number_of_points = 1, number_of_operations = 3125;
+    std::size_t copy_number_of_operations = 3125, copy_number_of_points = 1, save_number_of_points = 0;
+    std::size_t coefficient_of_operations = 2, coefficient_of_points = 2;
     const unsigned number_of_methods = 6;
     bool more_one_second = false;
     bool more_ten_second = false;
-    float(*methods[number_of_methods])(T&, const std::string&, unsigned) = { 
+    float(*methods[number_of_methods])(T&, const std::string&, std::size_t) = {
         measurement_append, measurement_insert, measurement_remove, measurement_get, 
-        measurement_set, measurement_clear };
-    T copy_list = list;
-    bool temp = copy_list.create();
-    while (true)
-    {     
-        
-        for (unsigned i = 0; i < (number_of_points - save_number_of_points); i++)
+        measurement_set, measurement_clear };    
+    for (number_of_operations = 3125; number_of_operations < the_end_of_numbers;)   
+    {      
+        T copy_list = list;
+        bool temp = copy_list.create();
+        save_number_of_points = number_of_operations;
+        copy_number_of_points = number_of_operations;
+        coefficient_of_points = 2;
+        for (number_of_points = number_of_operations; number_of_points < the_end_of_numbers;)
         {
-             temp = copy_list.append(point_generetor());
+            for (std::size_t i = 0; i < (number_of_points - save_number_of_points); i++)
+            {
+                temp = copy_list.append(point_generetor());
+            }
+            temp = list.create();
+            save_number_of_points = number_of_points;
+            cout << "\nThe initial number of points:" << number_of_points << endl;           
+            cout << "The initial number of operations:" << number_of_operations << endl;
+            for (unsigned j = 0; j < number_of_methods; j++)
+            {
+                float time;
+                list.copy_points(copy_list.give_points(), number_of_points);
+                time = methods[j](list, approach, number_of_operations);
+                if (time > 1) more_one_second = true;
+                if (time > 10) more_ten_second = true;
+            }
+            cout << endl;
+            if (more_ten_second) break;
+            if (more_one_second)
+            {
+                number_of_points = coefficient_of_points * copy_number_of_points;
+                coefficient_of_points++;
+            }
+            else
+            {
+                number_of_points *= 2;
+                copy_number_of_points = number_of_points;
+            }
         }
-        temp = list.create();
-        save_number_of_points = number_of_points;          
-        cout << "\nThe initial number of points:" << number_of_points << endl;  
-        cout << "The initial number of operations:" << number_of_operations << endl;
-        for (unsigned j = 0; j < number_of_methods; j++)
-        {
-            float time;            
-            list.add_points(copy_list.give_points(), number_of_points);
-            time = methods[j](list, approach, number_of_operations);
-            if (time > 1) more_one_second = true;
-            if (time > 10) more_ten_second = true;
-        }
-        cout << endl;
         if (more_ten_second) break;
         if (more_one_second)
         {
-            number_of_points = coefficient* copy_number_of_points;
-            number_of_operations = coefficient* copy_number_of_operations;
-            coefficient++;
+            number_of_operations = coefficient_of_operations * copy_number_of_operations;
+            coefficient_of_operations++;
         }
         else
         {
-            number_of_points *= 2;
             number_of_operations *= 2;
-            copy_number_of_points = number_of_points;
             copy_number_of_operations = number_of_operations;
-        }       
+        }
+        copy_list.clear();
     }
-    copy_list.clear();
+    
     cout << "\nResults of measurements of program in the following files:\n"
         << "result_append_"+approach+".txt\nresult_insert_" + approach + ".txt\n"
         << "result_remove_" + approach + ".txt\nresult_get_" + approach + ".txt\n"
@@ -1181,7 +1310,7 @@ void  benchmark_mode()
 {
     Fixed_list fixed;
     cout << "\nMeasurement result of Fixed list: " << endl;
-    fixed.add_max_size(10000000);
+    fixed.add_max_size(500001);
     measurement_menu(fixed, "fixed");
     Dynamic_list dynamic;
     cout << "\nMeasurement result of Dynamic list: " << endl;
