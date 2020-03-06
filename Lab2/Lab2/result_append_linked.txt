@@ -1,60 +1,123 @@
-The initial number of points: 1
-Number of operations: 1
-Time: 1.283e-06
-The initial number of points: 2
-Number of operations: 2
-Time: 1.284e-06
-The initial number of points: 4
-Number of operations: 4
-Time: 3.208e-06
-The initial number of points: 8
-Number of operations: 8
-Time: 5.133e-06
-The initial number of points: 16
-Number of operations: 16
-Time: 1.0266e-05
-The initial number of points: 32
-Number of operations: 32
-Time: 3.0156e-05
-The initial number of points: 64
-Number of operations: 64
-Time: 5.6462e-05
-The initial number of points: 128
-Number of operations: 128
-Time: 0.000164252
-The initial number of points: 256
-Number of operations: 256
-Time: 0.00015142
-The initial number of points: 512
-Number of operations: 512
-Time: 0.000372133
-The initial number of points: 1024
-Number of operations: 1024
-Time: 0.000814843
-The initial number of points: 2048
-Number of operations: 2048
-Time: 0.00153088
-The initial number of points: 4096
-Number of operations: 4096
-Time: 0.00291868
-The initial number of points: 8192
-Number of operations: 8192
-Time: 0.00424745
-The initial number of points: 16384
-Number of operations: 16384
-Time: 0.00779426
-The initial number of points: 32768
-Number of operations: 32768
-Time: 0.0240103
-The initial number of points: 49152
-Number of operations: 49152
-Time: 0.0237806
-The initial number of points: 65536
-Number of operations: 65536
-Time: 0.0348708
-The initial number of points: 81920
-Number of operations: 81920
-Time: 0.0438668
-The initial number of points: 98304
-Number of operations: 98304
-Time: 0.0603561
+Number of operations: 1562
+The initial number of points: 1562
+Time: 0.00171694
+Number of operations: 1562
+The initial number of points: 3124
+Time: 0.00113757
+Number of operations: 1562
+The initial number of points: 6248
+Time: 0.00176699
+Number of operations: 1562
+The initial number of points: 12496
+Time: 0.000995777
+Number of operations: 1562
+The initial number of points: 24992
+Time: 0.00119083
+Number of operations: 1562
+The initial number of points: 49984
+Time: 0.0017965
+Number of operations: 3124
+The initial number of points: 3124
+Time: 0.00277688
+Number of operations: 3124
+The initial number of points: 6248
+Time: 0.00307587
+Number of operations: 3124
+The initial number of points: 12496
+Time: 0.00429493
+Number of operations: 3124
+The initial number of points: 24992
+Time: 0.00250677
+Number of operations: 3124
+The initial number of points: 49984
+Time: 0.00355579
+Number of operations: 6248
+The initial number of points: 6248
+Time: 0.00757804
+Number of operations: 6248
+The initial number of points: 12496
+Time: 0.00677282
+Number of operations: 6248
+The initial number of points: 24992
+Time: 0.00527466
+Number of operations: 6248
+The initial number of points: 37488
+Time: 0.00529904
+Number of operations: 6248
+The initial number of points: 49984
+Time: 0.0070038
+Number of operations: 6248
+The initial number of points: 62480
+Time: 0.00323499
+Number of operations: 6248
+The initial number of points: 74976
+Time: 0.00437898
+Number of operations: 12496
+The initial number of points: 12496
+Time: 0.00984484
+Number of operations: 12496
+The initial number of points: 24992
+Time: 0.010865
+Number of operations: 12496
+The initial number of points: 37488
+Time: 0.0143996
+Number of operations: 12496
+The initial number of points: 49984
+Time: 0.0128033
+Number of operations: 12496
+The initial number of points: 62480
+Time: 0.00913394
+Number of operations: 12496
+The initial number of points: 74976
+Time: 0.00904026
+Number of operations: 18744
+The initial number of points: 18744
+Time: 0.0135719
+Number of operations: 18744
+The initial number of points: 37488
+Time: 0.0144683
+Number of operations: 18744
+The initial number of points: 56232
+Time: 0.013887
+Number of operations: 18744
+The initial number of points: 74976
+Time: 0.0145773
+Number of operations: 24992
+The initial number of points: 24992
+Time: 0.0186041
+Number of operations: 24992
+The initial number of points: 49984
+Time: 0.0183051
+Number of operations: 24992
+The initial number of points: 74976
+Time: 0.0128251
+Number of operations: 31240
+The initial number of points: 31240
+Time: 0.0179933
+Number of operations: 31240
+The initial number of points: 62480
+Time: 0.0227194
+Number of operations: 37488
+The initial number of points: 37488
+Time: 0.0249913
+Number of operations: 37488
+The initial number of points: 74976
+Time: 0.0216652
+Number of operations: 43736
+The initial number of points: 43736
+Time: 0.0287255
+Number of operations: 49984
+The initial number of points: 49984
+Time: 0.0309473
+Number of operations: 56232
+The initial number of points: 56232
+Time: 0.0333482
+Number of operations: 62480
+The initial number of points: 62480
+Time: 0.0325828
+Number of operations: 68728
+The initial number of points: 68728
+Time: 0.0336697
+Number of operations: 74976
+The initial number of points: 74976
+Time: 0.0375206

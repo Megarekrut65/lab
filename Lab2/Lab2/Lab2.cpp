@@ -59,8 +59,8 @@ void demo_show_list_length(unsigned, Fixed_list&);
 void demo_exit(unsigned);
 void demo_mode();
 void clear_result_files(const std::string&);
-void add_relust_to_file(const std::string&, measurement_result);
-void write_results(float, const std::string&);
+void add_result_to_file(const std::string&, measurement_result);
+void write_time(float, const std::string&);
 Point point_generetor();
 unsigned index_generator(std::size_t);
 template<class T>
@@ -78,6 +78,7 @@ float measurement_clear(T&, const std::string&, std::size_t);
 template<class T>
 void measurement_menu(T&, const std::string&);
 void  benchmark_mode();
+
 enum class implementation_approach{ FIXED, DYNAMIC, LINKED};
 struct measurement_result
 {    
@@ -684,9 +685,9 @@ std::size_t correct_read_size(const std::string& sentence)
     while (true)
     {
         cout << "\nEnter " << sentence << ": ";
-        std::size_t number;
+        long long number;
         cin >> number;
-        if ((!cin.good()) || (number < 0))//чого від'ємні числа не проходять?
+        if ((!cin.good()) || (number < 0))
         {
             cin.clear();
             cin.ignore(200, '\n');
@@ -1041,7 +1042,7 @@ void demo_mode()
     cout << "\nThe end of the demo mode\n" << endl;
     Sleep(delay);
 }
-void clear_result_files(const std::string& approach)//function clears old result files
+void clear_result_files(const std::string& approach)
 {
     std::string all_result_files[6] = { "result_append_" + approach + ".txt", "result_insert_" + approach + ".txt",
         "result_remove_" + approach + ".txt", "result_get_" + approach + ".txt", "result_set_" + approach + ".txt",
@@ -1052,15 +1053,15 @@ void clear_result_files(const std::string& approach)//function clears old result
         clear_file.close();
     }
 }
-void add_relust_to_file(const std::string& path, measurement_result result)
+void add_result_to_file(const std::string& path, measurement_result result)
 {
     std::ofstream file(path, std::ios_base::app);
-    file << "The initial number of points: " << result.number_of_points << endl;
     file << "Number of operations: " << result.number_of_operations << endl;
+    file << "The initial number of points: " << result.number_of_points << endl;   
     file << "Time: " << result.time << endl;
     file.close();
 }
-void write_results(float time, const std::string& method)
+void write_time(float time, const std::string& method)
 {
     cout << "Time of " + method + " points = " << time << " seconds." 
          << endl;
@@ -1101,8 +1102,8 @@ float measurement_append(T& list, const std::string& path, std::size_t number_of
     the_end = std::chrono::high_resolution_clock::now();  
     duration = the_end - the_start;
     append.time = duration.count();
-    add_relust_to_file("result_append_" + path + ".txt", append);
-    write_results(append.time,"append");
+    add_result_to_file("result_append_" + path + ".txt", append);
+    write_time(append.time,"append");
 
     return append.time;
 }
@@ -1118,17 +1119,22 @@ float measurement_insert(T& list, const std::string& path, std::size_t number_of
     insert.number_of_operations = number_of_operations;  
     insert.number_of_points = size;
     Point point = point_generetor();
-    unsigned index = index_generator(size);
+    std::vector<unsigned> indexs;
+    for (std::size_t k = 0; k < number_of_operations; k++)
+    {
+        indexs.push_back(index_generator(size));
+        size++;
+    }   
     the_start = std::chrono::high_resolution_clock::now();  
     for (std::size_t i = 0; i < number_of_operations; i++)
     {
-        temp = list.insert(index, point);
+        temp = list.insert(indexs[i], point);
     }
     the_end = std::chrono::high_resolution_clock::now();
     duration = the_end - the_start;
     insert.time = duration.count();
-    add_relust_to_file("result_insert_" + path + ".txt", insert);
-    write_results(insert.time,"insert");
+    add_result_to_file("result_insert_" + path + ".txt", insert);
+    write_time(insert.time,"insert");
     return insert.time;
 }
 template<class T>
@@ -1157,8 +1163,8 @@ float measurement_remove(T& list, const std::string& path, std::size_t number_of
     the_end = std::chrono::high_resolution_clock::now();
     duration = the_end - the_start;
     remove.time = duration.count();
-    add_relust_to_file("result_remove_" + path + ".txt", remove);
-    write_results(remove.time,"remove");
+    add_result_to_file("result_remove_" + path + ".txt", remove);
+    write_time(remove.time,"remove");
 
     return remove.time;
 }
@@ -1174,17 +1180,21 @@ float measurement_get(T& list, const std::string& path, std::size_t number_of_op
     get.number_of_operations = number_of_operations;
     get.number_of_points = size;
     Point point = point_generetor();
-    unsigned index = index_generator(size);
+    std::vector<unsigned> indexs;
+    for (std::size_t k = 0; k < number_of_operations; k++)
+    {
+        indexs.push_back(index_generator(size));
+    }
     the_start = std::chrono::high_resolution_clock::now();
     for (std::size_t i = 0; i < number_of_operations; i++)
     {
-        temp = list.get(index, point);
+        temp = list.get(indexs[i], point);
     }
     the_end = std::chrono::high_resolution_clock::now();
     duration = the_end - the_start;
     get.time = duration.count();
-    add_relust_to_file("result_get_" + path + ".txt", get);
-    write_results(get.time,"get");
+    add_result_to_file("result_get_" + path + ".txt", get);
+    write_time(get.time,"get");
 
     return get.time;
 }
@@ -1200,17 +1210,21 @@ float measurement_set(T& list, const std::string& path, std::size_t number_of_op
     set.number_of_operations = number_of_operations;   
     set.number_of_points = size;
     Point point = point_generetor();
-    unsigned index = index_generator(size);
+    std::vector<unsigned> indexs;
+    for (std::size_t k = 0; k < number_of_operations; k++)
+    {
+        indexs.push_back(index_generator(size));
+    }
     the_start = std::chrono::high_resolution_clock::now();
     for (std::size_t i = 0; i < number_of_operations; i++)
     {
-        temp = list.set(index, point);
+        temp = list.set(indexs[i], point);
     }     
     the_end = std::chrono::high_resolution_clock::now();
     duration = the_end - the_start;
     set.time = duration.count();
-    add_relust_to_file("result_set_" + path + ".txt", set);
-    write_results(set.time,"set");
+    add_result_to_file("result_set_" + path + ".txt", set);
+    write_time(set.time,"set");
 
     return set.time;
 }
@@ -1230,8 +1244,8 @@ float measurement_clear(T& list, const std::string& path, std::size_t number_of_
     the_end = std::chrono::high_resolution_clock::now();
     duration = the_end - the_start;
     clear.time = duration.count();
-    add_relust_to_file("result_clear_" + path + ".txt", clear);
-    write_results(clear.time,"clear");
+    add_result_to_file("result_clear_" + path + ".txt", clear);
+    write_time(clear.time,"clear");
 
     return clear.time;
 }
@@ -1239,9 +1253,10 @@ template<class T>
 void measurement_menu(T& list, const std::string& approach)
 {   
     clear_result_files(approach);
-    std::size_t the_end_of_numbers = 100001;
-    std::size_t number_of_points = 1, number_of_operations = 3125;
-    std::size_t copy_number_of_operations = 3125, copy_number_of_points = 1, save_number_of_points = 0;
+    const std::size_t number = 1562;
+    std::size_t the_end_of_numbers = 150001;
+    std::size_t number_of_points = 1, number_of_operations = number;
+    std::size_t copy_number_of_operations = number, copy_number_of_points = 1, save_number_of_points = 0;
     std::size_t coefficient_of_operations = 2, coefficient_of_points = 2;
     const unsigned number_of_methods = 6;
     bool more_one_second = false;
@@ -1249,14 +1264,15 @@ void measurement_menu(T& list, const std::string& approach)
     float(*methods[number_of_methods])(T&, const std::string&, std::size_t) = {
         measurement_append, measurement_insert, measurement_remove, measurement_get, 
         measurement_set, measurement_clear };    
-    for (number_of_operations = 3125; number_of_operations < the_end_of_numbers;)   
+    for (number_of_operations = number; number_of_operations < the_end_of_numbers;)
     {      
         T copy_list = list;
         bool temp = copy_list.create();
-        save_number_of_points = number_of_operations;
+        save_number_of_points = 0;
         copy_number_of_points = number_of_operations;
         coefficient_of_points = 2;
-        for (number_of_points = number_of_operations; number_of_points < the_end_of_numbers;)
+        more_one_second = false;
+        for (number_of_points = number_of_operations; number_of_points < (the_end_of_numbers/2);)
         {
             for (std::size_t i = 0; i < (number_of_points - save_number_of_points); i++)
             {
@@ -1264,12 +1280,12 @@ void measurement_menu(T& list, const std::string& approach)
             }
             temp = list.create();
             save_number_of_points = number_of_points;
-            cout << "\nThe initial number of points:" << number_of_points << endl;           
-            cout << "The initial number of operations:" << number_of_operations << endl;
+            cout << "\nThe initial number of operations:" << number_of_operations << endl; 
+            cout << "The initial number of points:" << number_of_points << endl;
             for (unsigned j = 0; j < number_of_methods; j++)
             {
                 float time;
-                list.copy_points(copy_list.give_points(), number_of_points);
+                list.copy_points(copy_list.give_points(), number_of_points);            
                 time = methods[j](list, approach, number_of_operations);
                 if (time > 1) more_one_second = true;
                 if (time > 10) more_ten_second = true;
@@ -1343,6 +1359,5 @@ int main()
         default: cout << "\nPress the correct key!\n" << endl;
         }
     }
-    //test();
     return 0;
 }
