@@ -1,6 +1,7 @@
 #include "lab2b_task_number_three.h"
 #include "my_correct_read.h"
 #include <iostream>
+#include <string>
 using std::cout;
 using std::cin;
 using std::endl;
@@ -26,12 +27,9 @@ namespace three
         void read_point()
         {
             cout << "\nEnter a point!" << endl;
-            double x = correct::read("the first coordinate");
-            double y = correct::read("the second coordinate");
-            double z = correct::read("the third coordinate");
-            this->x = x;
-            this->y = y;
-            this->z = z;
+            this->x = correct::read("the first coordinate");
+            this->y = correct::read("the second coordinate");
+            this->z = correct::read("the third coordinate");
         }
         void write_point()
         {
@@ -99,7 +97,7 @@ namespace three
             }
             size--;
         }
-        void delete_middle(std::size_t index)
+        void delete_middle(std::size_t index) 
         {
             List_Node* current_node = head->next;
             for (std::size_t i = 1; i < size; i++, current_node = current_node->next)
@@ -198,6 +196,11 @@ namespace three
             size++;
             return true;
         }
+        bool splice(int begin_index, int end_index, List* new_head)
+        {
+            if ((!is_list()) || (!is_index(abs(begin_index)))|| (!is_index(abs(end_index)))) return false;
+
+        }
         bool remove(std::size_t index)
         {
             if ((!is_list()) || (!is_index(index))) return false;
@@ -259,6 +262,6 @@ namespace three
         list.append(point);
         point.write_point();
         list.clear();
-		std::cout << "3" << std::endl;
+		std::cout << "\nThe end!" << std::endl;
 	}
 }

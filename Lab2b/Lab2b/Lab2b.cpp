@@ -12,7 +12,7 @@ int main()
         {
         case '1': three::menu();
             break;
-        case'2': twelve::write();
+        case'2': twelve::menu();
             break;
         case'3':  twenty_six::write();
             break;
