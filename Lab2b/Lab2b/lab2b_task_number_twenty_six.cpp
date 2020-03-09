@@ -285,7 +285,7 @@ namespace twenty_six
         void write_list()
         {
             cout << "\nSize: " << size;
-            std::size_t j = 0, k = 0;
+            std::size_t j = 0;
             for (ListNode* current = head; current; current = current->next)
             {      
                 for (std::size_t i = 0; i < current->arr_size; i++)

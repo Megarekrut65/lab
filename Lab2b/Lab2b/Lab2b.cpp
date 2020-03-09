@@ -1,4 +1,5 @@
 ﻿#include "lab2b_task_number_twelve.h"
+#include "lab2b_task_number_twenty.h"
 #include "lab2b_task_number_twenty_six.h"
 #include <iostream>
 #include <conio.h>
@@ -11,7 +12,7 @@ int main()
         {
         case '1': twelve::menu();
             break;
-        case'2': 
+        case'2': twenty::menu();
             break;
         case'3':  twenty_six::menu();
             break;

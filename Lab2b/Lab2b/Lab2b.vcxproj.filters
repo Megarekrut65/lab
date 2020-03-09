@@ -27,6 +27,9 @@
     <ClCompile Include="my_correct_read.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="lab2b_task_number_twenty.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lab2b_task_number_twenty_six.h">
@@ -37,6 +40,9 @@
     </ClInclude>
     <ClInclude Include="my_correct_read.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lab2b_task_number_twenty.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
