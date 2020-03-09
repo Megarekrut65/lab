@@ -86,7 +86,7 @@ namespace twelve
                     new_node = new SparseListNode(point, index, nullptr);
                     head = new_node;
                 }               
-                size = index + 1;
+                size = (index + 1) > size ? (index + 1) : size;
                 return;
             }           
             if (index < current->index)
@@ -95,14 +95,14 @@ namespace twelve
                 {
                     new_node = new SparseListNode(point, index, current);
                     head = new_node;
-                }              
+                }     
                 return;
             }           
             for (; current; current = current->next)
             {
                 if (index == current->index)
                 {
-                    cout << "The Point with the index has already created!" << endl;
+                    cout << "\nThe Point with the index has already created!" << endl;
                     return;
                 }
                 if (!current->next)
@@ -112,7 +112,7 @@ namespace twelve
                         new_node = new SparseListNode(point, index, nullptr);
                         current->next = new_node;
                     }                  
-                    size = index + 1;
+                    size = (index + 1) > size ? (index + 1) : size;
                     return;
                 }
                 if (index < current->next->index)
@@ -126,34 +126,71 @@ namespace twelve
                 }
             }
         }
+        bool get(Point& point, std::size_t index)
+        {
+            if (!is_index(index)) return false;            
+            for (SparseListNode* current = head; current; current = current->next)
+            {
+                if (index == current->index)
+                {
+                    point = current->point;
+                    return true;
+                }
+            }
+            point = Point(0, 0, 0);
+            return true;
+        }
+        bool set(Point point, std::size_t index)
+        {
+            if (!is_index(index)) return false;
+            for (SparseListNode* current = head; current; current = current->next)
+            {
+                if (index == current->index)
+                {
+                    current->point = point;
+                    if (point.is_zero())
+                    {
+                        bool temp = remove(index);
+                    }
+                    return true;
+                }
+            }
+            insert(point, index);
+            return true;
+        }
+        bool remove(std::size_t index)
+        {
+            if (!is_index(index)) return false;
+            SparseListNode* current = head;
+            if (index == current->index)
+            {
+                head = current->next;
+                delete current;
+                size--;
+                return true;
+            }
+            for (; current; current = current->next)
+            {
+                if (!current->next)
+                {
+                    size--;
+                    return true;
+                }
+                if (index == current->next->index)
+                {
+                    SparseListNode* temp_node = current->next;
+                    current->next = temp_node->next;
+                    delete temp_node;
+                    size--;
+                    return true;
+                }
+            }          
+        }
 	};
 	void menu()
 	{
         SparseList list;
-
-        list.insert(Point(3, 2, 1), 7);
-        list.write_list();
-        cout << "\n###########################################\n";
-        list.insert(Point(5, 2, 22), 5);
-        list.write_list();
-        cout << "\n###########################################\n";
-        list.insert(Point(55, 11, 82), 10);
-        list.write_list();
-        cout << "\n###########################################\n";
-        list.insert(Point(55, 11, 82), 5);
-        list.write_list();
-        cout << "\n###########################################\n";
-        list.insert(Point(0, 0, 0), 5);
-        list.write_list();
-        cout << "\n###########################################\n";
-        list.insert(Point(0, 0, 0), 7);
-        list.write_list();
-        cout << "\n###########################################\n";
-        list.insert(Point(0, 0, 0), 4);       
-        list.write_list();
-        cout << "\n###########################################\n";
-        list.insert(Point(0, 0, 0), 20);
-        list.write_list();
+        
         cout << "\nreturn 0" << endl;
   
 	}
