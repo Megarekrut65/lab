@@ -3,5 +3,7 @@
 #include <string>
 namespace correct
 {
-	double read(const std::string&);
+	double read_double(const std::string&);
+	std::size_t read_size_t(const std::string&);
+	unsigned read_unsigned(const std::string&);
 }

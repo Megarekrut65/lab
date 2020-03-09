@@ -27,9 +27,9 @@ namespace three
         void read_point()
         {
             cout << "\nEnter a point!" << endl;
-            this->x = correct::read("the first coordinate");
-            this->y = correct::read("the second coordinate");
-            this->z = correct::read("the third coordinate");
+            this->x = correct::read_double("the first coordinate");
+            this->y = correct::read_double("the second coordinate");
+            this->z = correct::read_double("the third coordinate");
         }
         void write_point()
         {

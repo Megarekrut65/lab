@@ -7,7 +7,7 @@ int main()
 {
     while (true)
     {
-        std::cout << "Select a task:" << std::endl;
+        std::cout << "Select a task:\n1)Task 3.\n2)Task 12.\n3)Task 26.\n0)Exit." << std::endl;
         switch (_getch())
         {
         case '1': three::menu();
