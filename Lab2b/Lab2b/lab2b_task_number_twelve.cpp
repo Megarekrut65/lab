@@ -391,7 +391,7 @@ namespace twelve
         demo_delete_point_by_index(delay, list, 0);
         demo_write_list(delay, list);
         demo_back(delay,list);
-        cout << "\nThe end of the demo mode\n" << endl;
+        cout << "\nThe end of the demo mode" << endl;
         Sleep(delay);
     }
     void menu()

@@ -370,45 +370,71 @@ namespace twenty_six
             if (current) delete current;           
         }
     };
-    void append_to_list(List& list)
+    void add_to_end_of_list(List& list)
     {
-
+        Point point;
+        point.read_point();
+        list.append(point);
+        cout << "\nThe point added to list!" << endl;
     }
     void add_to_list_by_index(List& list)
     {
-
+        std::size_t index = correct::read_size_t("the index");
+        Point point;
+        point.read_point();
+        if (list.insert(point, index))
+        {
+            cout << "\nThe point added to list!" << endl;
+        }       
     }
     void show_point_by_index(List& list)
     {
-
+        std::size_t index = correct::read_size_t("the index");
+        Point point;
+        if (list.get(point, index))
+        {
+            cout << "\nThe point: ";
+            point.write_point();
+        }
     }
     void edit_point_by_index(List& list)
     {
-
+        std::size_t index = correct::read_size_t("the index");
+        Point point;
+        point.read_point();
+        if (list.set(point, index))
+        {
+            cout << "\nThe point edited!" << endl;
+        }
     }
     void delete_point_by_index(List& list)
     {
-
+        std::size_t index = correct::read_size_t("the index");
+        if (list.remove(index))
+        {
+            cout << "\nThe point removed!" << endl;
+        }
     }
     void interactive_dialog_mode()
     {
         List list;
         while (true)
         {
-            cout << "\nMenu:\n1)Inserting a point by index.\n"
-                << "2)Show a point by index.\n3)Edit a point by index.\n"
-                << "4)Delete a point by index.\n5)Show all non-zero points.\n0)Back." << endl;
+            cout << "\nMenu:\n1)Adding a point to the end of the list.\n"
+                << "2)Inserting a point before a point with the index.\n"
+                << "3)Delete a point by index.\n4)Show a point by index.\n"
+                << "5)Edit a point by index.\n6)Show all list\n0)Back." << endl;
             switch (_getch())
             {
-            case '1': append_to_list(list);
+            case '1': add_to_end_of_list(list);
                 break;
             case '2': add_to_list_by_index(list);
                 break;
-            case '3': show_point_by_index(list);
+            case '3': delete_point_by_index(list); 
                 break;
-            case '4': edit_point_by_index(list);
+            case '4': show_point_by_index(list); 
                 break;
-            case '5': delete_point_by_index(list);
+            case '5': edit_point_by_index(list);
                 break;
             case '6': list.write_list();
                 break;
@@ -422,9 +448,144 @@ namespace twenty_six
             }
         }
     }
+    void demo_begin(unsigned delay)
+    {
+        cout << "\nSelect the application mode:\n1)Interactive dialog mode.\n"
+            << "2)Demo mode.\n0)Back.\n";
+        Sleep(delay);
+        cout << "\nSelect the application mode:\n1)Interactive dialog mode. <- press\n"
+            << "2)Demo mode.\n0)Back.\n";
+        Sleep(delay);
+    }
+    void demo_write_coordinate(unsigned delay, Point point)
+    {
+        cout << "\nEnter a point!" << endl;
+        cout << "\nEnter the first coordinate: <- write the coordinate and press <Enter>" << endl;
+        Sleep(delay);
+        cout << "Enter the first coordinate: " << point.x << endl;
+        Sleep(delay);
+        cout << "\nEnter the second coordinate: <- write the coordinate and press <Enter>" << endl;
+        Sleep(delay);
+        cout << "Enter the second coordinate: " << point.y << endl;
+        Sleep(delay);
+        cout << "\nEnter the third coordinate: <- write the coordinate and press <Enter>" << endl;
+        Sleep(delay);
+        cout << "Enter the third coordinate: " << point.z << endl;
+        Sleep(delay);
+    }
+    void demo_write_index(unsigned delay, std::size_t index)
+    {
+        cout << "\nEnter the index: <- write the index and press <Enter>" << endl;
+        Sleep(delay);
+        cout << "Enter the index: " << index << endl;
+        Sleep(delay);
+    }
+    void demo_add_to_end(unsigned delay, List& list, Point point)
+    {
+        cout << "\nMenu:\n1)Adding a point to the end of the list. <- press\n"
+            << "2)Inserting a point before a point with the index.\n"
+            << "3)Delete a point by index.\n4)Show a point by index.\n"
+            << "5)Edit a point by index.\n6)Show all list.\n0)Back." << endl;
+        Sleep(delay);
+        demo_write_coordinate(delay, point);
+        list.append(point);
+        cout << "\nThe point added to list!" << endl;
+        Sleep(delay);
+    }
+    void demo_add_to_list_by_index(unsigned delay, List& list, Point point, std::size_t index)
+    {
+        cout << "\nMenu:\n1)Adding a point to the end of the list.\n"
+            << "2)Inserting a point before a point with the index. <- press\n"
+            << "3)Delete a point by index.\n4)Show a point by index.\n"
+            << "5)Edit a point by index.\n6)Show all list.\n0)Back." << endl;
+        Sleep(delay);
+        demo_write_index(delay, index);
+        demo_write_coordinate(delay, point);
+        if (list.insert(point, index)) cout << "\nThe point added to list!" << endl;
+        Sleep(delay);
+    }
+    void demo_show_point_by_index(unsigned delay, List& list, std::size_t index)
+    {
+        cout << "\nMenu:\n1)Adding a point to the end of the list.\n"
+            << "2)Inserting a point before a point with the index.\n"
+            << "3)Delete a point by index.\n4)Show a point by index. <- press\n"
+            << "5)Edit a point by index.\n6)Show all list.\n0)Back." << endl;
+        Sleep(delay);
+        demo_write_index(delay, index);
+        Point point;
+        if (list.get(point, index))
+        {
+            cout << "The point: ";
+            point.write_point();
+        }
+        Sleep(delay);
+    }
+    void demo_edit_point_by_index(unsigned delay, List& list, Point point, std::size_t index)
+    {
+        cout << "\nMenu:\n1)Adding a point to the end of the list.\n"
+            << "2)Inserting a point before a point with the index.\n"
+            << "3)Delete a point by index.\n4)Show a point by index.\n"
+            << "5)Edit a point by index. <- press\n6)Show all list.\n0)Back." << endl;
+        Sleep(delay);
+        demo_write_index(delay, index);
+        demo_write_coordinate(delay, point);
+        if (list.set(point, index))  cout << "\nThe point edited!" << endl;
+        Sleep(delay);
+    }
+    void demo_delete_point_by_index(unsigned delay, List& list, std::size_t index)
+    {
+        cout << "\nMenu:\n1)Adding a point to the end of the list.\n"
+            << "2)Inserting a point before a point with the index.\n"
+            << "3)Delete a point by index. <- press\n4)Show a point by index.\n"
+            << "5)Edit a point by index.\n6)Show all list.\n0)Back." << endl;
+        Sleep(delay);
+        demo_write_index(delay, index);
+        if (list.remove(index))  cout << "\nThe point removed!" << endl;
+        Sleep(delay);
+    }
+    void demo_write_list(unsigned delay, List& list)
+    {
+        cout << "\nMenu:\n1)Adding a point to the end of the list.\n"
+            << "2)Inserting a point before a point with the index.\n"
+            << "3)Delete a point by index.\n4)Show a point by index.\n"
+            << "5)Edit a point by index.\n6)Show all list. <- press\n0)Back." << endl;
+        Sleep(delay);
+        list.write_list();
+        Sleep(delay);
+    }
+    void demo_back(unsigned delay, List& list)
+    {
+        cout << "\nMenu:\n1)Adding a point to the end of the list.\n"
+            << "2)Inserting a point before a point with the index.\n"
+            << "3)Delete a point by index.\n4)Show a point by index.\n"
+            << "5)Edit a point by index.\n6)Show all list.\n0)Back. <- press" << endl;
+        list.clear();
+        Sleep(delay);
+    }
     void demo_mode()
     {
-
+        unsigned delay = 1900;
+        delay = correct::read_unsigned("a delay to display data(in milliseconds; normal = 1900)");
+        List list;
+        cout << "\nThe start of the demo mode(press <Ctrl + C> to exit)" << endl;
+        Sleep(delay);
+        demo_begin(delay);
+        demo_add_to_end(delay, list, Point(5, 7, 4));
+        demo_add_to_end(delay, list, Point(12, 8, 14));
+        demo_add_to_list_by_index(delay, list, Point(1, 2, 3), 0);
+        demo_write_list(delay, list);
+        demo_edit_point_by_index(delay, list, Point(11, 12, 13), 2);
+        demo_show_point_by_index(delay, list, 2);
+        demo_edit_point_by_index(delay, list, Point(2, 7, 14), 0);
+        demo_add_to_end(delay, list, Point(15, 3, 1));
+        demo_add_to_list_by_index(delay, list, Point(3, 2, 6), 3);
+        demo_write_list(delay, list);
+        demo_delete_point_by_index(delay, list, 0);
+        demo_delete_point_by_index(delay, list, 2);
+        demo_write_list(delay, list);
+        demo_back(delay, list);
+        cout << "\nThe end of the demo mode" << endl;
+        Sleep(delay);
     }
     void menu()
 	{

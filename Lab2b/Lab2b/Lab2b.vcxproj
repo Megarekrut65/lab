@@ -149,13 +149,11 @@
   <ItemGroup>
     <ClCompile Include="Lab2b.cpp" />
     <ClCompile Include="lab2b_task_number_twelve.cpp" />
-    <ClCompile Include="lab2b_task_number_three.cpp" />
     <ClCompile Include="lab2b_task_number_twenty_six.cpp" />
     <ClCompile Include="my_correct_read.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lab2b_task_number_twelve.h" />
-    <ClInclude Include="lab2b_task_number_three.h" />
     <ClInclude Include="lab2b_task_number_twenty_six.h" />
     <ClInclude Include="my_correct_read.h" />
   </ItemGroup>

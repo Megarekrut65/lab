@@ -1,5 +1,4 @@
-﻿#include "lab2b_task_number_three.h"
-#include "lab2b_task_number_twelve.h"
+﻿#include "lab2b_task_number_twelve.h"
 #include "lab2b_task_number_twenty_six.h"
 #include <iostream>
 #include <conio.h>
@@ -7,12 +6,12 @@ int main()
 {
     while (true)
     {
-        std::cout << "Select a task:\n1)Task 3.\n2)Task 12.\n3)Task 26.\n0)Exit." << std::endl;
+        std::cout << "Select a task:\n1)Task 12.\n2)Task 20.\n3)Task 26.\n0)Exit." << std::endl;
         switch (_getch())
         {
-        case '1': three::menu();
+        case '1': twelve::menu();
             break;
-        case'2': twelve::menu();
+        case'2': 
             break;
         case'3':  twenty_six::menu();
             break;
