@@ -1,6 +1,8 @@
 #include "lab2b_task_number_twenty_six.h"
 #include "my_correct_read.h"
 #include <iostream>
+#include <conio.h>
+#include <Windows.h>
 using std::cout;
 using std::cin;
 using std::endl;
@@ -68,6 +70,7 @@ namespace twenty_six
     };
     struct List
     {
+    private:
         ListNode* head;
         ListNode* tail;
         std::size_t size;
@@ -75,30 +78,10 @@ namespace twenty_six
         {
             if ((index + 1) > size)
             {
-                cout << "\nThere isn`t points wiht the index!" << endl;
+                cout << "\nThere isn`t points with the index!" << endl;
                 return false;
             }
             return true;
-        }
-        List() : head(nullptr), tail(nullptr), size(0){}
-        void append(Point point)
-        {
-            size++;
-            if (tail)
-            {
-                if (tail->arr_size < (tail->max_size / 2))
-                {
-                    tail->points[tail->arr_size++] = point;
-                    return;
-                }
-                ListNode* new_node = new ListNode(tail, nullptr, point);
-                tail->next = new_node;
-                tail = new_node;
-                return;
-            }
-            ListNode* new_node = new ListNode(nullptr, nullptr, point);
-            tail = new_node;
-            head = new_node;
         }
         void add_to_head(Point point)
         {
@@ -106,7 +89,7 @@ namespace twenty_six
             head = current;
             size++;
             if (current->arr_size < current->max_size)
-            {                
+            {
                 for (std::size_t i = current->arr_size; i > 0; i--)
                 {
                     current->points[i] = current->points[i - 1];
@@ -124,13 +107,13 @@ namespace twenty_six
                 for (std::size_t k = 1; j < current->max_size; j++, k++)
                 {
                     new_node->points[k] = current->points[j];
-                }              
+                }
                 for (std::size_t i = current->max_size / 2; i > 0; i--)
                 {
                     current->points[i] = current->points[i - 1];
                 }
                 current->points[0] = point;
-                current->arr_size = current->max_size / 2 + 1;                
+                current->arr_size = current->max_size / 2 + 1;
             }
         }
         void add_to_middle(Point point, std::size_t index)
@@ -139,12 +122,12 @@ namespace twenty_six
             std::size_t current_size = 0;
             for (ListNode* current = head; current; current = current->next)
             {
-                
+                std::size_t new_index = index - current_size;
+                current_size += current->arr_size;
                 if (index < current_size)
                 {
-                    std::size_t new_index = index - current_size;
                     if (current->arr_size < current->max_size)
-                    {                       
+                    {
                         for (std::size_t i = current->arr_size; i > new_index; i--)
                         {
                             current->points[i] = current->points[i - 1];
@@ -159,12 +142,6 @@ namespace twenty_six
                         if (new_index < j)
                         {
                             current->arr_size = j;
-                            for (std::size_t i = j; i > new_index; i--)
-                            {
-                                current->points[i] = current->points[i - 1];
-                            }
-                            current->points[new_index] = point;
-                            current->arr_size++;
                             ListNode* new_node = new ListNode(current, current->next, current->points[j++]);
                             current->next->prev = new_node;
                             current->next = new_node;
@@ -172,7 +149,13 @@ namespace twenty_six
                             for (std::size_t k = 1; j < current->max_size; j++, k++)
                             {
                                 new_node->points[k] = current->points[j];
-                            }  
+                            }                          
+                            for (std::size_t i = current->arr_size; i > new_index; i--)
+                            {
+                                current->points[i] = current->points[i - 1];
+                            }
+                            current->points[new_index] = point;
+                            current->arr_size++;                            
                             return;
                         }
                         else
@@ -196,17 +179,101 @@ namespace twenty_six
                         }
                     }
                 }
-                current_size += current->arr_size;
+
             }
         }
+        void delete_head()
+        {
+            size--;
+            ListNode* current = head;
+            if (size == 0)
+            {
+                delete[] current->points;
+                head = nullptr;
+                tail = nullptr;
+                delete current;
+                return;
+            }
+            if (current->arr_size == 1)
+            {
+                delete[] current->points;
+                head = current->next;
+                current->next->prev = nullptr;
+                delete current;              
+                return;
+            }
+            current->arr_size--;
+            for (std::size_t i = 0; i < current->arr_size; i++)
+            {
+                current->points[i] = current->points[i + 1];
+            }
+        }
+        void delete_middle(std::size_t index)
+        {
+            size--;
+            std::size_t current_size = 0;
+            for (ListNode* current = head; current; current = current->next)
+            {
+                std::size_t new_index = index - current_size;
+                current_size += current->arr_size;
+                if (index < current_size)
+                {
+                    if (current->arr_size == 1)
+                    {
+                        delete[] current->points;
+                        current->prev->next = current->next;
+                        current->next->prev = current->prev;
+                        delete current;
+                       
+                        return;
+                    }
+                    current->arr_size--;
+                    for (std::size_t i = new_index; i < current->arr_size; i++)
+                    {
+                        current->points[i] = current->points[i + 1];
+                    }
+                    return;
+                }
+            }
+        }
+        void delete_tail()
+        {
+            size--;
+            ListNode* current = tail;
+            if (current->arr_size == 1)
+            {
+                delete[] current->points;
+                tail = current->prev;
+                current->prev->next = nullptr;
+                delete current;
+                return;
+            }
+            current->arr_size--;
+        }
+    public:
+        List() : head(nullptr), tail(nullptr), size(0){}
+        void append(Point point)
+        {
+            size++;
+            if (tail)
+            {
+                if (tail->arr_size < (tail->max_size / 2))
+                {
+                    tail->points[tail->arr_size++] = point;
+                    return;
+                }
+                ListNode* new_node = new ListNode(tail, nullptr, point);
+                tail->next = new_node;
+                tail = new_node;
+                return;
+            }
+            ListNode* new_node = new ListNode(nullptr, nullptr, point);
+            tail = new_node;
+            head = new_node;
+        }        
         bool insert(Point point, std::size_t index)
         {
             if (!is_index(index)) return false;
-            if ((index + 1) == size)
-            {
-                append(point);
-                return true;
-            }
             if (index == 0)
             {
                 add_to_head(point);
@@ -218,7 +285,7 @@ namespace twenty_six
         void write_list()
         {
             cout << "\nSize: " << size;
-            std::size_t j = 0;
+            std::size_t j = 0, k = 0;
             for (ListNode* current = head; current; current = current->next)
             {      
                 for (std::size_t i = 0; i < current->arr_size; i++)
@@ -228,18 +295,157 @@ namespace twenty_six
                 }
             }
         }
+        bool get(Point& point, std::size_t index)
+        {
+            if (!is_index(index)) return false;
+            std::size_t current_size = 0;
+            for (ListNode* current = head; current; current = current->next)
+            {
+                std::size_t new_index = index - current_size;
+                current_size += current->arr_size;
+                if (index < current_size)
+                {
+                    point = current->points[new_index];
+                    return true;
+                }
+            }
+            return false;
+        }
+        bool set(Point point, std::size_t index)
+        {
+            if (!is_index(index)) return false;
+            std::size_t current_size = 0;
+            for (ListNode* current = head; current; current = current->next)
+            {
+                std::size_t new_index = index - current_size;
+                current_size += current->arr_size;
+                if (index < current_size)
+                {
+                    current->points[new_index] = point;
+                    return true;
+                }
+            }
+            return false;
+        }
+        bool remove(std::size_t index)
+        {
+            if (!is_index(index)) return false;
+            if (index == 0)
+            {
+                delete_head();
+                return true;
+            }
+            if ((index + 1) == size)
+            {
+                delete_tail();
+                return true;
+            }
+            delete_middle(index);
+            return true;
+        }
+        void clear()
+        {
+            size = 0;
+            if (!head)
+            {
+                return;
+            }
+            if (head->next)
+            {
+                ListNode* current = head->next;
+                head = nullptr;
+                for (; current; current = current->next)
+                {
+                    delete[] current->prev->points;
+                    current->prev->next = nullptr;
+                    delete current->prev;
+                }
+                delete tail;
+                tail = nullptr;
+                return;
+            }
+            ListNode* current = head;
+            head = nullptr;
+            tail = nullptr;
+            if (current) delete current;           
+        }
     };
-    void write()
-	{
+    void append_to_list(List& list)
+    {
+
+    }
+    void add_to_list_by_index(List& list)
+    {
+
+    }
+    void show_point_by_index(List& list)
+    {
+
+    }
+    void edit_point_by_index(List& list)
+    {
+
+    }
+    void delete_point_by_index(List& list)
+    {
+
+    }
+    void interactive_dialog_mode()
+    {
         List list;
-        int i = 0;        
-        list.append(Point(1, 1, 1));   
-        list.append(Point(2, 2, 2));
-        list.append(Point(3, 3, 3));
-        list.write_list();
-        list.insert(Point(7, 7, 7), 3);
-        list.insert(Point(7, 7, 7), 0);
-        list.insert(Point(7, 7, 7), 2);
-        list.write_list();
+        while (true)
+        {
+            cout << "\nMenu:\n1)Inserting a point by index.\n"
+                << "2)Show a point by index.\n3)Edit a point by index.\n"
+                << "4)Delete a point by index.\n5)Show all non-zero points.\n0)Back." << endl;
+            switch (_getch())
+            {
+            case '1': append_to_list(list);
+                break;
+            case '2': add_to_list_by_index(list);
+                break;
+            case '3': show_point_by_index(list);
+                break;
+            case '4': edit_point_by_index(list);
+                break;
+            case '5': delete_point_by_index(list);
+                break;
+            case '6': list.write_list();
+                break;
+            case '0':
+            {
+                list.clear();
+                return;
+            }
+            break;
+            default: cout << "\nPress the correct key!" << endl;
+            }
+        }
+    }
+    void demo_mode()
+    {
+
+    }
+    void menu()
+	{
+        while (true)
+        {
+            cout << "\nSelect the application mode:\n1)Interactive dialog mode.\n"
+                << "2)Demo mode.\n0)Back.\n";
+            switch (_getch())
+            {
+            case '1': interactive_dialog_mode();
+                break;
+            case '2': demo_mode();
+                break;
+            case'0':
+            {
+                cout << endl;
+                return;
+            }
+            break;
+            default: cout << "\nPress the correct key!" << endl;
+            }
+        }
 	}
 }

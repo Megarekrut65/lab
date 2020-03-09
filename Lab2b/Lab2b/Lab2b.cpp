@@ -14,7 +14,7 @@ int main()
             break;
         case'2': twelve::menu();
             break;
-        case'3':  twenty_six::write();
+        case'3':  twenty_six::menu();
             break;
         case'0':
         {
