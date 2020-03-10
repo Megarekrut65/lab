@@ -212,7 +212,21 @@ namespace twenty
             return false;
         }
     };
-    List union_lists(List& list1, List& list2) // це перетнин!!!
+    List union_lists(List& list1, List& list2)
+    {
+        List new_list;
+        for (ListNode* current = list2.head; current; current = current->next)
+        {
+            new_list.append(current->point);
+        }
+        for (ListNode* current = list1.head; current; current = current->next)
+        {
+
+            if (!list2.is_point(current->point)) new_list.append(current->point);
+        }
+        return new_list;
+    }
+    List intersections_lists(List& list1, List& list2)
     {
         List new_list;
         for (ListNode* current = list1.head; current; current = current->next)
@@ -221,15 +235,11 @@ namespace twenty
         }
         return new_list;
     }
-    List intersections(List& list1, List& list2)
-    {
-
-    }
     void menu()
 	{
         List list1;
         list1.append(Point(0, 0, 0));
-        list1.append(Point(-1, -1, -1));
+        list1.append(Point(1, 1, 1));
         list1.append(Point(2, 3, 2));
         cout << "\nFirst list: " << endl;
         list1.write_list();
@@ -241,6 +251,9 @@ namespace twenty
         list2.write_list();
         List new_list = union_lists(list1, list2);
         cout << "\nUnion list: " << endl;
+        new_list.write_list();
+        new_list = intersections_lists(list1, list2);
+        cout << "\nIntersections list: " << endl;
         new_list.write_list();
 	}
 }
