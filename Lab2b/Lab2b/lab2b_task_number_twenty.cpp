@@ -45,13 +45,13 @@ namespace twenty
     {
         Point point;
         ListNode* next;
-        ListNode(): point(Point(0,0,0)), next(nullptr){}
-        ListNode(Point point, ListNode* next) : point(point), next(next) {}
+        ListNode* prev;
+        ListNode(): point(Point(0,0,0)), prev(nullptr), next(nullptr){}
+        ListNode(Point point, ListNode* prev, ListNode* next) : point(point), prev(prev), next(next) {}
     };
     struct List
     {
-    private:
-        ListNode* head;
+    private:      
         ListNode* tail;
         std::size_t size;
         bool is_index(std::size_t index)
@@ -65,7 +65,8 @@ namespace twenty
         }
         void add_to_head(Point point)
         {
-            ListNode* new_node = new ListNode(point, head);
+            ListNode* new_node = new ListNode(point, nullptr, head);
+            head->prev = new_node;
             head = new_node;
         }
         void add_to_middle(Point point, std::size_t index)
@@ -75,7 +76,8 @@ namespace twenty
             {
                 if (index == (i + 1))
                 {
-                    ListNode* new_node = new ListNode(point, current->next);
+                    ListNode* new_node = new ListNode(point,current, current->next);
+                    current->next->prev = new_node;
                     current->next = new_node;
                     return;
                 }
@@ -87,7 +89,8 @@ namespace twenty
             if (head->next)
             {
                 ListNode* current = head;
-                head = current->next;
+                current->next->prev = nullptr;
+                head = current->next;                
                 delete current;
                 return;
             }
@@ -103,11 +106,11 @@ namespace twenty
             std::size_t i = 0;
             for (ListNode* current = head; current; current = current->next)
             {
-                if (index == (i + 1))
+                if (index == i)
                 {
-                    ListNode* temp_node = current->next;
-                    current->next = current->next->next;
-                    delete temp_node;
+                    current->prev->next = current->next;
+                    current->next->prev = current->prev;
+                    delete current;
                     return;
                 }
                 i++;
@@ -115,35 +118,35 @@ namespace twenty
         }
         void delete_tail()
         {
-            for (ListNode* current = head; current; current = current->next)
-            {
-                if (!current->next->next)
-                {
-                    tail = current;
-                    delete current->next;
-                    return;
-                }
-            }
+            ListNode* current = tail;
+            tail = current->prev;
+            current->prev->next = nullptr;
+            delete current;
         }
     public:
+        ListNode* head;
         List(): head(nullptr), tail(nullptr), size(0) {}
         void append(Point point)
         {
-            ListNode* new_node = new ListNode(point, nullptr);
+            if (is_point(point)) return;
+            ListNode* new_node;
             size++;
             if (tail)
-            {              
+            {           
+                new_node = new ListNode(point,tail, nullptr);
                 tail->next = new_node;
                 tail = new_node;
                 return;
             }
+            new_node = new ListNode(point, nullptr, nullptr);
             tail = new_node;
             head = new_node;
             return;
         }
         bool insert(Point point, std::size_t index)
-        {
+        {          
             if (!is_index(index)) return false;
+            if (is_point(point)) return true;
             size++;
             if (index == 0)
             {
@@ -162,7 +165,7 @@ namespace twenty
                 cout << "Point[" << i++ << "]: ";
                 current->point.write_point();
             }
-        }
+        }       
         bool get(Point& point, std::size_t index)
         {
             if (!is_index(index)) return false;
@@ -177,52 +180,67 @@ namespace twenty
                 i++;
             }
             return false;
-        }
-        bool set(Point point, std::size_t index)
-        {
-            if (!is_index(index)) return false;
-            std::size_t i = 0;
-            for (ListNode* current = head; current; current = current->next)
-            {
-                if (index == i)
-                {
-                    current->point = point;
-                    return true;
-                }
-                i++;
-            }
-            return false;
-        }
+        }       
         bool remove(std::size_t index)
         {
-            if (!is_index(index)) return false;
-            size--;
+            if (!is_index(index)) return false;           
             if (index == 0)
             {
                 delete_head();
+                size--;
                 return true;
             }
             if ((index + 1) == size)
             {
                 delete_tail();
+                size--;
                 return true;
             }
             delete_middle(index);
+            size--;
             return true;
         }
+        bool is_point(Point point)
+        {
+            for (ListNode* current = head; current; current = current->next)
+            {
+                if ((point.x == current->point.x) && (point.y == current->point.y) && (point.z == current->point.z))
+                {                   
+                    return true;
+                }
+            }
+            return false;
+        }
     };
+    List union_lists(List& list1, List& list2) // це перетнин!!!
+    {
+        List new_list;
+        for (ListNode* current = list1.head; current; current = current->next)
+        {
+            if (list2.is_point(current->point)) new_list.append(current->point);
+        }
+        return new_list;
+    }
+    List intersections(List& list1, List& list2)
+    {
+
+    }
     void menu()
 	{
-        List list;
-        list.append(Point(0, 3, 1));
-        list.append(Point(1, 3, 1));
-        list.append(Point(2, 3, 1));
-        list.insert(Point(3, 3, 1),0);
-        list.insert(Point(4, 3, 1),3);
-        list.write_list();
-        list.remove(4);
-        list.remove(3);
-        list.remove(1);
-        list.write_list();
+        List list1;
+        list1.append(Point(0, 0, 0));
+        list1.append(Point(-1, -1, -1));
+        list1.append(Point(2, 3, 2));
+        cout << "\nFirst list: " << endl;
+        list1.write_list();
+        List list2;
+        list2.append(Point(0, 0, 0));
+        list2.append(Point(1, 1, 1));
+        list2.append(Point(2, 2, 2));
+        cout << "\nSecond list: " << endl;
+        list2.write_list();
+        List new_list = union_lists(list1, list2);
+        cout << "\nUnion list: " << endl;
+        new_list.write_list();
 	}
 }
