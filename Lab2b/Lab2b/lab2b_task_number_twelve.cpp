@@ -65,6 +65,20 @@ namespace twelve
             }
             return true;
         }
+        void minus_indexes(std::size_t index)
+        {
+            for (SparseListNode* current_node = head; current_node; current_node = current_node->next)
+            {
+                if (index < current_node->index) current_node->index--;
+            }
+        }
+        void plus_indexes(std::size_t index)
+        {
+            for (SparseListNode* current_node = head; current_node; current_node = current_node->next)
+            {
+                if (index < current_node->index) current_node->index++;
+            }
+        }
     public:
 		SparseList() : size(0), head(nullptr) {}
         void write_list()
@@ -79,24 +93,15 @@ namespace twelve
         bool insert(Point point, std::size_t index)
         {           
             SparseListNode* current = head;
-            SparseListNode* new_node;
-            if (!current)
-            {
-                if (!point.is_zero())
-                {
-                    new_node = new SparseListNode(point, index, nullptr);
-                    head = new_node;
-                }               
-                size = (index + 1) > size ? (index + 1) : size;
-                return true;
-            }           
-            if (index < current->index)
+            SparseListNode* new_node;    
+            if ((!current)||(index < current->index))
             {
                 if (!point.is_zero())
                 {
                     new_node = new SparseListNode(point, index, current);
                     head = new_node;
                 }     
+                size = (index + 1) > size ? (index + 1) : size;
                 return true;
             }           
             for (; current; current = current->next)
@@ -105,23 +110,14 @@ namespace twelve
                 {                   
                     return false;
                 }
-                if (!current->next)
-                {
-                    if (!point.is_zero())
-                    {
-                        new_node = new SparseListNode(point, index, nullptr);
-                        current->next = new_node;
-                    }                  
-                    size = (index + 1) > size ? (index + 1) : size;
-                    return true;
-                }
-                if (index < current->next->index)
+                if ((!current->next)||(index < current->next->index))
                 {
                     if (!point.is_zero())
                     {
                         new_node = new SparseListNode(point, index, current->next);
                         current->next = new_node;
                     }
+                    size = (index + 1) > size ? (index + 1) : size;
                     return true;
                 }
             }
@@ -153,29 +149,32 @@ namespace twelve
                     {
                         bool temp = remove(index);
                         size++;
+                        plus_indexes(index - 1);
                     }
                     return true;
                 }
             }
             bool temp = insert(point, index);
             return true;
-        }
+        }        
         bool remove(std::size_t index)
         {
             if (!is_index(index)) return false;
+            size--;
+            if (!head) return true;                      
             SparseListNode* current = head;
             if (index == current->index)
             {
                 head = current->next;
                 delete current;
-                size--;
+                minus_indexes(index);
                 return true;
             }
             for (; current; current = current->next)
             {
                 if (!current->next)
                 {
-                    size--;
+                    minus_indexes(index);
                     return true;
                 }
                 if (index == current->next->index)
@@ -183,7 +182,7 @@ namespace twelve
                     SparseListNode* temp_node = current->next;
                     current->next = temp_node->next;
                     delete temp_node;
-                    size--;
+                    minus_indexes(index);
                     return true;
                 }
             } 
@@ -200,6 +199,7 @@ namespace twelve
                 delete temp_node;
                 temp_node = nullptr;             
             }
+            size = 0;
         }
 	};
     void add_to_list_by_index(SparseList& list)
@@ -380,7 +380,7 @@ namespace twelve
         Sleep(delay);
         demo_begin(delay);
         demo_add_to_list_by_index(delay, list, Point(1.2, 4.1, 10), 10);
-        demo_add_to_list_by_index(delay, list, Point(0, 0, 0), 2);
+        demo_add_to_list_by_index(delay, list, Point(0, 0, 0), 15);
         demo_add_to_list_by_index(delay, list, Point(3, 2, 6), 5);
         demo_write_list(delay, list);
         demo_edit_point_by_index(delay, list, Point(11, 12, 13), 5);
@@ -389,6 +389,7 @@ namespace twelve
         demo_edit_point_by_index(delay, list, Point(0, 0, 0), 10);
         demo_write_list(delay, list);
         demo_delete_point_by_index(delay, list, 0);
+        demo_delete_point_by_index(delay, list, 9);
         demo_write_list(delay, list);
         demo_back(delay,list);
         cout << "\nThe end of the demo mode" << endl;

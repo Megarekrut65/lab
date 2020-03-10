@@ -346,28 +346,19 @@ namespace twenty_six
         void clear()
         {
             size = 0;
-            if (!head)
-            {
-                return;
-            }
-            if (head->next)
-            {
-                ListNode* current = head->next;
-                head = nullptr;
-                for (; current; current = current->next)
-                {
-                    delete[] current->prev->points;
-                    current->prev->next = nullptr;
-                    delete current->prev;
-                }
-                delete tail;
-                tail = nullptr;
-                return;
-            }
-            ListNode* current = head;
+            if (!head) return;           
+            ListNode* current = head->next;
             head = nullptr;
-            tail = nullptr;
-            if (current) delete current;           
+            for (; current; current = current->next)
+            {
+                delete[] current->prev->points;
+                current->prev->next = nullptr;
+                delete current->prev;
+                current->prev = nullptr;
+            }
+            delete[] tail->points;
+            delete tail;
+            tail = nullptr;                                     
         }
     };
     void add_to_end_of_list(List& list)
@@ -423,7 +414,7 @@ namespace twenty_six
             cout << "\nMenu:\n1)Adding a point to the end of the list.\n"
                 << "2)Inserting a point before a point with the index.\n"
                 << "3)Delete a point by index.\n4)Show a point by index.\n"
-                << "5)Edit a point by index.\n6)Show all list\n0)Back." << endl;
+                << "5)Edit a point by index.\n6)Show all list.\n0)Back." << endl;
             switch (_getch())
             {
             case '1': add_to_end_of_list(list);
