@@ -3,6 +3,7 @@
 #include "lab2b_task_number_twenty_six.h"
 #include <iostream>
 #include <conio.h>
+
 int main()
 {
     while (true)

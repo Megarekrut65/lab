@@ -1,6 +1,7 @@
 #include "my_correct_read.h"
 #include <iostream>
 #include <string>
+
 namespace correct
 {
     double read_double(const std::string& sentence)
