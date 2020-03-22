@@ -21,9 +21,15 @@
     <ClCompile Include="my_sorts.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\my_functions\correct read\my_correct_read.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="my_sorts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\my_functions\correct read\my_correct_read.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

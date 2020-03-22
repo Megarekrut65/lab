@@ -12,7 +12,6 @@ namespace sorting
     }
     void bubble_sort(int* array, long size)
     {
-        std::cout << "\nbuble\n";
         for (long i = 0; i < size; i++)
         {
             for (long j = 0; j < size - i - 1; j++)
@@ -27,13 +26,13 @@ namespace sorting
     long partition(int* array, long low, long high)
     {
         int pivot = array[high];
-        long i = (low - 1);
+        long i = low - 1;
         for (long j = low; j < high; j++)
         {
             if (array[j] <= pivot)
-            {
+            {      
                 i++;
-                swap(array[i], array[j]);
+                swap(array[i], array[j]);        
             }
         }
         swap(array[i + 1], array[high]);
@@ -51,24 +50,8 @@ namespace sorting
     void quick_sort(int* array, long size)
     {
         current_quick_sort(array, 0, size - 1);
-    }
-    void combined_quick_sort(int* array, long low, long high)
-    {
-        if (high - low < 11)
-        {
-            int* temp_array = &array[low];
-            bubble_sort(temp_array, high);
-            return;
-        }
-        if (low < high)
-        {
-            std::cout << "\nquick\n";
-            long index = partition(array, low, high);
-            combined_quick_sort(array, low, index - 1);
-            combined_quick_sort(array, index + 1, high);
-        }
-    }
-    void merge(int* source, int* destination, long begin, long middle, long end) 
+    }   
+    void merge_sort(int* source, int* destination, long begin, long middle, long end)
     {
         long first = begin, second = middle;
         for (long i = begin; i < end; i++) 
@@ -91,7 +74,7 @@ namespace sorting
         long middle = (end + begin) / 2;
         merge_sort_twoarrays(destination, source, begin, middle);
         merge_sort_twoarrays(destination, source, middle, end);
-        merge(source, destination, begin, middle, end);
+        merge_sort(source, destination, begin, middle, end);
     }
     void merge_sort_topdown(int* array, long size) 
     {
@@ -104,8 +87,24 @@ namespace sorting
     {
         std::sort(array, array + size);
     }
-    void combined_sort(int* array, long size)
+    void combined_quick_bubble_sort(int* array, long low, long high, int threshold)
     {
-        combined_quick_sort(array, 0, size);
+        if (low < high)
+        {
+            if (high - low < threshold)
+            {
+                int* temp_array = &array[low];
+                bubble_sort(temp_array, high - low + 1);
+                temp_array = nullptr;
+                return;
+            }
+            long index = partition(array, low, high);
+            combined_quick_bubble_sort(array, low, index - 1, threshold);
+            combined_quick_bubble_sort(array, index + 1, high, threshold);
+        }
+    }
+    void combined_sort(int* array, long size, const int threshold)
+    {
+        combined_quick_bubble_sort(array, 0, size - 1, threshold);
     }
 }
