@@ -12,11 +12,11 @@ namespace sorting
         }
         std::cout << std::endl;
     }
-    void audit_step(int* array, long size, int frequency, int& step)
+    void audit_step(int* array, long size, int frequency, long& step)
     {
         step++;
         if ((frequency == 0) || (frequency == -1) || (step % frequency != 0)) return;
-        std::cout << "step: " << step << std::endl;
+        std::cout << "Step: " << step << std::endl;
         write_array(array, size);
     }
     void swap(int& a, int& b)
@@ -26,7 +26,7 @@ namespace sorting
         a = b;
         b = temp;
     }
-    void current_bubble_sort(int* array, long end, long size, int frequency, int& step)
+    void current_bubble_sort(int* array, long end, long size, int frequency, long& step)
     {
         for (long i = 0; i < end; i++)
         {
@@ -42,14 +42,14 @@ namespace sorting
     }
     void bubble_sort(int* array, long size, int frequency)
     {
-        int step = 0;
+        long step = 0;
         current_bubble_sort(array, size, size, frequency, step);
         if (frequency == -1)
         {
             write_array(array, size);
         }
     }   
-    long partition(int* array, long low, long high, long size, int frequency, int& step)
+    long partition(int* array, long low, long high, long size, int frequency, long& step)
     {
         int pivot = array[high];
         long i = low - 1;
@@ -66,7 +66,7 @@ namespace sorting
         audit_step(array, size, frequency, step);
         return (i + 1);
     }
-    void current_quick_sort(int* array, long low, long high, long size, int frequency, int& step)
+    void current_quick_sort(int* array, long low, long high, long size, int frequency, long& step)
     {
         if (low < high)
         {
@@ -77,14 +77,14 @@ namespace sorting
     }
     void quick_sort(int* array, long size, int frequency)
     {
-        int step = 0;
+        long step = 0;
         current_quick_sort(array, 0, size - 1, size, frequency, step);
         if (frequency == -1)
         {
             write_array(array, size);
         }
     }
-    void merge_sort(int* source, int* destination, long begin, long middle, long end, long size, int frequency, int& step)
+    void merge_sort(int* source, int* destination, long begin, long middle, long end, long size, int frequency, long& step)
     {
         long first = begin, second = middle;
         for (long i = begin; i < end; i++)
@@ -102,7 +102,7 @@ namespace sorting
             audit_step(destination, size, frequency,step);
         }
     }
-    void merge_sort_twoarrays(int* source, int* destination, long begin, long end, long size, int frequency, int& step)
+    void merge_sort_twoarrays(int* source, int* destination, long begin, long end, long size, int frequency, long& step)
     {
         if (end - begin < 2) return;
         long middle = (end + begin) / 2;
@@ -112,7 +112,7 @@ namespace sorting
     }
     void merge_sort_topdown(int* array, long size, const int frequency)
     {
-        int step = 0;
+        long step = 0;
         int* destination = new int[size];
         std::copy(array, array + size, destination);
         merge_sort_twoarrays(destination, array, 0, size, size, frequency, step);
@@ -130,7 +130,7 @@ namespace sorting
             write_array(array,size);
         }
     }
-    void combined_quick_bubble_sort(int* array, long low, long high, int threshold, long size, int frequency, int& step)
+    void combined_quick_bubble_sort(int* array, long low, long high, int threshold, long size, int frequency, long& step)
     {
         if (low < high)
         {
@@ -148,7 +148,7 @@ namespace sorting
     }
     void combined_sort(int* array, long size, int threshold, int frequency)
     {
-        int step = 0;
+        long step = 0;
         combined_quick_bubble_sort(array, 0, size - 1, threshold, size, frequency, step);
         if (frequency == -1)
         {
