@@ -16,73 +16,101 @@ struct measurement_result
     long size;
     float time;
 };
-void array_random(int* array, long size)
+void array_random(int* array, long size, int max_value)
 {
-    int max_value = 30000;
     srand(time(0));
     for (long i = 0; i < size; i++)
     {
         array[i] = rand() % max_value;
     }
 }
-void array_sorted(int* array, long sorted, long not_sorted)
+void array_edit(int* array, long size, int max_value)
 {
-    int max_value = 30000;
-    long size = sorted > not_sorted ? sorted : not_sorted;
-    cout << "size: " << size << endl;
     long limit_size = size / 10;
-    cout << "limit: " << limit_size << endl;
-    for (long i = 0; i < (size - limit_size); i++)
+    sorting::merge_sort_topdown(array, (size - limit_size), 0);
+    if (max_value != 0)
     {
-        array[i] = abs(not_sorted - i) % max_value;
+        for (long i = 0; i < (size - limit_size); i++)
+        {
+            array[i] = max_value - array[i];
+        }
     }
-    for (long i = (size - limit_size); i < size; i++)
-    {
-        array[i] = abs(sorted - i) % max_value;
-    } 
 }
-int* array_generator(long size, array_set set)
+int* array_generator(long size, int max_value, array_set set)
 {
-    if (size == 0) return nullptr;
     int* array = new int[size];
+    array_random(array, size, max_value);
     switch (set)
     {
-    case array_set::RANDOM: array_random(array, size);
+    case array_set::RANDOM: 
         break;
-    case array_set::SORTED: array_sorted(array, size, 0);
+    case array_set::SORTED: array_edit(array, size, 0);
         break;
-    case array_set::NOTSORTED: array_sorted(array, 0, size);
+    case array_set::NOTSORTED: array_edit(array, size, max_value);
         break;
     }
     return array;
 }
-void write_array(int* array, long size)
+array_set choose_set()
 {
-    std::cout << "Array: ";
-    for (long i = 0; i < size; i++)
+    while (true)
     {
-        std::cout << array[i] << " ";
+        cout << "Choose the set of array:\n1)Random items.\n2)Almost sorted items in the correct order.\n"
+             << "3)Almost sorted items in the wrong order." << endl;
+        switch (_getch())
+        {
+        case '1': return array_set::RANDOM;
+            break;
+        case '2': return array_set::SORTED;
+            break;
+        case '3': return array_set::NOTSORTED;
+            break;
+        default:
+        {
+            cout << "\nPress the correct key!\n" << endl;
+        }
+        }
     }
-    std::cout << std::endl;
 }
-void test()
+void demo_sorts(int* array, long size, long frequency)
 {
-    int* array = array_generator(60000, array_set::SORTED);
-   // write_array(array, 6000000);
-    sorting::library_sort(array, 60000, 0);
-    delete[] array;
-    array = nullptr;
+    const int number_of_sorts = 4;
+    void(*all_sorts[number_of_sorts])(int*, long, long) = { sorting::bubble_sort, sorting::quick_sort,
+    sorting::merge_sort_topdown, sorting::library_sort };
+    std::string name_of_sorts[number_of_sorts] = { "\nBubble sort.", "\nQuick sort.", "\nMerge sort topdown.", "\nLibrary sort." };
+    for (int i = 0; i < number_of_sorts; i++)
+    {
+        cout << name_of_sorts[i] << endl;
+        int* copy_array = new int[size];
+        std::copy(array, array + size, copy_array);
+        all_sorts[i](copy_array, size, frequency);
+        delete[] copy_array;
+    }
+    cout << "\nCombined sort." << endl;
+    sorting::combined_sort(array, size, 11, frequency);
+    cout << endl;
 }
 void demo_mode()
 {
     long size, frequency;
-    cout << "Enter size:";
-    cin >> size;
-    cout << "Enter the frequency of the array to display\n"
-        << "(where '-1' is to show only the last step,\n"
-        << "'0' is not to show sorting steps,\n"
-        << "'1 - ...' is the number of steps through which the array will be displayed)";
-    cin >> frequency;
+    size = correct::read_long("size of array");
+    if (size < 0)
+    {
+        cout << "\nThe size can`t be < 0!" << endl;
+        return;
+    }
+    frequency = correct::read_long("the frequency of the array to display:\n(where '-1' is to show only the last step, '0' is not to show sorting steps,\n'1 - ...' is the number of steps through which the array will be displayed)");
+    if (frequency < -1)
+    {
+        cout << "\nThe frequency can`t be < -1!" << endl;
+        return;
+    }
+    array_set set = choose_set();
+    int* array = array_generator(size, 30000, set);
+    cout << endl;
+    sorting::write_array(array, size);
+    demo_sorts(array, size, frequency);
+    delete[] array;
 }
 template<class T>
 void add_to_end_of_file(T& value, const std::string& name_of_value,const std::string& path)
@@ -107,7 +135,7 @@ void clear_result_files(const std::string& name_of_set)
         file.close();
 ;   }
 }
-float measurement_sort(void sort(int*, long, int), int* array, long size, const std::string& name_of_sort, const std::string& name_of_set)
+float measurement_sort(void sort(int*, long, long), int* array, long size, const std::string& name_of_sort, const std::string& name_of_set)
 {
     int* copy_array = new int[size];
     std::copy(array, array + size, copy_array);
@@ -126,7 +154,7 @@ float measurement_sort(void sort(int*, long, int), int* array, long size, const 
     delete[] copy_array;
     return result.time;
 }
-float measurement_combined(int* array, long size, const int threshold, const std::string& name_of_set)
+float measurement_combined(int* array, long size, int threshold, const std::string& name_of_set)
 {
     int* copy_array = new int[size];
     std::copy(array, array + size, copy_array);
@@ -162,16 +190,17 @@ void benchmark_mode(array_set set, const std::string& name_of_set)
 {
     clear_result_files(name_of_set);
     const int number_of_sorts = 4;
-    void(*all_sorts[number_of_sorts])(int*, long, int) = { sorting::bubble_sort, sorting::quick_sort,
+    void(*all_sorts[number_of_sorts])(int*, long, long) = { sorting::bubble_sort, sorting::quick_sort,
     sorting::merge_sort_topdown, sorting::library_sort };
     std::string name_of_sorts[number_of_sorts] = { "Bubble sort", "Quick sort", "Merge sort topdown", "Library sort" };
     bool is_one_second = false, are_ten_seconds = false, long_bubble = false, once = true;
     long size = 1000;
     long copy_size = size, coefficient = 2;
     int max_threshold = 15;
+    int max_value = 30000;
     while (true)
     {     
-        int* array = array_generator(size, set);
+        int* array = array_generator(size, max_value, set);
         float time;
         cout << "\nSize of array = " << size << endl << endl;
         for (int i = 0; i < number_of_sorts; i++)
@@ -183,7 +212,7 @@ void benchmark_mode(array_set set, const std::string& name_of_set)
             if (time > 10) long_bubble = true;
         }     
         cout << endl;
-        for (int j = 5; j < max_threshold; j++)
+        for (long j = 5; j < max_threshold; j++)
         {
             time = measurement_combined(array, size, j, name_of_set);
             if (time > 1) is_one_second = true;
@@ -208,8 +237,8 @@ void benchmark_mode(array_set set, const std::string& name_of_set)
 }
 void benchmark_mode_menu()
 {
-    /*cout << "\nRandom items:" << endl << endl;
-    benchmark_mode(array_set::RANDOM, "Random ");*/
+    cout << "\nRandom items:" << endl << endl;
+    benchmark_mode(array_set::RANDOM, "Random ");
     cout << "\nAlmost sorted items in the correct order:" << endl << endl;
     benchmark_mode(array_set::SORTED, "Sorted ");
     cout << "\nAlmost sorted items in the wrong order:" << endl << endl;
@@ -222,7 +251,7 @@ int main()
         cout << "Select the application mode:\n1)Demo mode.\n2)Automatic benchmark mode.\n0)Exit.\n";
         switch (_getch())
         {
-        case '1':  test();// demo_mode();
+        case '1':  demo_mode();
             break;
         case '2': benchmark_mode_menu();
             break;
