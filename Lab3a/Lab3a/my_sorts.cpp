@@ -3,16 +3,17 @@
 #include <algorithm>
 namespace sorting
 {    
+    //auxiliary functions
     void write_array(int* array, long size)
     {
-        std::cout << "Array: ";
+        std::cout << "\nArray: ";
         for (long i = 0; i < size; i++)
         {
             std::cout << array[i] << " ";
         }
         std::cout << std::endl;
     }
-    void audit_step(int* array, long size, long frequency, long& step)
+    void audit_step(int* array, long size, long frequency, long& step)//checks whether an array is to be output
     {
         step++;      
         if ((frequency == 0) || (frequency == -1) || (step % frequency != 0)) return;
@@ -26,7 +27,8 @@ namespace sorting
         a = b;
         b = temp;
     }
-    void current_bubble_sort(int* array, long end, long size, long frequency, long& step)
+    //Bubble sort
+    void current_bubble_sort(int* array, long end, int* show_array, long size, long frequency, long& step)
     {
         for (long i = 0; i < end; i++)
         {
@@ -35,7 +37,7 @@ namespace sorting
                 if (array[j] > array[j + 1])
                 {
                     swap(array[j], array[j + 1]);
-                    audit_step(array, size, frequency, step);
+                    audit_step(show_array, size, frequency, step);
                 }
             }
         }
@@ -43,12 +45,13 @@ namespace sorting
     void bubble_sort(int* array, long size, long frequency)
     {
         long step = 0;
-        current_bubble_sort(array, size, size, frequency, step);
+        current_bubble_sort(array, size, array, size, frequency, step);
         if (frequency != 0)
         {
             write_array(array, size);
         }
     }   
+    //Quick sort, Lomuto partition scheme, rightmost pivot
     long partition(int* array, long low, long high, long size, int frequency, long& step)
     {
         int pivot = array[high];
@@ -84,6 +87,7 @@ namespace sorting
             write_array(array, size);
         }
     }
+    //Merge sort, top-down, two arrays
     void merge_sort(int* source, int* destination, long begin, long middle, long end, long size, long frequency, long& step)
     {
         long first = begin, second = middle;
@@ -102,12 +106,12 @@ namespace sorting
             audit_step(destination, size, frequency,step);
         }
     }
-    void merge_sort_twoarrays(int* source, int* destination, long begin, long end, long size, long frequency, long& step)
+    void merge_sort_two_arrays(int* source, int* destination, long begin, long end, long size, long frequency, long& step)
     {
         if (end - begin < 2) return;
         long middle = (end + begin) / 2;
-        merge_sort_twoarrays(destination, source, begin, middle, size, frequency, step);
-        merge_sort_twoarrays(destination, source, middle, end, size, frequency, step);
+        merge_sort_two_arrays(destination, source, begin, middle, size, frequency, step);
+        merge_sort_two_arrays(destination, source, middle, end, size, frequency, step);
         merge_sort(source, destination, begin, middle, end, size, frequency, step);
     }
     void merge_sort_topdown(int* array, long size, long frequency)
@@ -115,13 +119,14 @@ namespace sorting
         long step = 0;
         int* destination = new int[size];
         std::copy(array, array + size, destination);
-        merge_sort_twoarrays(destination, array, 0, size, size, frequency, step);
+        merge_sort_two_arrays(destination, array, 0, size, size, frequency, step);
         delete[] destination;
         if (frequency != 0)
         {
             write_array(array,size);
         }
     }
+    //Library sort
     void library_sort(int* array, long size, long frequency)
     {
         std::sort(array, array + size);
@@ -130,6 +135,7 @@ namespace sorting
             write_array(array,size);
         }
     }
+    //Combined sort, Quick sort and Bubble sort
     void combined_quick_bubble_sort(int* array, long low, long high, int threshold, long size, long frequency, long& step)
     {
         if (low < high)
@@ -137,7 +143,7 @@ namespace sorting
             if (high - low < threshold)
             {
                 int* temp_array = &array[low];
-                current_bubble_sort(temp_array, high - low + 1,size, frequency, step);
+                current_bubble_sort(temp_array, high - low + 1, array, size, frequency, step);
                 temp_array = nullptr;
                 return;
             }
@@ -154,6 +160,5 @@ namespace sorting
         {
             write_array(array, size);
         }
-    }
-   
+    } 
 }

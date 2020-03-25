@@ -16,7 +16,7 @@ struct measurement_result
     long size;
     float time;
 };
-void array_random(int* array, long size, int max_value)
+void array_random(int* array, long size, int max_value)//fills in an array with random values
 {
     srand(time(0));
     for (long i = 0; i < size; i++)
@@ -24,7 +24,7 @@ void array_random(int* array, long size, int max_value)
         array[i] = rand() % max_value;
     }
 }
-void array_edit(int* array, long size, int max_value)
+void array_edit(int* array, long size, int max_value)//sorts part of an array in the correct or wrong order
 {
     long limit_size = size / 10;
     sorting::merge_sort_topdown(array, (size - limit_size), 0);
@@ -36,7 +36,7 @@ void array_edit(int* array, long size, int max_value)
         }
     }
 }
-int* array_generator(long size, int max_value, array_set set)
+int* array_generator(long size, int max_value, array_set set)//fills the array with elements
 {
     int* array = new int[size];
     array_random(array, size, max_value);
@@ -72,12 +72,12 @@ array_set choose_set()
         }
     }
 }
-void demo_sorts(int* array, long size, long frequency)
+void demo_sorts(int* array, long size, long frequency)//invokes sort functions and shows intermediate sorting steps
 {
     const int number_of_sorts = 4;
     void(*all_sorts[number_of_sorts])(int*, long, long) = { sorting::bubble_sort, sorting::quick_sort,
     sorting::merge_sort_topdown, sorting::library_sort };
-    std::string name_of_sorts[number_of_sorts] = { "\nBubble sort.", "\nQuick sort.", "\nMerge sort topdown.", "\nLibrary sort." };
+    std::string name_of_sorts[number_of_sorts] = { "\nBubble sort.", "\nQuick sort.", "\nMerge sort.", "\nLibrary sort." };
     for (int i = 0; i < number_of_sorts; i++)
     {
         cout << name_of_sorts[i] << endl;
@@ -96,13 +96,13 @@ void demo_mode()
     size = correct::read_long("size of array");
     if (size < 0)
     {
-        cout << "\nThe size can`t be < 0!" << endl;
+        cout << "\nThe size can`t be < 0!\n" << endl;
         return;
     }
-    frequency = correct::read_long("the frequency of the array to display:\n(where '-1' is to show only the last step, '0' is not to show sorting steps,\n'1 - ...' is the number of steps through which the array will be displayed)");
+    frequency = correct::read_long("the frequency of the array to display:\n('-1' - to show only the last step, '0' - not to show sorting steps,\n'1 - ...' - the number of steps through which the array will be displayed)");
     if (frequency < -1)
     {
-        cout << "\nThe frequency can`t be < -1!" << endl;
+        cout << "\nThe frequency can`t be < -1!\n" << endl;
         return;
     }
     array_set set = choose_set();
@@ -126,16 +126,16 @@ void add_result_to_file(measurement_result result, const std::string& name_of_so
 }
 void clear_result_files(const std::string& name_of_set)
 {
-    const int number_of_sorts = 5;
-    std::string paths[number_of_sorts] = { "Bubble sort", "Quick sort", 
-        "Merge sort topdown", "Library sort", "Combined sort" };
-    for (int i = 0; i < number_of_sorts; i++)
+    const int number_of_files = 5;
+    std::string paths[number_of_files] = { "Bubble sort", "Quick sort", 
+        "Merge sort", "Library sort", "Combined sort" };
+    for (int i = 0; i < number_of_files; i++)
     {
         std::ofstream file(name_of_set+paths[i]+".txt");
         file.close();
 ;   }
 }
-float measurement_sort(void sort(int*, long, long), int* array, long size, const std::string& name_of_sort, const std::string& name_of_set)
+float measurement_sort(void sort(int*, long, long), int* array, long size, const std::string& name_of_sort, const std::string& name_of_set)//measures the sort time of an array
 {
     int* copy_array = new int[size];
     std::copy(array, array + size, copy_array);
@@ -154,7 +154,7 @@ float measurement_sort(void sort(int*, long, long), int* array, long size, const
     delete[] copy_array;
     return result.time;
 }
-float measurement_combined(int* array, long size, int threshold, const std::string& name_of_set)
+float measurement_combined(int* array, long size, int threshold, const std::string& name_of_set)//measures the time of combined array sorting
 {
     int* copy_array = new int[size];
     std::copy(array, array + size, copy_array);
@@ -175,7 +175,7 @@ float measurement_combined(int* array, long size, int threshold, const std::stri
     delete[] copy_array;
     return result.time;
 }
-long set_size(bool is_one_second, long& copy_size, long& coefficient)
+long set_size(bool is_one_second, long& copy_size, long& coefficient)//resizes depending on condition
 {
     if (is_one_second)
     {
@@ -186,13 +186,13 @@ long set_size(bool is_one_second, long& copy_size, long& coefficient)
         return copy_size *= 2;
     }
 }
-void benchmark_mode(array_set set, const std::string& name_of_set)
+void benchmark_sorts(array_set set, const std::string& name_of_set)//creates everything you need to measure the sort time of arrays
 {
     clear_result_files(name_of_set);
     const int number_of_sorts = 4;
     void(*all_sorts[number_of_sorts])(int*, long, long) = { sorting::bubble_sort, sorting::quick_sort,
     sorting::merge_sort_topdown, sorting::library_sort };
-    std::string name_of_sorts[number_of_sorts] = { "Bubble sort", "Quick sort", "Merge sort topdown", "Library sort" };
+    std::string name_of_sorts[number_of_sorts] = { "Bubble sort", "Quick sort", "Merge sort", "Library sort" };
     bool is_one_second = false, are_ten_seconds = false, long_bubble = false, once = true;
     long size = 1000;
     long copy_size = size, coefficient = 2;
@@ -233,16 +233,16 @@ void benchmark_mode(array_set set, const std::string& name_of_set)
     cout << "\nResults of measurements of program in the following files:\n"
         << name_of_set+name_of_sorts[0] + ".txt\n" << name_of_set+name_of_sorts[1] + ".txt\n"
         << name_of_set+name_of_sorts[2] + ".txt\n" << name_of_set+name_of_sorts[3] + ".txt\n"
-        << name_of_set+"Combined sort.txt" << endl;
+        << name_of_set+"Combined sort.txt\n" << endl;
 }
-void benchmark_mode_menu()
+void benchmark_mode()
 {
     cout << "\nRandom items:" << endl << endl;
-    benchmark_mode(array_set::RANDOM, "Random ");
+    benchmark_sorts(array_set::RANDOM, "Random ");
     cout << "\nAlmost sorted items in the correct order:" << endl << endl;
-    benchmark_mode(array_set::SORTED, "Sorted ");
+    benchmark_sorts(array_set::SORTED, "Sorted ");
     cout << "\nAlmost sorted items in the wrong order:" << endl << endl;
-    benchmark_mode(array_set::NOTSORTED,"Not sorted ");
+    benchmark_sorts(array_set::NOTSORTED,"Not sorted ");
 }
 int main()
 {
@@ -253,7 +253,7 @@ int main()
         {
         case '1':  demo_mode();
             break;
-        case '2': benchmark_mode_menu();
+        case '2': benchmark_mode();
             break;
         case'0':
         {
