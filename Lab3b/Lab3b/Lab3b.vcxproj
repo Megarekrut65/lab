@@ -148,12 +148,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Lab3b.cpp" />
-    <ClCompile Include="my_key_sort.cpp" />
-    <ClCompile Include="my_monsters.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="my_key_sort.h" />
-    <ClInclude Include="my_monsters.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

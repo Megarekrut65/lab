@@ -18,19 +18,5 @@
     <ClCompile Include="Lab3b.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="my_monsters.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="my_key_sort.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="my_monsters.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="my_key_sort.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
