@@ -40,10 +40,10 @@ namespace monster
             this->damage = damage;
             this->chance = chance;
             this->type_of_attack = type_of_attack;
-            time_t second = time(nullptr);
-            struct std::tm timeinfo;
-            localtime_s(&timeinfo, &second);
-            this->time_info = timeinfo;
+            time_t seconds = time(nullptr);
+            struct std::tm time_info;
+            localtime_s(&time_info, &seconds);
+            this->time_info = time_info;
             this->id = set_id(all_monsters);
         }
     };   
@@ -107,7 +107,7 @@ namespace monster
     }
     std::string random_name()
     {        
-        int size = rand() % 30;
+        int size = rand() % 30 + 1;
         std::string name = "";
         for (int i = 0; i < size; i++)
         {
@@ -174,7 +174,16 @@ namespace key_sorting
         {
             if ((index >= number_of_keys)) return;
             if (key) priorities[index] = priority--;
-            else priorities[index] = -1;
+            else
+            {
+                if (priorities[index] == -1) return;
+                for (int i = 0; i < number_of_keys; i++)
+                {
+                    if ((priorities[i] != -1) && (priorities[i] < priorities[index])) priorities[i]++;
+                }                
+                priorities[index] = -1;
+                priority++;
+            }
         }
         bool is_key(int index)
         {
@@ -228,7 +237,7 @@ namespace key_sorting
         a = b;
         b = temp;
     }
-    bool is_time(const int* time_a, const int* time_b, int number = 0)//recursion to check that the monster is created no later than the specified time
+    bool is_time(const int* time_a, const int* time_b, int number = 0)
     {
         if (number == 6) return false;
         if (time_a[number] > time_b[number]) return false;
@@ -259,9 +268,6 @@ namespace key_sorting
     }
     bool comparison(const monster::info_monster& a, const monster::info_monster& b, int number)
     {
-        monster::write_parameter(a, number);
-        std::cout << std::endl;
-        monster::write_parameter(b, number);
         switch (number)
         {
         case 0: return (a.id <= b.id);
@@ -301,7 +307,6 @@ namespace key_sorting
     bool comparison_monsters(monster::info_monster& a, monster::info_monster& b, Keys keys)
     {
         int priority = keys.give_min_priority();
-        std::cout << "min pri: " << priority << std::endl;
         bool end = false;
         for (int i = 6; i >= priority; i--)
         {
@@ -318,15 +323,13 @@ namespace key_sorting
         }
         return end;
     }
-    long partition(std::vector<monster::info_monster> array, Keys keys, long low, long high, long frequency, long& step)
+    long partition(std::vector<monster::info_monster>& array, Keys keys, long low, long high, long frequency, long& step)
     {
-        monster::info_monster pivot = array[high];
         long i = low - 1;
         for (long j = low; j < high; j++)
         {
-            if (comparison_monsters(array[j], pivot, keys))
+            if (comparison_monsters(array[j], array[high], keys))
             {
-                std::cout << "true\n";
                 i++;
                 swap(array[j], array[i]);
                 audit_step(array, keys, frequency, step);
@@ -336,7 +339,7 @@ namespace key_sorting
         audit_step(array, keys, frequency, step);
         return (i + 1);
     }
-    void current_quick_sort(std::vector<monster::info_monster> array, Keys keys, long low, long high, long frequency, long& step)
+    void current_quick_sort(std::vector<monster::info_monster>& array, Keys keys, long low, long high, long frequency, long& step)
     {
         if (low < high)
         {
@@ -345,7 +348,7 @@ namespace key_sorting
             current_quick_sort(array, keys, index + 1, high, frequency, step);
         }
     }
-    void quick_sort(std::vector<monster::info_monster> array, Keys keys, long frequency)
+    void quick_sort(std::vector<monster::info_monster>& array, Keys keys, long frequency)
     {
         long step = 0;
         long size = array.size();
@@ -356,21 +359,31 @@ namespace key_sorting
         }
     }
 }
-
 int main()
 {
 	std::vector<monster::info_monster> array;
-    for (unsigned i = 0; i < 7; i++)
+
+    for (long i = 0; i < 6000; i++)
     {
-        array.push_back(monster::info_monster("name", 7 - i, 7 - i, 0.1, monster::types_of_attack::CURE, array));
+        array.push_back(monster::info_monster("name", 1, 2, 0.3, monster::types_of_attack::CURE, array));
     }
-    array.push_back(monster::info_monster("name", 10, 1, 0.1, monster::types_of_attack::CURE, array));
+    array.push_back(monster::info_monster("name", 3, 2, 0.3, monster::types_of_attack::CURE, array));
     key_sorting::Keys keys;
     keys.edit_key(true, 2);
-    key_sorting::write_array(array, keys);
-    //key_sorting::write_array(all_monsters, keys);
-    key_sorting::quick_sort(array, keys, 1);
+    //keys.edit_key(true, 5);
+   // keys.edit_key(true, 0);
+    //keys.edit_key(true, 5);
+   // keys.edit_key(true, 0);
+    //keys.edit_key(true, 2);
+    //keys.edit_key(true, 3);
+    //keys.edit_key(true, 1);
+    //key_sorting::write_array(array, keys);
+   // key_sorting::quick_sort(array, keys, -1);
+   // keys.edit_key(false, 2);
+    key_sorting::quick_sort(array, keys, 0);
+    array.clear();
     keys.clear();
+    std::cout << "\nend" << std::endl;
 	return 0;
 }
 
