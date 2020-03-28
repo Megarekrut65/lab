@@ -3,6 +3,7 @@
 #include <ctime>
 #include <conio.h>
 #include <chrono>
+#include "my_correct_read.h"
 
 namespace monster
 {
@@ -159,6 +160,14 @@ namespace monster
             all_monsters.push_back(info_monster(random_name(), random_hp(), random_damage(), random_chance(), random_type(), random_time(), all_monsters));
         }
         return all_monsters;
+    }
+    void copy(const std::vector<info_monster>& array, std::vector<info_monster>& copy_array)
+    {
+        long size = array.size();
+        for (long i = 0; i < size; i++)
+        {
+            copy_array[i] = array[i];
+        }
     }
 }
 namespace key_sorting
@@ -375,95 +384,92 @@ namespace key_sorting
     }
 }
 namespace other_sorting
-{
-    void count_sort(std::vector<monster::info_monster>& array)
+{     
+    void current_radix_sort(std::vector<monster::info_monster>& array, int exp, int count_size)
     {
         long size = array.size();
-        std::vector<long> count(4, 0);          
-        for (long i = 0; i < size; i++)
-        {
-            switch (array[i].type_of_attack)
-            {
-            case monster::types_of_attack::INCREASE:count[0]++;
-                break;
-            case monster::types_of_attack::REPEAT:count[1]++;
-                break;
-            case monster::types_of_attack::CURE:count[2]++;
-                break;
-            case monster::types_of_attack::PARALYZE:count[3]++;
-                break;
-            }
-        }        
-        long k = 0;
-        for (unsigned i = 0; i < 4; i++) 
-        {
-            for (long j = 0; j < count[i]; j++)
-            {
-                switch (i)
-                {
-                case 0: array[k++].type_of_attack = monster::types_of_attack::INCREASE;
-                    break;
-                case 1: array[k++].type_of_attack = monster::types_of_attack::REPEAT;
-                    break;
-                case 2: array[k++].type_of_attack = monster::types_of_attack::CURE;
-                    break;
-                case 3: array[k++].type_of_attack = monster::types_of_attack::PARALYZE;
-                    break;
-                }
-            }          
-        }
-        count.clear();
-    }
-    template<class T>
-    unsigned max_item(std::vector<T>& array)
-    {
-        long size = array.size();
-        T max = array[0];
-        for (long i = 1; i < size; i++)
-        {
-            if (array[i] > max)
-            {
-                max = array[i];
-            }               
-        }            
-        return max;
-    }
-    void current_count_sort(std::vector<unsigned> array, int exp, int count_size)
-    {
-        long size = array.size();
-        std::vector<unsigned> result(size);
+        std::vector<monster::info_monster> result(size);
         std::vector<unsigned> count(count_size, 0);
-        // Counting occurence of digits
         for (long i = 0; i < size; i++)
         {
-            count[(array[i] / exp) % count_size]++;
+            count[(array[i].hp / exp) % count_size]++;
         }
-        // Changing the position of count so that it appears at actual position in result.
         for (long i = 1; i < count_size; i++)
         {
             count[i] += count[i - 1];
-        }           
-        // Resultant output array
+        }
         for (long i = size - 1; i >= 0; i--)
         {
-            result[count[(array[i] / exp) % count_size] - 1] = array[i];
-            count[(array[i] / exp) % count_size]--;
+            result[count[(array[i].hp / exp) % count_size] - 1] = array[i];
+            count[(array[i].hp / exp) % count_size]--;
         }
         for (long i = 0; i < size; i++)
         {
             array[i] = result[i];
-        }            
+        }
+        result.clear();
+        count.clear();
     }
-
-    // Radix Sort to sort a[] of given size.
-    void radix_sort(std::vector<unsigned> array)
+    unsigned max_hp(std::vector<monster::info_monster>& array)
     {
-        unsigned exp, i;
-        i = max_item(array);
-        for (exp = 1; i / exp > 0; exp *= 10)
+        long size = array.size();
+        unsigned max = array[0].hp;
+        for (long i = 1; i < size; i++)
         {
-            current_count_sort(array, exp, 10);
-        }          
+            if (array[i].hp > max)
+            {
+                max = array[i].hp;
+            }
+        }
+        return max;
+    }
+    void radix_sort(std::vector<monster::info_monster>& array)
+    {
+        long size = array.size();
+        unsigned max = max_hp(array);
+        for (unsigned exp = 1; max / exp > 0; exp *= 10)
+        {
+            current_radix_sort(array, exp, 10);
+        }
+    }
+    int types_of_attack_to_int(monster::types_of_attack& type)
+    {
+        switch (type)
+        {
+        case monster::types_of_attack::INCREASE: return 0;
+            break;
+        case monster::types_of_attack::REPEAT: return 1;
+            break;
+        case monster::types_of_attack::CURE: return 2;
+            break;
+        case monster::types_of_attack::PARALYZE: return 3;
+            break;
+        }
+    }
+    void count_sort(std::vector<monster::info_monster>& array)
+    {
+        long size = array.size();
+        std::vector<monster::info_monster> result(size);
+        std::vector<int> count(4, 0);
+        for (long i = 0; i < size; i++)
+        {
+            count[types_of_attack_to_int(array[i].type_of_attack)]++;
+        }
+        for (int i = 1; i < 4; i++)
+        {
+            count[i] += count[i - 1];
+        }
+        for (long i = size - 1; i >= 0; i--)
+        {
+            result[count[types_of_attack_to_int(array[i].type_of_attack)] - 1] = array[i];
+            count[types_of_attack_to_int(array[i].type_of_attack)]--;
+        }
+        for (long i = 0; i < size; i++)
+        {
+            array[i] = result[i];
+        }
+        result.clear();
+        count.clear();
     }
 }
 void write_keys(key_sorting::Keys keys, bool choose)
@@ -558,16 +564,44 @@ key_sorting::Keys choose_keys_menu()
     }
     return keys;
 }
+void demo_key_sort(const std::vector<monster::info_monster>& array, key_sorting::Keys keys, long frequency)
+{
+    if (keys.give_min_priority() > 6) keys.edit_key(true, 0);
+    std::cout << "\nQuick sort by the selected keys." << std::endl;
+    std::vector<monster::info_monster> copy_array(array.size());
+    monster::copy(array, copy_array);
+    key_sorting::quick_sort(copy_array, keys, frequency);
+    copy_array.clear();
+}
+void demo_other_sorts(const std::vector<monster::info_monster>& array, long frequency)
+{
+    key_sorting::Keys keys;
+    keys.edit_key(true, 5);
+    std::cout << "\nCount sort by type of attack." << std::endl;
+    std::vector<monster::info_monster> copy_array(array.size());
+    monster::copy(array, copy_array);
+    other_sorting::count_sort(copy_array);
+    if (frequency != 0) key_sorting::write_array(copy_array, keys);
+    keys.edit_key(false, 5);
+    keys.edit_key(true, 2);
+    std::cout << "\nRadix sort by hp." << std::endl;
+    monster::copy(array, copy_array);
+    other_sorting::radix_sort(copy_array);
+    if (frequency != 0) key_sorting::write_array(copy_array, keys);
+    copy_array.clear();
+    keys.clear();
+    std::cout << std::endl;
+}
 void demo_mode()
 {
     long size, frequency;
-    size = 10;// correct::read_long("size of array");
+    size = correct::read_long("size of array");
     if (size < 0)
     {
         std::cout << "\nThe size can`t be < 0!\n" << std::endl;
         return;
     }
-    frequency = -1; // correct::read_long("the frequency of the array to display:\n('-1' - to show only the last step, '0' - not to show sorting steps,\n'1 - ...' - the number of steps through which the array will be displayed)");
+    frequency = correct::read_long("the frequency of the array to display:\n('-1' - to show only the last step, '0' - not to show sorting steps,\n'1 - ...' - the number of steps through which the array will be displayed)");
     if (frequency < -1)
     {
         std::cout << "\nThe frequency can`t be < -1!\n" << std::endl;
@@ -575,36 +609,18 @@ void demo_mode()
     }
     std::vector<monster::info_monster> array;
     array = monster::monsters_generator(size);
+    std::cout << "\nPress '1' if you want to see the array or enter another key if you don`t want that.";
+    if(_getch() == '1') monster::write_monsters(array);
     std::cout << std::endl;
     key_sorting::Keys keys = choose_keys_menu();
-    key_sorting::quick_sort(array, keys, frequency);
+    demo_key_sort(array, keys, frequency);   
+    demo_other_sorts(array, frequency);
     keys.clear();
     array.clear();
 }
-void test_copy(const std::vector<monster::info_monster>& array)
-{
-    auto the_start = std::chrono::high_resolution_clock::now();
-    auto the_end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<float> duration;
-    the_start = std::chrono::high_resolution_clock::now();
-    long size = array.size();
-    std::vector<unsigned> copy(size);
-    for (long i = 0; i < size; i++)
-    {
-        copy[i] = array[i].hp;
-    }
-    the_end = std::chrono::high_resolution_clock::now();
-    duration = the_end - the_start;
-    std::cout << "time: " << duration.count() << std::endl;
-}
 void benchmark_mode()
 {
-    std::vector<monster::info_monster> array;
-    key_sorting::Keys keys;
-    keys.edit_key(true, 2);
-    array = monster::monsters_generator(60000);
-    test_copy(array);
-    array.clear();
+
 }
 int main()
 {

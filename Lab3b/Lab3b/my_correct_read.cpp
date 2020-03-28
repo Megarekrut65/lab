@@ -5,7 +5,7 @@
 namespace correct
 {
     double read_double(const std::string& sentence)
-    {   
+    {
         while (true)
         {
             std::cout << "\nEnter " << sentence << ": ";

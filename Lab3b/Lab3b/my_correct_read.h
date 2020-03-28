@@ -1,7 +1,6 @@
 #pragma once
 #include "my_correct_read.h"
 #include <string>
-
 namespace correct
 {
 	double read_double(const std::string&);
