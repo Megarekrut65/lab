@@ -618,9 +618,65 @@ void demo_mode()
     keys.clear();
     array.clear();
 }
+void clear_result_files(const std::string& name_of_set)
+{
+    const int number_of_files = 5;
+    std::string paths[number_of_files] = { "Bubble sort", "Quick sort",
+        "Merge sort", "Library sort", "Combined sort" };
+    for (int i = 0; i < number_of_files; i++)
+    {
+        std::ofstream file(name_of_set + paths[i] + ".txt");
+        file.close();
+    }
+}
 void benchmark_mode()
 {
-
+    clear_result_files(name_of_set);
+    const int number_of_sorts = 4;
+    void(*all_sorts[number_of_sorts])(int*, long, long) = { sorting::bubble_sort, sorting::quick_sort,
+    sorting::merge_sort_topdown, sorting::library_sort };
+    std::string name_of_sorts[number_of_sorts] = { "Bubble sort", "Quick sort", "Merge sort", "Library sort" };
+    bool is_one_second = false, are_ten_seconds = false, long_bubble = false, once = true;
+    long size = 1000;
+    long copy_size = size, coefficient = 2;
+    int max_threshold = 15;
+    int max_value = 30000;
+    while (true)
+    {
+        int* array = array_generator(size, max_value, set);
+        float time;
+        cout << "\nSize of array = " << size << endl << endl;
+        for (int i = 0; i < number_of_sorts; i++)
+        {
+            if (long_bubble && (i == 0)) continue;
+            time = measurement_sort(all_sorts[i], array, size, name_of_sorts[i], name_of_set);
+            if (time > 1) is_one_second = true;
+            if ((time > 10) && (i != 0)) are_ten_seconds = true;
+            if (time > 10) long_bubble = true;
+        }
+        cout << endl;
+        for (long j = 5; j < max_threshold; j++)
+        {
+            time = measurement_combined(array, size, j, name_of_set);
+            if (time > 1) is_one_second = true;
+            if (time > 10) are_ten_seconds = true;
+        }
+        if (once && long_bubble)
+        {
+            is_one_second = false;
+            copy_size = size;
+            coefficient = 2;
+            once = false;
+        }
+        size = set_size(is_one_second, copy_size, coefficient);
+        delete[] array;
+        array = nullptr;
+        if (are_ten_seconds) break;
+    }
+    cout << "\nResults of measurements of program in the following files:\n"
+        << name_of_set + name_of_sorts[0] + ".txt\n" << name_of_set + name_of_sorts[1] + ".txt\n"
+        << name_of_set + name_of_sorts[2] + ".txt\n" << name_of_set + name_of_sorts[3] + ".txt\n"
+        << name_of_set + "Combined sort.txt\n" << endl;
 }
 int main()
 {

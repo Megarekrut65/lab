@@ -133,7 +133,7 @@ void clear_result_files(const std::string& name_of_set)
     {
         std::ofstream file(name_of_set+paths[i]+".txt");
         file.close();
-;   }
+    }
 }
 float measurement_sort(void sort(int*, long, long), int* array, long size, const std::string& name_of_sort, const std::string& name_of_set)//measures the sort time of an array
 {
