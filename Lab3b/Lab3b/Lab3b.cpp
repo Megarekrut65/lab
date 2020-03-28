@@ -4,6 +4,7 @@
 #include <conio.h>
 #include <chrono>
 #include "my_correct_read.h"
+#include <fstream>
 
 namespace monster
 {
@@ -423,7 +424,7 @@ namespace other_sorting
         }
         return max;
     }
-    void radix_sort(std::vector<monster::info_monster>& array)
+    void radix_sort(std::vector<monster::info_monster>& array, key_sorting::Keys keys, long frequency)
     {
         long size = array.size();
         unsigned max = max_hp(array);
@@ -431,6 +432,7 @@ namespace other_sorting
         {
             current_radix_sort(array, exp, 10);
         }
+        if (frequency != 0) key_sorting::write_array(array, keys);
     }
     int types_of_attack_to_int(monster::types_of_attack& type)
     {
@@ -445,8 +447,9 @@ namespace other_sorting
         case monster::types_of_attack::PARALYZE: return 3;
             break;
         }
+        return 0;
     }
-    void count_sort(std::vector<monster::info_monster>& array)
+    void count_sort(std::vector<monster::info_monster>& array, key_sorting::Keys keys, long frequency)
     {
         long size = array.size();
         std::vector<monster::info_monster> result(size);
@@ -470,8 +473,14 @@ namespace other_sorting
         }
         result.clear();
         count.clear();
+        if (frequency != 0) key_sorting::write_array(array, keys);
     }
 }
+struct measurement_result
+{
+    long size;
+    float time;
+};
 void write_keys(key_sorting::Keys keys, bool choose)
 {
     const int number_of_keys = 7;
@@ -527,7 +536,7 @@ key_sorting::Keys choose_keys_menu()
     key_sorting::Keys keys;
     std::string regime = "\nChoose ";
     bool choose = true;
-    while (priority != 7)
+    while (true)
     {
         if (choose) regime = "\nChoose ";
         else regime = "\nRemove ";
@@ -537,7 +546,7 @@ key_sorting::Keys choose_keys_menu()
         write_keys(keys, choose);
         if (choose) std::cout << "8)Remove sort key.\n";
         else std::cout << "8)Choose sort key.\n";
-        std::cout << "0)Start sorting."<< std::endl;
+        std::cout << "0)Save keys."<< std::endl;
         std::cout << std::endl;
         switch (_getch())
         {
@@ -557,7 +566,11 @@ key_sorting::Keys choose_keys_menu()
             break;
         case '8': choose = !choose;
             break;
-        case '0': return keys;
+        case '0': 
+        {
+            if (keys.give_min_priority() > 6) keys.edit_key(true, 0);
+            return keys;
+        }
             break;
         default: std::cout << "\nPress the correct key!\n" << std::endl;
         }
@@ -566,7 +579,6 @@ key_sorting::Keys choose_keys_menu()
 }
 void demo_key_sort(const std::vector<monster::info_monster>& array, key_sorting::Keys keys, long frequency)
 {
-    if (keys.give_min_priority() > 6) keys.edit_key(true, 0);
     std::cout << "\nQuick sort by the selected keys." << std::endl;
     std::vector<monster::info_monster> copy_array(array.size());
     monster::copy(array, copy_array);
@@ -580,14 +592,12 @@ void demo_other_sorts(const std::vector<monster::info_monster>& array, long freq
     std::cout << "\nCount sort by type of attack." << std::endl;
     std::vector<monster::info_monster> copy_array(array.size());
     monster::copy(array, copy_array);
-    other_sorting::count_sort(copy_array);
-    if (frequency != 0) key_sorting::write_array(copy_array, keys);
+    other_sorting::count_sort(copy_array, keys, frequency);
     keys.edit_key(false, 5);
     keys.edit_key(true, 2);
     std::cout << "\nRadix sort by hp." << std::endl;
     monster::copy(array, copy_array);
-    other_sorting::radix_sort(copy_array);
-    if (frequency != 0) key_sorting::write_array(copy_array, keys);
+    other_sorting::radix_sort(copy_array, keys, frequency);
     copy_array.clear();
     keys.clear();
     std::cout << std::endl;
@@ -618,65 +628,164 @@ void demo_mode()
     keys.clear();
     array.clear();
 }
-void clear_result_files(const std::string& name_of_set)
-{
-    const int number_of_files = 5;
-    std::string paths[number_of_files] = { "Bubble sort", "Quick sort",
-        "Merge sort", "Library sort", "Combined sort" };
+void clear_result_files(std::string name_of_set[], const int number_of_files)
+{ 
     for (int i = 0; i < number_of_files; i++)
     {
-        std::ofstream file(name_of_set + paths[i] + ".txt");
+        std::ofstream file(name_of_set[i] + ".txt");
         file.close();
     }
 }
-void benchmark_mode()
+std::string create_keys_string(key_sorting::Keys keys)
 {
-    clear_result_files(name_of_set);
-    const int number_of_sorts = 4;
-    void(*all_sorts[number_of_sorts])(int*, long, long) = { sorting::bubble_sort, sorting::quick_sort,
-    sorting::merge_sort_topdown, sorting::library_sort };
-    std::string name_of_sorts[number_of_sorts] = { "Bubble sort", "Quick sort", "Merge sort", "Library sort" };
-    bool is_one_second = false, are_ten_seconds = false, long_bubble = false, once = true;
-    long size = 1000;
+    std::string keys_string = "";
+    for (int i = 6; i >= keys.give_min_priority(); i--)
+    {
+        switch (keys.give_index(i))
+        {
+        case 0: keys_string += " ID";
+            break;
+        case 1: keys_string += " Name";
+            break;
+        case 2: keys_string += " HP";
+            break;
+        case 3: keys_string += " Damage";
+            break;
+        case 4: keys_string += " Chance";
+            break;
+        case 5: keys_string += " Type";
+            break;
+        case 6: keys_string += " Time and date";
+            break;
+        }
+    }
+    keys_string += ".";
+
+    return keys_string;
+}
+void add_result_to_file(measurement_result result, key_sorting::Keys keys, const std::string& path)
+{
+    std::ofstream file(path + ".txt", std::ios_base::app);
+    file << "Size = " << result.size << "." << std::endl;
+    file << "Time = " << result.time << "." << std::endl;
+    file << "Keys:" << create_keys_string(keys) << std::endl;
+    file.close();
+}
+float measurement_sort(void sort(std::vector<monster::info_monster>&, key_sorting::Keys, long), const std::vector<monster::info_monster>& array, key_sorting::Keys keys, const std::string& name_of_sort)//measures the sort time of an array
+{
+    long size = array.size();
+    std::vector<monster::info_monster> copy_array(size);
+    monster::copy(array, copy_array);
+    auto the_start = std::chrono::high_resolution_clock::now();
+    auto the_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> duration;
+    the_start = std::chrono::high_resolution_clock::now();
+    sort(copy_array, keys, 0);
+    the_end = std::chrono::high_resolution_clock::now();
+    duration = the_end - the_start;
+    measurement_result result;
+    result.size = size;
+    result.time = duration.count();
+    add_result_to_file(result, keys, name_of_sort);
+    std::cout << "Time of " << name_of_sort << " = " << result.time << std::endl;
+    std::cout << "Keys:" << create_keys_string(keys) << std::endl;
+    copy_array.clear();
+    return result.time;
+}
+long set_size(bool is_one_second, long& copy_size, long& coefficient)//resizes depending on condition
+{
+    if (is_one_second)
+    {
+        return coefficient++ * copy_size;
+    }
+    else
+    {
+        return copy_size *= 2;
+    }
+}
+void benchmark_sorts(std::vector<key_sorting::Keys> keys)
+{
+    const int number_of_keys = keys.size();
+    const int number_of_sorts = 3;
+    std::string name_of_sorts[number_of_sorts] = {"Quick sort", "Count sort", "Radix sort" };
+    clear_result_files(name_of_sorts, number_of_sorts);   
+    void(*all_sorts[number_of_sorts])(std::vector<monster::info_monster>&, key_sorting::Keys, long) = { 
+        key_sorting::quick_sort, other_sorting::count_sort, other_sorting::radix_sort}; 
+    bool is_one_second = false, are_ten_seconds = false;
+    long size = 10;
     long copy_size = size, coefficient = 2;
-    int max_threshold = 15;
-    int max_value = 30000;
     while (true)
     {
-        int* array = array_generator(size, max_value, set);
-        float time;
-        cout << "\nSize of array = " << size << endl << endl;
+        std::vector<monster::info_monster> array;
+        std::cout << "\nWait for the monsters to be created..." << std::endl;
+        array = monster::monsters_generator(size);      
+        std::cout << "\nMonsters created!" << std::endl;
+        float time = 0;
+        std::cout << "\nSize of array = " << size << std::endl << std::endl;
         for (int i = 0; i < number_of_sorts; i++)
         {
-            if (long_bubble && (i == 0)) continue;
-            time = measurement_sort(all_sorts[i], array, size, name_of_sorts[i], name_of_set);
-            if (time > 1) is_one_second = true;
-            if ((time > 10) && (i != 0)) are_ten_seconds = true;
-            if (time > 10) long_bubble = true;
+            if (i == 0)
+            {
+                for (int j = 0; j < (number_of_keys - 2); j++)
+                {
+                    time = measurement_sort(all_sorts[i], array, keys[j], name_of_sorts[i]);
+                    if (time > 1) is_one_second = true;
+                    if (time > 10) are_ten_seconds = true;
+                }
+            }
+            else
+            {
+                time = measurement_sort(all_sorts[i], array, keys[number_of_keys - 3 + i], name_of_sorts[i]);
+                if (time > 1) is_one_second = true;
+                if (time > 10) are_ten_seconds = true;
+            }           
         }
-        cout << endl;
-        for (long j = 5; j < max_threshold; j++)
-        {
-            time = measurement_combined(array, size, j, name_of_set);
-            if (time > 1) is_one_second = true;
-            if (time > 10) are_ten_seconds = true;
-        }
-        if (once && long_bubble)
-        {
-            is_one_second = false;
-            copy_size = size;
-            coefficient = 2;
-            once = false;
-        }
+        std::cout << std::endl;       
         size = set_size(is_one_second, copy_size, coefficient);
-        delete[] array;
-        array = nullptr;
+        array.clear(); 
         if (are_ten_seconds) break;
     }
-    cout << "\nResults of measurements of program in the following files:\n"
-        << name_of_set + name_of_sorts[0] + ".txt\n" << name_of_set + name_of_sorts[1] + ".txt\n"
-        << name_of_set + name_of_sorts[2] + ".txt\n" << name_of_set + name_of_sorts[3] + ".txt\n"
-        << name_of_set + "Combined sort.txt\n" << endl;
+    std::cout << "\nResults of measurements of program in the following files:\n"
+        << name_of_sorts[0] + ".txt\n" << name_of_sorts[1] + ".txt\n"
+        << name_of_sorts[2] + ".txt" << std::endl;
+}
+void benchmark_mode()
+{
+    std::vector<key_sorting::Keys> keys;
+    while (true)
+    {
+        std::cout << "\nMenu:\n1)Add new sort keys.\n2)Start benchmark mode.\n0)Back" << std::endl;
+        switch (_getch())
+        {
+        case '1':  
+        {
+            keys.push_back(choose_keys_menu());
+        }
+            break;
+        case '2': 
+        {
+            key_sorting::Keys keys_for_count, keys_for_radix;
+            keys_for_count.edit_key(true, 5);
+            keys_for_radix.edit_key(true, 2);
+            keys.push_back(keys_for_count);
+            keys.push_back(keys_for_radix);
+            benchmark_sorts(keys);
+        }
+            break;
+        case'0':
+        {
+            for (unsigned i = 0; i < keys.size(); i++)
+            {
+                keys[i].clear();
+            }
+            keys.clear();
+            std::cout << std::endl;
+            return;
+        }
+        break;
+        default: std::cout << "\nPress the correct key!\n" << std::endl;
+        }
+    }
 }
 int main()
 {

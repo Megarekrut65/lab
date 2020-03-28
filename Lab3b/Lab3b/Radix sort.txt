@@ -1,0 +1,63 @@
+Size = 10.
+Time = 0.000495322.
+Keys: HP.
+Size = 20.
+Time = 0.000986795.
+Keys: HP.
+Size = 40.
+Time = 0.00191777.
+Keys: HP.
+Size = 80.
+Time = 0.0034448.
+Keys: HP.
+Size = 160.
+Time = 0.00616651.
+Keys: HP.
+Size = 320.
+Time = 0.00986731.
+Keys: HP.
+Size = 640.
+Time = 0.0192002.
+Keys: HP.
+Size = 1280.
+Time = 0.0372659.
+Keys: HP.
+Size = 2560.
+Time = 0.0778907.
+Keys: HP.
+Size = 5120.
+Time = 0.150625.
+Keys: HP.
+Size = 10240.
+Time = 0.28931.
+Keys: HP.
+Size = 20480.
+Time = 0.611166.
+Keys: HP.
+Size = 40960.
+Time = 1.23712.
+Keys: HP.
+Size = 81920.
+Time = 2.40342.
+Keys: HP.
+Size = 122880.
+Time = 3.56024.
+Keys: HP.
+Size = 163840.
+Time = 4.87837.
+Keys: HP.
+Size = 204800.
+Time = 5.88044.
+Keys: HP.
+Size = 245760.
+Time = 7.10175.
+Keys: HP.
+Size = 286720.
+Time = 8.31552.
+Keys: HP.
+Size = 327680.
+Time = 9.42171.
+Keys: HP.
+Size = 368640.
+Time = 10.638.
+Keys: HP.
