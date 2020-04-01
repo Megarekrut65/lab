@@ -619,7 +619,7 @@ void demo_mode()
     }
     std::vector<monster::info_monster> array;
     array = monster::monsters_generator(size);
-    std::cout << "\nPress '1' if you want to see the array or enter another key if you don`t want that.";
+    std::cout << "\nPress '1' if you want to see the array or press another key if you don`t want that." << std::endl;
     if(_getch() == '1') monster::write_monsters(array);
     std::cout << std::endl;
     key_sorting::Keys keys = choose_keys_menu();
@@ -754,7 +754,7 @@ void benchmark_mode()
     std::vector<key_sorting::Keys> keys;
     while (true)
     {
-        std::cout << "\nMenu:\n1)Add new sort keys.\n2)Start benchmark mode.\n0)Back" << std::endl;
+        std::cout << "\nMenu:\n1)Add new sort keys.\n2)Start benchmark mode." << std::endl;
         switch (_getch())
         {
         case '1':  
@@ -770,10 +770,6 @@ void benchmark_mode()
             keys.push_back(keys_for_count);
             keys.push_back(keys_for_radix);
             benchmark_sorts(keys);
-        }
-            break;
-        case'0':
-        {
             for (unsigned i = 0; i < keys.size(); i++)
             {
                 keys[i].clear();
@@ -782,8 +778,9 @@ void benchmark_mode()
             std::cout << std::endl;
             return;
         }
+            break;
         break;
-        default: std::cout << "\nPress the correct key!\n" << std::endl;
+        default: std::cout << "\nPress the correct key!" << std::endl;
         }
     }
 }

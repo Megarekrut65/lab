@@ -1,0 +1,60 @@
+Size = 10.
+Time = 0.00128065.
+Keys: Type.
+Size = 10.
+Time = 0.000165536.
+Keys: Time and date.
+Size = 20.
+Time = 0.000577448.
+Keys: Type.
+Size = 20.
+Time = 0.000612737.
+Keys: Time and date.
+Size = 40.
+Time = 0.00192419.
+Keys: Type.
+Size = 40.
+Time = 0.00124857.
+Keys: Time and date.
+Size = 80.
+Time = 0.00719501.
+Keys: Type.
+Size = 80.
+Time = 0.00285388.
+Keys: Time and date.
+Size = 160.
+Time = 0.0199066.
+Keys: Type.
+Size = 160.
+Time = 0.00577513.
+Keys: Time and date.
+Size = 320.
+Time = 0.0744709.
+Keys: Type.
+Size = 320.
+Time = 0.0179593.
+Keys: Time and date.
+Size = 640.
+Time = 0.281238.
+Keys: Type.
+Size = 640.
+Time = 0.0319239.
+Keys: Time and date.
+Size = 1280.
+Time = 1.25406.
+Keys: Type.
+Size = 1280.
+Time = 0.0882643.
+Keys: Time and date.
+Size = 2560.
+Time = 4.57229.
+Keys: Type.
+Size = 2560.
+Time = 0.182948.
+Keys: Time and date.
+Size = 3840.
+Time = 10.1583.
+Keys: Type.
+Size = 3840.
+Time = 0.26513.
+Keys: Time and date.
