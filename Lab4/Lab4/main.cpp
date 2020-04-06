@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
-
+#include <conio.h>
+#include <Windows.h>
+#include "my_correct_read.h"
+//¹0 ¹2 ¹3 ¹11 ¹13
 struct Tree_node
 {
 private:
@@ -80,15 +83,6 @@ public:
 	{
 		return parent;
 	}
-	void refresh_new_path(std::size_t old_size_of_path)
-	{
-		children_refresh_path(old_size_of_path);
-		path.clear();		
-	}
-	void set_parent(Tree_node* new_parent)
-	{
-		parent = new_parent;
-	}
 	std::size_t get_size()
 	{
 		return children.size();
@@ -101,6 +95,15 @@ public:
 	{
 		return path;
 	}
+	void refresh_new_path(std::size_t old_size_of_path)
+	{
+		children_refresh_path(old_size_of_path);
+		path.clear();		
+	}
+	void set_parent(Tree_node* new_parent)
+	{
+		parent = new_parent;
+	}	
 	void write_value()
 	{
 		write_path();
@@ -125,7 +128,7 @@ public:
 struct Tree
 {
 private:
-	Tree_node* root;
+	Tree_node* root;	
 	bool add_value_current(Tree_node* node, int value, std::vector<std::size_t>& path, std::size_t index = 0)
 	{
 		if (node == nullptr) return false;
@@ -182,13 +185,18 @@ public:
 	{
 		root = nullptr;
 	}
+	bool is_root()
+	{
+		if (root) return true;
+		return false;
+	}
 	void add_root(int value)
 	{
 		if (root) return;
 		std::vector<std::size_t> path;
 		Tree_node* node = new Tree_node(nullptr, value, path, 0, false);
 		root = node;
-	}	
+	}
 	bool add_value(int value, std::vector<std::size_t>& path)
 	{
 		if (root == nullptr) return false;
@@ -206,7 +214,12 @@ public:
 	}
 	void write_paths(std::vector<Tree_node*> pointers)
 	{
-		std::cout << "Paths:" << std::endl;
+		if (pointers.size() == 0)
+		{
+			std::cout << "\nPointer(s) don't found!" << std::endl;
+			return;
+		}
+		std::cout << "\nPath(s):" << std::endl;
 		for (std::size_t i = 0; i < pointers.size(); i++)
 		{
 			std::cout << i + 1 << ")";
@@ -243,8 +256,220 @@ public:
 		return Tree(child, size_of_path);
 	}
 };
+std::vector<std::size_t> choose_path(Tree& tree, std::vector<Tree_node*>& pointers)
+{
+	while (true)
+	{
+		tree.write_paths(pointers);
+		std::size_t number = correct::read_size_t("number of the path");
+		if (number - 1 < pointers.size())
+		{
+			return pointers[number - 1]->get_path();
+		}
+		else
+		{
+			std::cout << "\nNumber entered incorrect!" << std::endl;
+		}
+	}
+}
+std::vector<std::size_t> create_path()
+{
+	std::size_t size = correct::read_size_t("size of path(path to root - enter 0)");
+	std::vector<std::size_t> path(size);
+	if(size == 0) return path;
+	std::cout << "\nEnter the path\n________\nExample:\n\nEnter:0\n\nEnter:1\n...\n________" << std::endl;
+	for (std::size_t i = 0; i < size; i++)
+	{
+		path[i] = correct::read_size_t("");
+	}
+	return path;
+}
+std::vector<std::size_t> select_path(Tree& tree, std::vector<Tree_node*>& pointers)
+{
+	while (true)
+	{
+		std::cout << "\n1)Create new path.\n2)Choose the path found."<< std::endl;
+		switch (_getch())
+		{
+		case '1':  return create_path();
+			break;
+		case '2': return choose_path(tree, pointers);
+			break;
+		default: std::cout << "\nPress the correct key!" << std::endl;
+		}
+	}
+}
+void add_new_item_to_tree(Tree& tree, std::vector<Tree_node*>& pointers)
+{
+	int value = correct::read_int("the value");
+	if (!tree.is_root())
+	{
+		tree.add_root(value);
+		std::cout << "\nThe root added to tree!" << std::endl;
+		return;
+	}
+	std::vector<std::size_t> path = select_path(tree, pointers);
+	std::size_t size = path.size();
+	if (!tree.add_value(value, path))
+	{
+		std::cout << "\nPath entered incorrect or don't found!" << std::endl;
+		return;
+	}
+	std::cout << "\nThe item added to tree!" << std::endl;
+}
+std::vector<Tree_node*> get_pointer_to_item(Tree& tree)
+{
+	int value = correct::read_int("the value");
+	std::vector<Tree_node*> pointers = tree.find_pointers(value);
+	std::cout << "\nFound " << pointers.size() << " pointer(s)." << std::endl;
+
+	return pointers;
+}
+void get_item_by_path(Tree& tree, std::vector<Tree_node*>& pointers)
+{
+	bool is_found;
+	std::vector<std::size_t> path = select_path(tree, pointers);
+	int value = tree.get_value_by_path(path, is_found);
+	if (is_found)
+	{
+		std::cout << "\nItem found!\nValue = " << value << std::endl;
+	}
+	else
+	{
+		std::cout << "\nItem don't found!" << std::endl;
+	}
+}
+void actions_new_tree(Tree& new_tree)
+{
+	while (true)
+	{
+		std::cout << "\nReceived a new tree!\n1)Edit new tree.\n"
+			      << "0)Back to old tree and delete new tree." << std::endl;
+		switch (_getch())
+		{
+		case '1': 
+		{
+			return;
+		}
+			break;
+		case '2': 
+		{
+			return;
+		}
+			break;
+		default: std::cout << "\nPress the correct key!" << std::endl;
+		}
+	}
+	
+}
+void remove_sub_tree_by_path(Tree& tree, std::vector<Tree_node*>& pointers)
+{
+	bool is_remove;
+	std::vector<std::size_t> path = select_path(tree, pointers);
+	Tree new_tree = tree.remove_sub_tree(path, is_remove);
+	if (is_remove)
+	{
+		std::cout << "\nItem removed!"<< std::endl;
+		actions_new_tree(new_tree);
+	}
+	else
+	{
+		std::cout << "\nItem don't found!" << std::endl;
+	}
+}
+void tree_menu(Tree& tree)
+{
+	std::vector<Tree_node*> pointers;
+	while (true)
+	{
+		std::cout << "\nGeneral tree:\n1)Add new item to tree.\n2)Get the pointers to item.\n"
+			      << "3)Get the path of item by pointer.\n4)Get the item by path.\n"
+			      << "5)Write all tree\n6)Remove sub-tree by path.\n0)Back."<< std::endl;
+		switch (_getch())
+		{
+		case '1':  add_new_item_to_tree(tree, pointers);
+			break;
+		case '2': pointers = get_pointer_to_item(tree);
+			break;
+		case '3': tree.write_paths(pointers);
+			break;
+		case '4': get_item_by_path(tree, pointers);
+			break;
+		case '5': tree.write_tree();
+			break;
+		case '6': remove_sub_tree_by_path(tree, pointers);
+			break;
+		case'0':
+		{
+			return;
+		}
+		break;
+		default: std::cout << "\nPress the correct key!" << std::endl;
+		}
+	}
+}
+void binary_tree_menu()
+{
+
+}
+void use_of_trees_menu()
+{
+
+}
+void interactive_dialog_mode()
+{
+	while (true)
+	{
+		std::cout << "\nMenu:\n1)General tree.\n2)Binary tree.\n"
+			<< "3)Use of trees.\n0)Back."
+			<< "" << std::endl;
+		switch (_getch())
+		{
+		case '1':
+		{
+			Tree tree = Tree();
+			tree_menu(tree);
+			//delete tree
+		}
+			break;
+		case '2':
+			break;
+		case '3':
+			break;
+		case'0':
+		{
+			std::cout << std::endl;
+			return;
+		}
+		break;
+		default: std::cout << "\nPress the correct key!" << std::endl;
+		}
+	}	
+}
+void demo_mode()
+{
+
+}
 int main()
 {
-	
+	while (true)
+	{
+		std::cout << "Select the application mode:\n1)Interactive dialog mode.\n"
+			<< "2)Demo mode.\n0)Exit." << std::endl;
+		switch (_getch())
+		{
+		case '1':  interactive_dialog_mode();
+			break;
+		case '2': demo_mode();
+			break;
+		case'0':
+		{
+			std::cout << "\nExit..." << std::endl;
+			return 0;
+		}
+		break;
+		default: std::cout << "\nPress the correct key!\n" << std::endl;
+		}
+	}
 	return 0;
 }
