@@ -7,7 +7,6 @@
 struct Tree_node;
 struct Tree;
 void tree_menu(Tree&);
-
 struct Tree_node
 {
 private:
@@ -328,6 +327,18 @@ public:
 		else this->path = path;
 		this->value = value;
 	}	
+	Binary_node* get_parent()
+	{
+		return parent;
+	}
+	Binary_node* get_left()
+	{
+		return left;
+	}
+	Binary_node* get_right()
+	{
+		return right;
+	}
 	std::vector<Side> get_path()
 	{
 		return path;
@@ -427,6 +438,10 @@ public:
 	{
 		root = nullptr;
 	}
+	Binary_node* get_root()
+	{
+		return root;
+	}
 	void add_to_tree(int value)
 	{
 		if (!root)
@@ -451,6 +466,90 @@ public:
 		root = nullptr;
 	}
 };
+struct Consistent_presentation
+{
+	int value;
+	bool is_left;
+	bool is_right;
+	std::size_t index_of_right;
+	Consistent_presentation()
+	{
+		value = 0;
+		is_left = false;
+		is_right = false;
+		index_of_right = 0;
+	}
+	Consistent_presentation(int value, bool is_left, bool is_right, std::size_t index_of_right)
+	{
+		this->value = value;
+		this->is_left = is_left;
+		this->is_right = is_right;
+		this->index_of_right = index_of_right;
+	}
+};
+void union_arrays(std::vector<Consistent_presentation>& new_tree, std::vector<Consistent_presentation>& right_node)
+{
+	std::size_t size = new_tree.size();
+	for (std::size_t i = 0; i < size; i++)
+	{
+		if (new_tree[i].is_right) new_tree[i].index_of_right += size;
+	}
+	for (std::size_t i = 0; i < right_node.size(); i++)
+	{
+		new_tree.push_back(right_node[i]);
+	}
+}
+void create_consistent_presentation_current(Binary_node* node, std::vector<Consistent_presentation>& new_tree, std::vector<Consistent_presentation>& right_nodes)
+{
+	if (!node) return;
+	bool is_left;
+	bool is_right;
+	std::size_t index_of_right = 0;
+	if (node->get_left()) is_left = true;
+	else is_left = false;
+	if (node->get_right()) is_right = true;
+	else is_right = false;
+	new_tree.push_back(Consistent_presentation(node->get_value(), is_left, is_right, index_of_right));
+	if (is_left)
+	{
+		create_consistent_presentation_current(node->get_left(), new_tree, right_nodes);	
+	}
+	if (is_right)
+	{		
+		std::vector<Consistent_presentation> next_right_nodes;
+		create_consistent_presentation_current(node->get_right(), right_nodes, next_right_nodes);
+		union_arrays(right_nodes, next_right_nodes);
+	}
+}
+void write_consistent_presentation(std::vector<Consistent_presentation>& new_tree)
+{
+	if (new_tree.size() == 0)
+	{
+		std::cout << "\nTree is empty!" << std::endl;
+		return;
+	}
+	std::cout << "\nConsistent presentation of tree:" << std::endl;
+	for (std::size_t i = 0; i < new_tree.size(); i++)
+	{
+		std::cout << "value: " << new_tree[i].value << " index of right: ";
+		if (new_tree[i].is_right) std::cout << new_tree[i].index_of_right;
+		else std::cout << "-1";
+		std::cout << " left: ";
+		if (new_tree[i].is_left) std::cout << "true";
+		else std::cout << "false";
+		std::cout << std::endl;	
+	}
+	std::cout << std::endl;
+}
+std::vector<Consistent_presentation> create_consistent_presentation(Binary_tree& tree)
+{
+	std::vector<Consistent_presentation> new_tree;
+	std::vector<Consistent_presentation> right_nodes;
+	create_consistent_presentation_current(tree.get_root(), new_tree, right_nodes);
+	union_arrays(new_tree, right_nodes);
+
+	return new_tree;
+}
 std::vector<std::size_t> choose_path(Tree& tree, std::vector<Tree_node*>& pointers)
 {
 	while (true)
@@ -593,11 +692,7 @@ void tree_menu(Tree& tree)
 			break;
 		case '6': remove_sub_tree_by_path(tree, pointers);
 			break;
-		case'0':
-		{
-			
-			return;
-		}
+		case'0': return;		
 		break;
 		default: std::cout << "\nPress the correct key!" << std::endl;
 		}
@@ -613,18 +708,21 @@ void binary_tree_menu(Binary_tree& tree)
 {
 	while (true)
 	{
-		std::cout << "\nBinary tree:\n1)Add new item to tree.\n2)Write all tree.\n0)Back." << std::endl;
+		std::cout << "\nBinary tree:\n1)Add new item to tree.\n2)Write all tree.\n"
+				  <<"3)Create consistent presentation of the tree and write it.\n0)Back." << std::endl;
 		switch (_getch())
 		{
 		case '1': binary_add_new_item(tree);
 			break;
 		case '2': tree.write_tree();
-			break;		
-		case'0':
+			break;	
+		case '3': 
 		{
-
-			return;
+			std::vector<Consistent_presentation> new_tree = create_consistent_presentation(tree);
+			write_consistent_presentation(new_tree);
 		}
+			break;
+		case'0': return;
 		break;
 		default: std::cout << "\nPress the correct key!" << std::endl;
 		}
