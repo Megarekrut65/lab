@@ -1,0 +1,3 @@
+Nickname=Water
+Points=20
+Element=water

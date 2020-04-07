@@ -1,0 +1,3 @@
+Nickname=Bogdan
+Points=20
+Element=water

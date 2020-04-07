@@ -4,6 +4,10 @@
 #include <Windows.h>
 #include "my_correct_read.h"
 //¹0 ¹2 ¹3 ¹11 ¹13
+struct Tree_node;
+struct Tree;
+void tree_menu(Tree&);
+
 struct Tree_node
 {
 private:
@@ -11,20 +15,6 @@ private:
 	std::vector<Tree_node*> children;
 	int value;
 	std::vector<std::size_t> path;
-	void write_path()
-	{
-		std::size_t size = path.size();
-		if (size == 0) std::cout << "Root: ";
-		else
-		{
-			std::cout << "Root->";
-			for (std::size_t i = 0; i < size - 1; i++)
-			{
-				std::cout << path[i] << "->";
-			}
-			std::cout << path[size - 1] << ": ";
-		}
-	}
 	std::vector<std::size_t> create_path(std::vector<std::size_t>& path, std::size_t index)
 	{
 		std::vector<std::size_t> array;
@@ -104,6 +94,23 @@ public:
 	{
 		parent = new_parent;
 	}	
+	void write_path(bool show_value = true)
+	{
+		std::string end;
+		if (show_value) end = ": ";
+		else end = ".\n";
+		std::size_t size = path.size();
+		if (size == 0) std::cout << "Root" + end;
+		else
+		{
+			std::cout << "Root->";
+			for (std::size_t i = 0; i < size - 1; i++)
+			{
+				std::cout << path[i] << "->";
+			}
+			std::cout << path[size - 1] << end;
+		}
+	}
 	void write_value()
 	{
 		write_path();
@@ -123,6 +130,16 @@ public:
 		children[index] = nullptr;
 		children.erase(children.begin() + index);
 		return child;
+	}
+	void delete_all_children()
+	{
+		for (std::size_t i = 0; i < children.size(); i++)
+		{
+			if (children[i]->children.size() != 0) children[i]->delete_all_children();
+			children[i]->parent = nullptr;
+			delete children[i];
+			children.erase(children.begin() + i);
+		}		
 	}
 };
 struct Tree
@@ -202,14 +219,25 @@ public:
 		if (root == nullptr) return false;
 		return add_value_current(root, value, path);		
 	}
+	bool is_empty()
+	{
+		if (!root)
+		{
+			std::cout << "\nThe tree is empty!" << std::endl;
+			return true;
+		}
+		return false;
+	}
 	void write_tree()
 	{
+		if (is_empty()) return;
+		std::cout << std::endl;
 		write_tree_current(root);
 	}
 	std::vector<Tree_node*> find_pointers(int value)
 	{
 		std::vector<Tree_node*> pointers;
-		find_pointers_current(root, value, pointers);
+		if (!is_empty()) find_pointers_current(root, value, pointers);	
 		return pointers;
 	}
 	void write_paths(std::vector<Tree_node*> pointers)
@@ -223,7 +251,7 @@ public:
 		for (std::size_t i = 0; i < pointers.size(); i++)
 		{
 			std::cout << i + 1 << ")";
-			pointers[i]->write_value();
+			pointers[i]->write_path(false);
 		}
 	}
 	int get_value_by_path(std::vector<std::size_t>& path, bool& is_found)
@@ -236,6 +264,7 @@ public:
 	}
 	Tree remove_sub_tree(std::vector<std::size_t>& path, bool& is_remove)
 	{		
+		if (!root) return Tree();
 		is_remove = true;
 		std::size_t size_of_path = path.size();
 		if (size_of_path == 0)
@@ -255,11 +284,90 @@ public:
 		Tree_node* child = current->get_parent()->remove_child(index);		
 		return Tree(child, size_of_path);
 	}
+	void clear_tree()
+	{
+		if (is_empty()) return;
+		root->delete_all_children();
+		delete root;
+		root = nullptr;
+	}
+};
+struct Binary_node
+{
+private:
+	Binary_node* parent;
+	Binary_node* left;
+	Binary_node* right;
+	int value;
+public:
+	Binary_node()
+	{
+		parent = nullptr;
+		left = nullptr;
+		right = nullptr;
+		value = 0;
+	}
+	Binary_node(Binary_node* parent, Binary_node* left, Binary_node* right, int value)
+	{
+		this->parent = parent;
+		this->left = left;
+		this->right = right;
+		this->value = value;
+	}	
+	int get_value()
+	{
+		return value;
+	}
+	void add_to_tree_current(Binary_node* node, int value)
+	{
+		if (value < node->value)
+		{
+			if (!node->left)
+			{
+				Binary_node* new_node = new Binary_node(node, nullptr, nullptr, value);
+				node->left = new_node;
+				return;
+			}
+			add_to_tree_current(node->left, value);
+		}
+		else
+		{
+			if (!node->right)
+			{
+				Binary_node* new_node = new Binary_node(node, nullptr, nullptr, value);
+				node->right = new_node;
+				return;
+			}
+			add_to_tree_current(node->right, value);
+		}
+	}
+};
+struct Binary_tree
+{
+private:
+	Binary_node* root;
+public:
+	Binary_tree()
+	{
+		root = nullptr;
+	}
+
+	void add_to_tree(int value)
+	{
+		if (!root)
+		{
+			Binary_node* new_node = new Binary_node(nullptr, nullptr, nullptr, value);
+			root = new_node;
+			return;
+		}
+		root->add_to_tree_current(root, value);
+	}
+	
 };
 std::vector<std::size_t> choose_path(Tree& tree, std::vector<Tree_node*>& pointers)
 {
 	while (true)
-	{
+	{		
 		tree.write_paths(pointers);
 		std::size_t number = correct::read_size_t("number of the path");
 		if (number - 1 < pointers.size())
@@ -293,7 +401,11 @@ std::vector<std::size_t> select_path(Tree& tree, std::vector<Tree_node*>& pointe
 		{
 		case '1':  return create_path();
 			break;
-		case '2': return choose_path(tree, pointers);
+		case '2': 
+		{
+			if (pointers.size() != 0) return choose_path(tree, pointers);
+			else std::cout << "\nThe pointer(s) don't found!" << std::endl;;
+		}
 			break;
 		default: std::cout << "\nPress the correct key!" << std::endl;
 		}
@@ -347,30 +459,26 @@ void actions_new_tree(Tree& new_tree)
 			      << "0)Back to old tree and delete new tree." << std::endl;
 		switch (_getch())
 		{
-		case '1': 
-		{
-			return;
-		}
+		case '1': tree_menu(new_tree);			
 			break;
-		case '2': 
-		{
-			return;
-		}
+		case '0': return;
 			break;
 		default: std::cout << "\nPress the correct key!" << std::endl;
 		}
 	}
-	
 }
 void remove_sub_tree_by_path(Tree& tree, std::vector<Tree_node*>& pointers)
 {
-	bool is_remove;
+	bool is_remove = false;
 	std::vector<std::size_t> path = select_path(tree, pointers);
 	Tree new_tree = tree.remove_sub_tree(path, is_remove);
 	if (is_remove)
 	{
-		std::cout << "\nItem removed!"<< std::endl;
+		std::cout << "\nItem removed and pointers to all items cleared!"<< std::endl;
+		pointers.clear();
 		actions_new_tree(new_tree);
+		new_tree.clear_tree();
+		std::cout << "\nOld Tree:" << std::endl;
 	}
 	else
 	{
@@ -401,6 +509,7 @@ void tree_menu(Tree& tree)
 			break;
 		case'0':
 		{
+			
 			return;
 		}
 		break;
@@ -429,7 +538,7 @@ void interactive_dialog_mode()
 		{
 			Tree tree = Tree();
 			tree_menu(tree);
-			//delete tree
+			tree.clear_tree();
 		}
 			break;
 		case '2':
