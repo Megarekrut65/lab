@@ -382,7 +382,7 @@ public:
 		{
 			switch (path[i])
 			{
-			case Side::LEFT: std::cout << "left->";
+			case Side::LEFT: std::cout << "left-->";
 				break;
 			case Side::RIGHT: std::cout << "right->";
 				break;
@@ -487,69 +487,7 @@ struct Consistent_presentation
 		this->index_of_right = index_of_right;
 	}
 };
-void union_arrays(std::vector<Consistent_presentation>& new_tree, std::vector<Consistent_presentation>& right_node)
-{
-	std::size_t size = new_tree.size();
-	for (std::size_t i = 0; i < size; i++)
-	{
-		if (new_tree[i].is_right) new_tree[i].index_of_right += size;
-	}
-	for (std::size_t i = 0; i < right_node.size(); i++)
-	{
-		new_tree.push_back(right_node[i]);
-	}
-}
-void create_consistent_presentation_current(Binary_node* node, std::vector<Consistent_presentation>& new_tree, std::vector<Consistent_presentation>& right_nodes)
-{
-	if (!node) return;
-	bool is_left;
-	bool is_right;
-	std::size_t index_of_right = 0;
-	if (node->get_left()) is_left = true;
-	else is_left = false;
-	if (node->get_right()) is_right = true;
-	else is_right = false;
-	new_tree.push_back(Consistent_presentation(node->get_value(), is_left, is_right, index_of_right));
-	if (is_left)
-	{
-		create_consistent_presentation_current(node->get_left(), new_tree, right_nodes);	
-	}
-	if (is_right)
-	{		
-		std::vector<Consistent_presentation> next_right_nodes;
-		create_consistent_presentation_current(node->get_right(), right_nodes, next_right_nodes);
-		union_arrays(right_nodes, next_right_nodes);
-	}
-}
-void write_consistent_presentation(std::vector<Consistent_presentation>& new_tree)
-{
-	if (new_tree.size() == 0)
-	{
-		std::cout << "\nTree is empty!" << std::endl;
-		return;
-	}
-	std::cout << "\nConsistent presentation of tree:" << std::endl;
-	for (std::size_t i = 0; i < new_tree.size(); i++)
-	{
-		std::cout << "value: " << new_tree[i].value << " index of right: ";
-		if (new_tree[i].is_right) std::cout << new_tree[i].index_of_right;
-		else std::cout << "-1";
-		std::cout << " left: ";
-		if (new_tree[i].is_left) std::cout << "true";
-		else std::cout << "false";
-		std::cout << std::endl;	
-	}
-	std::cout << std::endl;
-}
-std::vector<Consistent_presentation> create_consistent_presentation(Binary_tree& tree)
-{
-	std::vector<Consistent_presentation> new_tree;
-	std::vector<Consistent_presentation> right_nodes;
-	create_consistent_presentation_current(tree.get_root(), new_tree, right_nodes);
-	union_arrays(new_tree, right_nodes);
 
-	return new_tree;
-}
 std::vector<std::size_t> choose_path(Tree& tree, std::vector<Tree_node*>& pointers)
 {
 	while (true)
@@ -698,6 +636,59 @@ void tree_menu(Tree& tree)
 		}
 	}
 }
+void create_consistent_presentation_current(Binary_node* node, std::vector<Consistent_presentation>& new_tree, bool will_right, std::size_t index_of_parent)
+{
+	if (!node) return;
+	if (will_right) new_tree[index_of_parent].index_of_right = new_tree.size();
+	bool is_left;
+	bool is_right;
+	if (node->get_left()) is_left = true;
+	else is_left = false;
+	if (node->get_right()) is_right = true;
+	else is_right = false;
+	std::size_t index = new_tree.size();
+	new_tree.push_back(Consistent_presentation(node->get_value(), is_left, is_right, 0));
+	if (is_left)
+	{
+		std::cout << "left: true" << std::endl;
+		std::cout << "value: " << node->get_value() << std::endl;
+		create_consistent_presentation_current(node->get_left(), new_tree, false, 0);
+	}
+	if (is_right)
+	{
+		std::cout << "right: true" << std::endl;
+		std::cout << "value: " << node->get_value() << std::endl;
+		create_consistent_presentation_current(node->get_right(), new_tree, true, index);
+	}
+}
+void write_consistent_presentation(std::vector<Consistent_presentation>& new_tree)
+{
+	if (new_tree.size() == 0)
+	{
+		std::cout << "\nTree is empty!" << std::endl;
+		return;
+	}
+	std::cout << "\nConsistent presentation of tree:" << std::endl;
+	for (std::size_t i = 0; i < new_tree.size(); i++)
+	{
+		std::cout << i << ")value: " << new_tree[i].value << ". index of right: ";
+		if (new_tree[i].is_right) std::cout << new_tree[i].index_of_right;
+		else std::cout << "-1";
+		std::cout << ". left: ";
+		if (new_tree[i].is_left) std::cout << "true.";
+		else std::cout << "false.";
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+}
+std::vector<Consistent_presentation> create_consistent_presentation(Binary_tree& tree)
+{
+	std::vector<Consistent_presentation> new_tree;
+	std::size_t index_of_parent = 0;
+	create_consistent_presentation_current(tree.get_root(), new_tree, false, index_of_parent);
+
+	return new_tree;
+}
 void binary_add_new_item(Binary_tree& tree)
 {
 	int value = correct::read_int("the value");
@@ -720,6 +711,7 @@ void binary_tree_menu(Binary_tree& tree)
 		{
 			std::vector<Consistent_presentation> new_tree = create_consistent_presentation(tree);
 			write_consistent_presentation(new_tree);
+			new_tree.clear();
 		}
 			break;
 		case'0': return;
@@ -949,9 +941,64 @@ namespace all_demo_mode
 		{
 			std::cout << "\nItem don't found!" << std::endl;
 		}
+	}	
+	void demo_binary_add_new_item(unsigned delay, Binary_tree& tree, int value)
+	{
+		std::cout << "\nBinary tree:\n1)Add new item to tree. <-press\n2)Write all tree.\n"
+			<< "3)Create consistent presentation of the tree and write it.\n0)Back." << std::endl;
+		Sleep(delay);
+		std::cout << "\nEnter the value: <-write the value and press <Enter>" << std::endl;
+		Sleep(delay);
+		std::cout << "Enter the value: " << value << std::endl;
+		tree.add_to_tree(value);
+		std::cout << "\nItem added to tree!" << std::endl;
+		Sleep(delay);
+	}
+	void demo_binary_write_tree(unsigned delay, Binary_tree& tree)
+	{
+		std::cout << "\nBinary tree:\n1)Add new item to tree.\n2)Write all tree. <-press\n"
+			<< "3)Create consistent presentation of the tree and write it.\n0)Back." << std::endl;
+		Sleep(delay);
+		tree.write_tree();
+		Sleep(delay);
+	}
+	void demo_create_consistent_presentation(unsigned delay, Binary_tree& tree)
+	{
+		std::cout << "\nBinary tree:\n1)Add new item to tree.\n2)Write all tree.\n"
+			<< "3)Create consistent presentation of the tree and write it. <-press\n0)Back." << std::endl;
+		Sleep(delay);
+		std::vector<Consistent_presentation> new_tree = create_consistent_presentation(tree);
+		write_consistent_presentation(new_tree);
+		new_tree.clear();
+		Sleep(delay);
+	}
+	void demo_binary_tree_menu(unsigned delay)
+	{
+		std::cout << "\nMenu:\n1)General tree.\n2)Binary tree. <-press\n"
+			<< "3)Use of trees.\n0)Back." << std::endl;
+		Sleep(delay);
+	}
+	void binary_demo_mode(unsigned delay)
+	{
+		Binary_tree tree;
+		demo_binary_tree_menu(delay);
+		demo_binary_add_new_item(delay, tree, 3);
+		demo_binary_add_new_item(delay, tree, 4);
+		demo_binary_add_new_item(delay, tree, 5);
+		demo_binary_add_new_item(delay, tree, 2);
+		demo_binary_add_new_item(delay, tree, 1);
+		demo_binary_add_new_item(delay, tree, 3);
+		demo_binary_write_tree(delay, tree);
+		demo_binary_add_new_item(delay, tree, 6);
+		demo_binary_add_new_item(delay, tree, 7);
+		demo_binary_add_new_item(delay, tree, 10);
+		demo_binary_add_new_item(delay, tree, 8);
+		demo_binary_write_tree(delay, tree);
+		demo_create_consistent_presentation(delay, tree);
+		demo_back(delay);
 	}
 	void tree_demo_mode(unsigned delay)
-	{		
+	{
 		Tree tree;
 		std::vector<std::size_t> path;
 		std::vector<Tree_node*> pointers;
@@ -974,6 +1021,7 @@ namespace all_demo_mode
 		path.clear();
 		path.push_back(0);
 		demo_add_new_item_to_tree(delay, tree, 100, path, pointers, number, true);
+		demo_write_all_tree(delay, tree);
 		demo_back(delay);
 	}
 }
@@ -981,6 +1029,7 @@ void demo_mode()
 {
 	unsigned delay = correct::read_unsigned("a delay to display data(in milliseconds; normal = 1900)");
 	all_demo_mode::tree_demo_mode(delay);
+	all_demo_mode::binary_demo_mode(delay);
 }
 int main()
 {
