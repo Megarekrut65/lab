@@ -2,8 +2,9 @@
 #include <vector>
 #include <conio.h>
 #include <Windows.h>
+#include <string>
 #include "my_correct_read.h"
-//¹0 ¹2 ¹3 ¹11 ¹13
+//¹1 ¹2 ¹3 ¹11 ¹13 ¹18 ¹21 ¹22
 struct Tree_node;
 struct Tree;
 void tree_menu(Tree&);
@@ -487,7 +488,336 @@ struct Consistent_presentation
 		this->index_of_right = index_of_right;
 	}
 };
+enum class Arithmetic_type { CONSTANT, VARIABLE, OPERATION, INCORRECT };
+struct Characteristics
+{
+	int priority;
+	Arithmetic_type type;
+	std::string value;
+	std::string parentheses;
+	bool is_open;
+	bool is_close;	
+	Characteristics()
+	{
+		priority = 0;
+		type = Arithmetic_type::INCORRECT;
+		value = "";
+		parentheses = "";
+		is_open = false;
+		is_close = false;		
+	}
+	Characteristics(int priority, Arithmetic_type type, std::string value, std::string parentheses)
+	{
+		this->priority = priority;
+		this->type = type;
+		this->value = value;
+		this->parentheses = parentheses;
+		if (parentheses[0] == '(') is_open = true;
+		else is_open = false;
+		if (parentheses[0] == ')') is_close = true;
+		else is_close = false;
+	}
+};
+struct Expression_node
+{
+	Expression_node* parent;
+	Expression_node* left;
+	Expression_node* right;
+	Characteristics item;
+	Expression_node()
+	{
+		parent = nullptr;
+		left = nullptr;
+		right = nullptr;
+		item = Characteristics(-1, Arithmetic_type::INCORRECT, "", "");
+	}
+	Expression_node(Expression_node* parent, Expression_node* left, Expression_node* right, Characteristics item)
+	{
+		this->parent = parent;
+		this->left = left;
+		this->right = right;
+		this->item = item;	
+	}	
+};
+struct Expression_tree
+{
+	Expression_node* root;
 
+	Expression_tree()
+	{
+		root = nullptr;
+	}
+	int get_priority(std::string value)
+	{
+		if ((value == "+") || (value == "-")) return 0;
+		if ((value == "*") || (value == "/")) return 1;
+		if (value == "^") return 2;
+		return -1;
+	}
+	Arithmetic_type find_type(std::string value)
+	{
+		std::size_t size = value.size();
+		if (size < 1) return Arithmetic_type::INCORRECT;
+		if (size == 1)
+		{
+			if ((value == "+") || (value == "-")
+				|| (value == "*") || (value == "/")
+				|| (value == "^")) return Arithmetic_type::OPERATION;
+			if ((value[0] >= 'a') && (value[0] <= 'z')) return Arithmetic_type::VARIABLE;
+			if ((value[0] >= '0') && (value[0] <= '9')) return Arithmetic_type::CONSTANT;
+			return Arithmetic_type::INCORRECT;
+		}
+		std::size_t i = 0;
+		if (value[i] == '-') i++;
+		for (; i < size; i++)
+		{
+			if ((value[i] < '0') || (value[i] > '9')) return Arithmetic_type::INCORRECT;
+		}
+		return Arithmetic_type::CONSTANT;
+	}
+	bool regulation_parentheses(char symbol, int& priority, std::string& parentheses)
+	{
+		if (symbol == '(')
+		{
+			priority += 10;
+			parentheses += "( ";
+			return true;
+		}
+		if (symbol == ')')
+		{
+			priority -= 10;
+			parentheses += ") ";
+			return true;
+		}
+		return false;
+	}
+	bool add_to_characteristics(std::vector<Characteristics>& characteristics, int priority, std::string value, std::string& parentheses)
+	{
+		std::string parentheses_of_item = "";
+		if (parentheses.size() != 0)
+		{
+			if (parentheses[0] == '(')
+			{
+				parentheses_of_item = parentheses;
+				parentheses = "";
+			} 
+		}
+		Arithmetic_type type = find_type(value);
+		switch (type)
+		{
+		case Arithmetic_type::CONSTANT: characteristics.push_back(Characteristics(-1, type, value, parentheses_of_item));
+			break;
+		case Arithmetic_type::VARIABLE: characteristics.push_back(Characteristics(-1, type, value, parentheses_of_item));
+			break;
+		case Arithmetic_type::OPERATION: characteristics.push_back(Characteristics(priority + get_priority(value), type, value, parentheses_of_item));
+			break;
+		case Arithmetic_type::INCORRECT:
+		{
+			std::cout << "\nExpression entered incorrect!" << std::endl;
+			return false;
+		}
+		break;
+		}
+		return true;
+	}
+	void write_array(std::vector<Characteristics> characteristics)
+	{
+		for (std::size_t i = 0; i < characteristics.size(); i++)
+		{
+			std::cout << "priority: " << characteristics[i].priority << " type: ";
+			switch (characteristics[i].type)
+			{
+			case Arithmetic_type::CONSTANT: std::cout << "constant";
+				break;
+			case Arithmetic_type::VARIABLE: std::cout << "variable";
+				break;
+			case Arithmetic_type::OPERATION: std::cout << "operation";
+				break;
+			}
+			std::cout << " value: " << characteristics[i].value << std::endl;
+		}
+	}
+	bool check_input(std::vector<Characteristics> characteristics)
+	{
+		std::size_t size = characteristics.size();
+		if ((characteristics[0].type == Arithmetic_type::OPERATION)
+			|| (characteristics[size - 1].type == Arithmetic_type::OPERATION)) return false;
+		bool is_operation = false;
+		for (std::size_t i = 1; i < size - 1; i++)
+		{
+			if (((characteristics[i].type == Arithmetic_type::OPERATION) && !is_operation)
+				|| ((characteristics[i].type == Arithmetic_type::CONSTANT) && is_operation)
+				|| ((characteristics[i].type == Arithmetic_type::VARIABLE) && is_operation)) is_operation = !is_operation;
+			else return false;
+		}
+		return true;
+	}
+	bool find_simple_mistakes(int priority, std::vector<Characteristics>& characteristics)
+	{
+		if (priority != 0)
+		{
+			std::cout << "\nParentheses entered incorrect!" << std::endl;
+			return false;
+		}
+		if (characteristics.size() == 0)
+		{
+			std::cout << "\nArithmetic expression is not entered!" << std::endl;
+			return false;
+		}
+		if (!check_input(characteristics))
+		{
+			std::cout << "\nWrong order of operations, constants, or variables!" << std::endl;
+			return false;
+		}
+		return true;
+	}
+	bool add_expression_to_array(std::string expression, std::vector<Characteristics>& characteristics)
+	{
+		std::size_t size = expression.size();
+		int priority = 0;
+		std::string parentheses = "";
+		for (std::size_t i = 0; i < size; i++)
+		{
+			if (regulation_parentheses(expression[i], priority, parentheses))
+			{
+				i++;
+				continue;
+			}
+			if (priority < 0)
+			{
+				std::cout << "\nParentheses entered incorrect!" << std::endl;
+				return false;
+			}
+			std::string value = "";
+			while ((expression[i] != ' ') && (i < size))
+			{
+				value += expression[i++];
+			}
+			if (parentheses[0] == ')')
+			{
+				characteristics[characteristics.size() - 1].parentheses = parentheses;
+				characteristics[characteristics.size() - 1].is_close = true;
+				parentheses = "";
+			}
+			if (!add_to_characteristics(characteristics, priority, value, parentheses)) return false;
+		}		
+		//write_array(characteristics);
+		return find_simple_mistakes(priority, characteristics);
+	}
+	void add_to_tree_current(Expression_node* node, Characteristics item, bool& is_added)
+	{
+		if (node->item.type != Arithmetic_type::OPERATION) return;	
+		if (!node->left)
+		{
+			Expression_node* new_node = new Expression_node(node, nullptr, nullptr, item);
+			node->left = new_node;
+			is_added = true;
+			return;
+		}
+		else
+		{
+			bool this_is_added = false;
+			add_to_tree_current(node->left, item, this_is_added);
+			is_added = this_is_added;
+			if (this_is_added) return;
+		}
+		if (!node->right)
+		{
+			Expression_node* new_node = new Expression_node(node, nullptr, nullptr, item);
+			node->right = new_node;
+			is_added = true;
+			return;
+		}
+		else
+		{
+			bool this_is_added = false;
+			add_to_tree_current(node->right, item, this_is_added);
+			is_added = this_is_added;
+			if (this_is_added) return;
+		}
+	}
+	void add_to_tree(Characteristics item)
+	{
+		if (!root)
+		{
+			Expression_node* node = new Expression_node(nullptr, nullptr, nullptr, item);
+			root = node;
+			return;
+		}
+		bool is_added = false;
+		add_to_tree_current(root, item, is_added);
+		if (!is_added)
+		{
+			std::cout << "\nError" << std::endl;
+		}
+	}
+	std::size_t index_of_min_priority(Characteristics* array, std::size_t size)
+	{
+		std::size_t min_priority = array[1].priority;
+		std::size_t index = 1;
+		for (std::size_t i = 3; i < size; i+=2)
+		{
+			if (array[i].priority < min_priority)
+			{
+				min_priority = array[i].priority;
+				index = i;
+			}
+		}
+		return index;
+	}
+	void separation_of_expression(Characteristics* array, std::size_t size)
+	{
+		std::size_t index = index_of_min_priority(array, size);
+		add_to_tree(array[index]);
+		if (index > 2)
+		{
+			Characteristics* new_array = new Characteristics[index];
+			new_array = &array[0];
+			separation_of_expression(new_array, index);
+		}
+		else
+		{
+			add_to_tree(array[index - 1]);
+		}
+		if (index + 2 < size)
+		{
+			Characteristics* new_array = new Characteristics[size - index - 1];
+			new_array = &array[index + 1];
+			separation_of_expression(new_array, size - index - 1);
+		}
+		else
+		{
+			add_to_tree(array[index + 1]);
+		}
+	}
+	void expression_analysis(std::string expression)
+	{
+		std::vector<Characteristics> characteristics;
+		if (!add_expression_to_array(expression, characteristics)) return;
+		std::size_t size = characteristics.size();
+		Characteristics* array = new Characteristics[size];
+		array = &characteristics[0];
+		separation_of_expression(array, size);
+	}
+	void write_expression_current(Expression_node* node, std::string& parentheses, int& number_of_parentheses)
+	{
+		if (!node) return;
+		if (node->left) write_expression_current(node->left, parentheses, number_of_parentheses);
+		if (node->item.is_open) std::cout << node->item.parentheses;
+		std::cout << node->item.value << " ";
+		if (node->item.is_close) std::cout << node->item.parentheses;
+		if (node->right) write_expression_current(node->right, parentheses, number_of_parentheses);
+	}
+	void write_expression()
+	{
+		if (!root) return;
+		std::cout << "\nExpression: ";
+		std::string parentheses = "";
+		int number_of_parentheses = 0;
+		write_expression_current(root, parentheses, number_of_parentheses);
+		std::cout << std::endl;
+	}
+};
 std::vector<std::size_t> choose_path(Tree& tree, std::vector<Tree_node*>& pointers)
 {
 	while (true)
@@ -722,7 +1052,12 @@ void binary_tree_menu(Binary_tree& tree)
 }
 void use_of_trees_menu()
 {
-
+	Expression_tree tree;
+	std::string c;
+	std::cout << "enter c: ";
+	std::getline(std::cin, c);
+	tree.expression_analysis(c);
+	tree.write_expression();
 }
 void interactive_dialog_mode()
 {
@@ -746,7 +1081,7 @@ void interactive_dialog_mode()
 			tree.clear_tree();
 		}
 			break;
-		case '3':
+		case '3': use_of_trees_menu();
 			break;
 		case'0':
 		{
