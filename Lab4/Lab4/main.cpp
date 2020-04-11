@@ -494,29 +494,259 @@ struct Characteristics
 	int priority;
 	Arithmetic_type type;
 	std::string value;
-	std::string parentheses;
-	bool is_open;
-	bool is_close;	
+	int open_parentheses;
+	int close_parentheses;
 	Characteristics()
 	{
 		priority = 0;
 		type = Arithmetic_type::INCORRECT;
 		value = "";
-		parentheses = "";
-		is_open = false;
-		is_close = false;		
+		open_parentheses = 0;
+		close_parentheses = 0;
 	}
-	Characteristics(int priority, Arithmetic_type type, std::string value, std::string parentheses)
+	Characteristics(int priority, Arithmetic_type type, std::string value, int open_parentheses, int close_parentheses)
 	{
 		this->priority = priority;
 		this->type = type;
 		this->value = value;
-		this->parentheses = parentheses;
-		if (parentheses[0] == '(') is_open = true;
-		else is_open = false;
-		if (parentheses[0] == ')') is_close = true;
-		else is_close = false;
+		this->open_parentheses = open_parentheses;
+		this->close_parentheses = close_parentheses;
 	}
+	void write_open()
+	{
+		for (int i = 0; i < open_parentheses; i++)
+		{
+			std::cout << "( ";
+		}
+	}
+	void write_close()
+	{
+		for (int i = 0; i < close_parentheses; i++)
+		{
+			std::cout << ") ";
+		}
+	}
+};
+struct Variable
+{
+	std::vector<std::string> multiply_variables;
+	int coefficient;
+	std::vector<int> degrees;
+	Variable()
+	{
+		coefficient = 0;
+	}
+	Variable(std::string variable, int coefficient, int degree)
+	{
+		multiply_variables.push_back(variable);
+		this->coefficient = coefficient;
+		degrees.push_back(degree);
+	}
+	int check_degrees()
+	{
+		std::size_t size = degrees.size();
+		for (std::size_t i = 0; i < size; i++)
+		{
+			if (degrees[i] == 0)
+			{
+				degrees.erase(degrees.begin() + i);
+				size--;
+				i--;
+			}
+		}
+		if (degrees.size() == 0) return coefficient;
+		return 0;
+	}
+	void multiply_by_new_variable(std::string variable, int degree)
+	{
+		for (std::size_t i = 0; i < multiply_variables.size(); i++)
+		{
+			if (variable == multiply_variables[i])
+			{
+				degrees[i] += degree;
+				return;
+			}
+		}
+		multiply_variables.push_back(variable);
+		degrees.push_back(degree);		
+	}
+	bool add_variable(Variable variable)
+	{
+		if (degrees.size() != variable.degrees.size()) return false;
+		std::size_t size = degrees.size();
+		std::size_t number = 0;
+		for (std::size_t i = 0; i < size; i++)
+		{
+			for (std::size_t j = 0; j < size; j++)
+			{
+				if ((multiply_variables[i] == variable.multiply_variables[j])&&(degrees[i] == variable.degrees[j]))
+				{
+					number++;
+					break;
+				}
+			}
+		}
+		if (number == size)
+		{
+			coefficient += variable.coefficient;
+			return true;
+		}
+		return false;
+	}
+	/*std::string create_string()
+	{
+		std::string new_variable = "";
+		new_variable += std::to_string(coefficient) + " * ";
+		if (degree == 1)
+		{
+			new_variable += variable + " ";
+			return;
+		}
+		else
+		{
+			if (variable.size() > 1)
+			{
+
+			}
+			else
+			{
+				new_variable += variable + " ";
+			}
+			if (degree == 1) return;
+			new_variable += "^ ";
+			if (degree < 0)
+			{
+				new_variable += "( " + std::to_string(degree) + " ) ";
+			}
+			else
+			{
+				new_variable += std::to_string(degree) + " ";
+			}
+		}
+	}*/
+};
+struct Calculation
+{
+	int constant;
+	std::vector<Variable> variables;
+	Calculation()
+	{
+		constant = 0;
+	}
+	void add_variable(std::string variable)
+	{
+		int coefficient = 0;
+		if (variable[0] == '-') coefficient = -1;
+		else coefficient = 1;
+		Variable new_variable = Variable(variable, coefficient, 1);
+		for (std::size_t i = 0; i < variables.size(); i++)
+		{
+			if (variables[i].add_variable(new_variable))
+			{
+				if (variables[i].coefficient == 0)
+				{
+					variables.erase(variables.begin() + i);
+				}
+				return;
+			}
+		}
+		variables.push_back(new_variable);	
+	}
+	void add_constant(std::string constant)
+	{
+		this->constant+= atoi(constant.c_str());
+	}
+	void add(Characteristics item)
+	{
+		switch (item.type)
+		{
+		case Arithmetic_type::CONSTANT: add_constant(item.value);
+			break;
+		case Arithmetic_type::VARIABLE: add_variable(item.value);
+			break;
+		default: return;
+		}
+	}
+	void multiply_by_variable(std::string variable)
+	{
+		int coefficient = 0;
+		if (variable[0] == '-')
+		{
+			coefficient = -1;
+			variable = variable.substr(1);
+		}
+		else coefficient = 1;
+		for (std::size_t i = 0; i < variables.size(); i++)
+		{
+			variables[i].coefficient *= coefficient;
+			variables[i].multiply_by_new_variable(variable, 1);
+		}
+		variables.push_back(Variable(variable, constant, 1));
+		constant = 0;
+		std::size_t size = variables.size();
+		for (std::size_t i = 0; i < size; i++)
+		{
+			int new_constant = variables[i].check_degrees();
+			constant += new_constant;
+			if (new_constant != 0)
+			{
+				variables.erase(variables.begin() + i);
+				size--;
+				i--;
+			}
+		}
+	}
+	void multiply_by_constant(std::string constant)
+	{
+		int integer_constant = atoi(constant.c_str());
+		this->constant *= integer_constant;
+		for (std::size_t i = 0; i < variables.size(); i++)
+		{
+			variables[i].coefficient *= integer_constant;		
+		}
+	}
+	void multiply(Characteristics item)
+	{
+		switch (item.type)
+		{
+		case Arithmetic_type::CONSTANT: multiply_by_variable(item.value);
+			break;
+		case Arithmetic_type::VARIABLE: multiply_by_constant(item.value);
+			break;
+		default: return;
+		}
+	}	
+	void div(Characteristics item)
+	{
+		switch (item.type)
+		{
+		case Arithmetic_type::CONSTANT: multiply_by_variable(item.value);
+			break;
+		case Arithmetic_type::VARIABLE: multiply_by_constant(item.value);
+			break;
+		default: return;
+		}
+	}
+	std::string create_new_expression()
+	{
+		std::string expression = "";
+		std::string operation = "";
+		for (std::size_t i = 0; i < variables.size(); i++)
+		{
+			if (i != 0)
+			{
+				if (variables[i].coefficient > 0) operation = "+ ";
+				else
+				{
+					operation = "- ";
+					variables[i].coefficient = abs(variables[i].coefficient);
+				}
+			}
+			else operation = "";
+
+		}
+	}
+	
 };
 struct Expression_node
 {
@@ -529,7 +759,7 @@ struct Expression_node
 		parent = nullptr;
 		left = nullptr;
 		right = nullptr;
-		item = Characteristics(-1, Arithmetic_type::INCORRECT, "", "");
+		item = Characteristics();
 	}
 	Expression_node(Expression_node* parent, Expression_node* left, Expression_node* right, Characteristics item)
 	{
@@ -556,6 +786,7 @@ struct Expression_tree
 	}
 	Arithmetic_type find_type(std::string value)
 	{
+		std::cout << "value: " << value << std::endl;
 		std::size_t size = value.size();
 		if (size < 1) return Arithmetic_type::INCORRECT;
 		if (size == 1)
@@ -569,47 +800,58 @@ struct Expression_tree
 		}
 		std::size_t i = 0;
 		if (value[i] == '-') i++;
-		for (; i < size; i++)
+		if ((value[0] >= '0') && (value[0] <= '9'))
 		{
-			if ((value[i] < '0') || (value[i] > '9')) return Arithmetic_type::INCORRECT;
+			i++;
+			for (; i < size; i++)
+			{
+				if ((value[i] < '0') || (value[i] > '9')) return Arithmetic_type::INCORRECT;
+			}
+			return Arithmetic_type::CONSTANT;
 		}
-		return Arithmetic_type::CONSTANT;
+		else
+		{
+			for (; i < size; i++)
+			{
+				if ((value[i] < 'a') || (value[i] > 'z')) return Arithmetic_type::INCORRECT;
+			}
+			return Arithmetic_type::VARIABLE;
+		}
+		
+		return Arithmetic_type::INCORRECT;
 	}
-	bool regulation_parentheses(char symbol, int& priority, std::string& parentheses)
+	bool regulation_parentheses(char symbol, int& priority, int& parentheses)
 	{
 		if (symbol == '(')
 		{
 			priority += 10;
-			parentheses += "( ";
+			parentheses++;
 			return true;
 		}
 		if (symbol == ')')
 		{
 			priority -= 10;
-			parentheses += ") ";
+			parentheses--;
 			return true;
 		}
 		return false;
 	}
-	bool add_to_characteristics(std::vector<Characteristics>& characteristics, int priority, std::string value, std::string& parentheses)
+	bool add_to_characteristics(std::vector<Characteristics>& characteristics, int priority, std::string value, int& parentheses)
 	{
-		std::string parentheses_of_item = "";
-		if (parentheses.size() != 0)
+		int parentheses_of_item = 0;
+		if (parentheses > 0)
 		{
-			if (parentheses[0] == '(')
-			{
-				parentheses_of_item = parentheses;
-				parentheses = "";
-			} 
+			parentheses_of_item = parentheses;
+			parentheses = 0;		
 		}
 		Arithmetic_type type = find_type(value);
 		switch (type)
 		{
-		case Arithmetic_type::CONSTANT: characteristics.push_back(Characteristics(-1, type, value, parentheses_of_item));
+		case Arithmetic_type::CONSTANT: characteristics.push_back(Characteristics(-1, type, value, parentheses_of_item, 0));
 			break;
-		case Arithmetic_type::VARIABLE: characteristics.push_back(Characteristics(-1, type, value, parentheses_of_item));
+		case Arithmetic_type::VARIABLE: characteristics.push_back(Characteristics(-1, type, value, parentheses_of_item, 0));
 			break;
-		case Arithmetic_type::OPERATION: characteristics.push_back(Characteristics(priority + get_priority(value), type, value, parentheses_of_item));
+		case Arithmetic_type::OPERATION: characteristics.push_back(Characteristics(priority + get_priority(value), type, value, parentheses_of_item, 0));
 			break;
 		case Arithmetic_type::INCORRECT:
 		{
@@ -675,7 +917,7 @@ struct Expression_tree
 	{
 		std::size_t size = expression.size();
 		int priority = 0;
-		std::string parentheses = "";
+		int parentheses = 0;
 		for (std::size_t i = 0; i < size; i++)
 		{
 			if (regulation_parentheses(expression[i], priority, parentheses))
@@ -693,11 +935,10 @@ struct Expression_tree
 			{
 				value += expression[i++];
 			}
-			if (parentheses[0] == ')')
+			if (parentheses < 0)
 			{
-				characteristics[characteristics.size() - 1].parentheses = parentheses;
-				characteristics[characteristics.size() - 1].is_close = true;
-				parentheses = "";
+				characteristics[characteristics.size() - 1].close_parentheses = abs(parentheses);
+				parentheses = 0;
 			}
 			if (!add_to_characteristics(characteristics, priority, value, parentheses)) return false;
 		}		
@@ -799,23 +1040,44 @@ struct Expression_tree
 		array = &characteristics[0];
 		separation_of_expression(array, size);
 	}
-	void write_expression_current(Expression_node* node, std::string& parentheses, int& number_of_parentheses)
+	void write_expression_current(Expression_node* node)
 	{
 		if (!node) return;
-		if (node->left) write_expression_current(node->left, parentheses, number_of_parentheses);
-		if (node->item.is_open) std::cout << node->item.parentheses;
+		if (node->left) write_expression_current(node->left);
+		node->item.write_open();
 		std::cout << node->item.value << " ";
-		if (node->item.is_close) std::cout << node->item.parentheses;
-		if (node->right) write_expression_current(node->right, parentheses, number_of_parentheses);
+		node->item.write_close();
+		if (node->right) write_expression_current(node->right);
 	}
 	void write_expression()
 	{
 		if (!root) return;
 		std::cout << "\nExpression: ";
-		std::string parentheses = "";
-		int number_of_parentheses = 0;
-		write_expression_current(root, parentheses, number_of_parentheses);
+		write_expression_current(root);
 		std::cout << std::endl;
+	}
+	void facilitation_of_expression()
+	{
+		/*std::vector<Characteristics> characteristics;
+		if (!add_expression_to_array(expression, characteristics)) return;
+		std::size_t size = characteristics.size();
+		Characteristics* array = new Characteristics[size];
+		array = &characteristics[0];
+		separation_of_expression(array, size);*/
+	}
+	void add_tree_to_calculation_current(Expression_node* node)
+	{
+		if (!node) return;
+		if (node->left) write_expression_current(node->left);
+		
+		std::cout << node->item.value << " ";
+		
+		if (node->right) write_expression_current(node->right);
+	}
+	void add_tree_to_calculation()
+	{
+		Calculation calculation;
+		add_tree_to_calculation_current(root);
 	}
 };
 std::vector<std::size_t> choose_path(Tree& tree, std::vector<Tree_node*>& pointers)
