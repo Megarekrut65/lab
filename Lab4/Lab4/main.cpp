@@ -646,6 +646,26 @@ struct Variable
 		}
 		return new_variable;
 	}
+	bool is_monotony(Variable variable)
+	{
+		std::size_t size = multiply_variables.size();
+		std::size_t variable_size = variable.multiply_variables.size();
+		if (size != variable_size) return false;
+		int number_of_monotony = 0;
+		for (std::size_t i = 0; i < size; i++)
+		{
+			for (std::size_t j = 0; j < variable_size; j++)
+			{
+				if ((multiply_variables[i] == variable.multiply_variables[j])
+					&&(powers[i] == variable.powers[j]))
+				{
+					number_of_monotony++;
+				}
+			}
+		}
+		if (number_of_monotony == size) return true;
+		return false;
+	}
 };
 struct Calculation
 {
@@ -756,6 +776,29 @@ private:
 			}
 		}
 	}
+	void combine_the_same_variables()
+	{
+		std::size_t size = variables.size();
+		for (std::size_t i = 0; i < size; i++)
+		{		
+			for (std::size_t j = i + 1; j < size; j++)
+			{
+				if (variables[i].is_monotony(variables[j]))
+				{
+					variables[i].coefficient += variables[j].coefficient;
+					variables.erase(variables.begin() + j);
+					j--;
+					size--;
+					if (variables[i].coefficient == 0)
+					{
+						variables.erase(variables.begin() + i);
+						i--;
+						size--;
+					}
+				}
+			}
+		}
+	}
 	void addition_calculation(Calculation& calculation)
 	{
 		constant += calculation.constant;
@@ -766,35 +809,20 @@ private:
 			addition_variable(calculation.variables[i]);
 		}
 	}
-	void minus_calculation(Calculation& calculation)
-	{
-		calculation.constant *= -1;
-		for (std::size_t i = 0; i < calculation.variables.size(); i++)
-		{
-			calculation.variables[i].coefficient *= -1;
-		}
-		addition_calculation(calculation);
-	}
 	void multiply_by_calculation(Calculation& calculation)
 	{
 		double new_constant = constant;
 		std::vector<Variable> new_variables = variables;
 		std::vector<Variable> save_variables;
-		std::cout << "\n2mul1\n";
 		multiply_by_constant(calculation.constant);
-		std::cout << "\n2mul2\n";
 		double save_constant = constant;
-		std::cout << "\n3mul1\n";
 		for (std::size_t i = 0; i < calculation.variables.size(); i++)
 		{
 			copy_variables(save_variables);
 			constant = new_constant;
 			variables = new_variables;
-			std::cout << "\n32mul1\n";
 			multiply_by_variable(calculation.variables[i]);
-			std::cout << "\n32mul2\n";
 		}
-		std::cout << "\n3mul2\n";
 		copy_variables(save_variables);
 		constant = save_constant;
 		variables = save_variables;
@@ -805,12 +833,13 @@ private:
 		{
 			if (calculation.variables.size() != 0)
 			{
-				std::cout << "\nThe program counts divide only into monomials!" << std::endl;
-				return false;
+				std::cout << "\nThe program counts divide only into numbers!" << std::endl;
+				return true;
 			}
+			constant /= calculation.constant;
 			for (std::size_t i = 0; i < variables.size(); i++)
 			{
-				variables[i].coefficient /= constant;
+				variables[i].coefficient /= calculation.constant;
 			}
 		}
 		else
@@ -818,26 +847,15 @@ private:
 			if (calculation.variables.size() == 0)
 			{
 				std::cout << "\nError! Division by zero..." << std::endl;
-				return false;
+				return true;
 			}
-			if (calculation.variables.size() > 1)
+			if (calculation.variables.size() > 0)
 			{
-				std::cout << "\nThe program counts divide only into monomials!" << std::endl;
-				return false;
-			}
-			for (std::size_t i = 0; i < calculation.variables[0].powers.size(); i++)
-			{
-				calculation.variables[0].powers[i] *= -1;
-			}
-			double save_coefficient = calculation.variables[0].coefficient;
-			calculation.variables[0].coefficient = 1;
-			multiply_by_calculation(calculation);
-			for (std::size_t i = 0; i < variables.size(); i++)
-			{
-				variables[i].coefficient /= save_coefficient;
+				std::cout << "\nThe program counts divide only into numbers!" << std::endl;
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 public:
 	Calculation()
@@ -883,22 +901,24 @@ public:
 		if ((variables.size() == 0) && (constant == 0)) expression += "0 ";
 		return expression;
 	}
-	void union_calculations(Calculation& calculation, std::string operation)
+	bool union_calculations(Calculation& calculation, std::string operation)
 	{
+		bool is_mistakes = false;
 		switch (operation[0])
 		{
 		case '+': addition_calculation(calculation);		
 			break;
-		case '-': minus_calculation(calculation);		
-			break;
 		case '*': multiply_by_calculation(calculation);		
 			break;
-		case '/': divide_by_calculation(calculation);
+		case '/': is_mistakes = divide_by_calculation(calculation);
 			break;
-		default: return;
+		default: return true;
 			break;
 		}
+		if (is_mistakes) return true;
 		remove_zero_coefficient();
+		combine_the_same_variables();
+		return false;
 	}
 };
 struct Expression_node
@@ -926,7 +946,7 @@ struct Expression_tree
 {
 	Expression_node* root;
 private:
-	Calculation add_tree_to_calculation(Expression_node* node)
+	Calculation add_tree_to_calculation(Expression_node* node, bool& is_mistakes)
 	{
 		if (!node) return Calculation();
 		if (node->item.type != Arithmetic_type::OPERATION)
@@ -934,10 +954,13 @@ private:
 			return Calculation(node->item);
 		}
 		Calculation left;
-		if (node->left) left = add_tree_to_calculation(node->left);
+		if (node->left) left = add_tree_to_calculation(node->left, is_mistakes);
+		if (is_mistakes) return Calculation();
 		Calculation right;
-		if (node->right) right = add_tree_to_calculation(node->right);
-		left.union_calculations(right, node->item.value);
+		if (node->right) right = add_tree_to_calculation(node->right, is_mistakes);
+		if (is_mistakes) return Calculation();
+		is_mistakes = left.union_calculations(right, node->item.value);
+		if (is_mistakes) return Calculation();
 		return left;
 	}
 	int get_priority(std::string value)
@@ -1025,6 +1048,30 @@ private:
 		}
 		return true;
 	}
+	void edit_characteristics(std::vector<Characteristics>& characteristics)
+	{
+		for (std::size_t i = 0; i < characteristics.size(); i++)
+		{
+			if (characteristics[i].value == "-")
+			{
+				characteristics[i].value = "+";
+				if (characteristics[i + 1].value[0] == '-')
+				{
+					characteristics[i + 1].value = characteristics[i + 1].value.substr(1);
+				}
+				else
+				{
+					characteristics[i + 1].value = "-" + characteristics[i + 1].value;
+				}
+				if ((characteristics[i + 1].open_parentheses > 0) 
+					&& (characteristics[i + 1].close_parentheses > 0))
+				{
+					characteristics[i + 1].open_parentheses--;
+					characteristics[i + 1].close_parentheses--;
+				}
+			}
+		}
+	}
 	bool check_input(std::vector<Characteristics> characteristics)
 	{
 		std::size_t size = characteristics.size();
@@ -1042,7 +1089,7 @@ private:
 		return true;
 	}
 	bool find_simple_mistakes(int priority, std::vector<Characteristics>& characteristics)
-	{
+	{		
 		if (priority != 0)
 		{
 			std::cout << "\nParentheses entered incorrect!" << std::endl;
@@ -1162,7 +1209,14 @@ private:
 		if (!node) return;
 		if (node->left) write_expression_current(node->left);
 		node->item.write_open();
+		if ((node->item.type != Arithmetic_type::OPERATION)
+			&&(node->item.value[0] == '-') 
+			&& (node->item.open_parentheses == 0)) std::cout << "( ";
 		std::cout << node->item.value << " ";
+		if ((node->item.type != Arithmetic_type::OPERATION) 
+			&& (node->item.value[0] == '-') 
+			&& (node->item.open_parentheses == 0) 
+			&& (node->item.close_parentheses == 0)) std::cout << ") ";
 		node->item.write_close();
 		if (node->right) write_expression_current(node->right);
 	}
@@ -1218,10 +1272,11 @@ public:
 	{
 		root = nullptr;
 	}		
-	bool expression_analysis(std::string expression)
+	bool expression_analysis(std::string expression, bool edit = true)
 	{
 		std::vector<Characteristics> characteristics;
 		if (!add_expression_to_array(expression, characteristics)) return false;
+		if(edit) edit_characteristics(characteristics);
 		std::size_t size = characteristics.size();
 		Characteristics* array = new Characteristics[size];
 		array = &characteristics[0];
@@ -1238,10 +1293,16 @@ public:
 	}
 	void facilitation_of_expression()
 	{
-		Calculation calculation = add_tree_to_calculation(root);
+		bool is_mistakes = false;
+		Calculation calculation = add_tree_to_calculation(root, is_mistakes);
+		if (is_mistakes)
+		{
+			clear_tree();
+			return;
+		}
 		std::string expression = calculation.create_new_expression();
 		clear_tree();
-		expression_analysis(expression);
+		expression_analysis(expression, false);
 		write_expression();
 	}	
 	void clear_tree()
@@ -1487,7 +1548,7 @@ void binary_tree_menu(Binary_tree& tree)
 void expression_tree_menu(Expression_tree& tree)
 {	
 	std::string expression;
-	std::cout << "enter c: ";
+	std::cout << "Enter: ";
 	std::getline(std::cin, expression);
 	if(!tree.expression_analysis(expression)) return;
 	tree.write_expression();
