@@ -8,7 +8,39 @@
 //¹1 ¹2 ¹3 ¹11 ¹13 ¹18 ¹21 ¹22
 struct Tree_node;
 struct Tree;
+enum class Side;
+struct Binary_node;
+struct Binary_tree;
+struct Consistent_presentation;
+enum class Arithmetic_type;
+struct Characteristics;
+struct Variable;
+struct Calculation;
+struct Expression_node;
+struct Path_to_variable;
+struct Expression_tree;
+std::vector<std::size_t> choose_path(Tree&, std::vector<Tree_node*>&);
+std::vector<std::size_t> create_path();
+std::vector<std::size_t> select_path(Tree&, std::vector<Tree_node*>&);
+void add_new_item_to_tree(Tree&, std::vector<Tree_node*>&);
+std::vector<Tree_node*> get_pointer_to_item(Tree&);
+void get_item_by_path(Tree&, std::vector<Tree_node*>&);
+void actions_new_tree(Tree&);
+void remove_sub_tree_by_path(Tree&, std::vector<Tree_node*>&);
 void tree_menu(Tree&);
+void create_consistent_presentation_current(Binary_node*, std::vector<Consistent_presentation>&, bool, std::size_t);
+void write_consistent_presentation(std::vector<Consistent_presentation>&);
+std::vector<Consistent_presentation> create_consistent_presentation(Binary_tree&);
+void binary_add_new_item(Binary_tree&);
+void binary_tree_menu(Binary_tree&);
+std::string create_new_expression();
+void add_the_expression_to_tree(Expression_tree&, std::string);
+void expression_tree_menu(Expression_tree&);
+void create_task_tree(Tree&, int[], std::size_t);
+void create_and_write_task_tree();
+void interactive_dialog_mode();
+void demo_mode();
+
 struct Tree_node
 {
 private:
@@ -614,15 +646,14 @@ struct Variable
 	std::string create_string()
 	{
 		std::string new_variable = "";
-		if (abs(coefficient) != 1)
+		if (coefficient != 1)
 		{
 			std::ostringstream to_string;
 			to_string << coefficient;
-			new_variable += to_string.str() + " * ";
-		}
-		if (coefficient == -1)
-		{
-			new_variable += "-";
+			if (coefficient < 0) new_variable += "( ";
+			new_variable += to_string.str();
+			if (coefficient < 0) new_variable += " )"; 
+			new_variable += " * ";
 		}
 		if (powers[0] == 1)
 		{
@@ -644,6 +675,7 @@ struct Variable
 				new_variable += multiply_variables[i] + " ^ " + std::to_string(powers[i]);
 			}
 		}
+
 		return new_variable;
 	}
 	bool is_monotony(Variable variable)
@@ -751,16 +783,14 @@ private:
 		std::string new_constanta = "";
 		if (variables.size() != 0)
 		{
-			if (constant < 0)
-			{
-				new_constanta += " - ";
-				constant = abs(constant);
-			}
+			if (constant < 0) new_constanta += " + ( ";			
 			else new_constanta += " + ";
 		}
 		std::ostringstream to_string;
 		to_string << constant;
 		new_constanta += to_string.str();
+		if (constant < 0) new_constanta += " ) ";
+
 		return new_constanta;
 	}
 	void remove_zero_coefficient()
@@ -833,7 +863,7 @@ private:
 		{
 			if (calculation.variables.size() != 0)
 			{
-				std::cout << "\nThe program counts divide only into numbers!" << std::endl;
+				std::cout << "\nThe program counts divide only into constant!" << std::endl;
 				return true;
 			}
 			constant /= calculation.constant;
@@ -857,6 +887,29 @@ private:
 		}
 		return false;
 	}
+	bool raise_to_the_power_of_calculations(Calculation& calculation)
+	{
+		if ((calculation.variables.size() > 0) 
+			||(calculation.constant < 0)
+			||(calculation.constant != trunc(calculation.constant)))
+		{
+			std::cout << "\nOnly nonnegative integers can be power!" << std::endl;
+			return true;
+		}
+		if (calculation.constant == 0)
+		{
+			variables.clear();
+			constant = 1;
+			return false;
+		}
+		if (calculation.constant == 1) return false;
+		Calculation new_calculation = Calculation(constant, is_constant, variables);
+		for (double i = 2; i <= calculation.constant; i++)
+		{
+			multiply_by_calculation(new_calculation);
+		}
+		return false;
+	}
 public:
 	Calculation()
 	{
@@ -875,23 +928,22 @@ public:
 			break;
 		default: return;
 		}
-	}			
+	}	
+	Calculation(double constant, bool is_constant, std::vector<Variable> variables)
+	{
+		this->constant = constant;
+		this->is_constant = is_constant;
+		this->variables = variables;
+	}
 	std::string create_new_expression()
 	{		
 		std::string expression = "";
 		if (variables.size() != 0)
 		{
 			expression = variables[0].create_string();
-			std::string operation = "";
 			for (std::size_t i = 1; i < variables.size(); i++)
 			{
-				if (variables[i].coefficient > 0) operation = " + ";
-				else
-				{
-					operation = " - ";
-					variables[i].coefficient = abs(variables[i].coefficient);
-				}
-				expression += operation + variables[i].create_string();
+				expression += " + " + variables[i].create_string();
 			}
 		}		
 		if (constant != 0)
@@ -911,6 +963,8 @@ public:
 		case '*': multiply_by_calculation(calculation);		
 			break;
 		case '/': is_mistakes = divide_by_calculation(calculation);
+			break;
+		case '^': is_mistakes = raise_to_the_power_of_calculations(calculation);
 			break;
 		default: return true;
 			break;
@@ -942,9 +996,42 @@ struct Expression_node
 		this->item = item;	
 	}	
 };
+struct Path_to_variable
+{
+	std::vector<Expression_node*> all_paths;
+	std::string variable;
+	Path_to_variable()
+	{
+		variable = "";
+	}
+	Path_to_variable(Expression_node* path)
+	{
+		variable = path->item.value;
+		all_paths.push_back(path);
+	}
+	void add_path(Expression_node* path)
+	{
+		all_paths.push_back(path);
+	}
+	void edit_types(Arithmetic_type type)
+	{
+		for (std::size_t i = 0; i < all_paths.size(); i++)
+		{
+			all_paths[i]->item.type = type;
+		}
+	}
+	void edit_values(std::string value)
+	{
+		for (std::size_t i = 0; i < all_paths.size(); i++)
+		{
+			all_paths[i]->item.value = value;
+		}
+	}
+};
 struct Expression_tree
 {
 	Expression_node* root;
+	double tree_value;
 private:
 	Calculation add_tree_to_calculation(Expression_node* node, bool& is_mistakes)
 	{
@@ -987,7 +1074,7 @@ private:
 		if (size == 1)
 		{
 			if ((value == "+") || (value == "-")
-				|| (value == "*") || (value == "/")) return Arithmetic_type::OPERATION;
+				|| (value == "*") || (value == "/") || (value == "^")) return Arithmetic_type::OPERATION;
 			if ((value[0] >= 'a') && (value[0] <= 'z')) return Arithmetic_type::VARIABLE;
 			if (line_is_number(value)) return Arithmetic_type::CONSTANT;
 			return Arithmetic_type::INCORRECT;
@@ -1063,11 +1150,10 @@ private:
 				{
 					characteristics[i + 1].value = "-" + characteristics[i + 1].value;
 				}
-				if ((characteristics[i + 1].open_parentheses > 0) 
-					&& (characteristics[i + 1].close_parentheses > 0))
+				if (characteristics[i + 1].open_parentheses == 0)
 				{
-					characteristics[i + 1].open_parentheses--;
-					characteristics[i + 1].close_parentheses--;
+					characteristics[i + 1].open_parentheses++;
+					characteristics[i + 1].close_parentheses++;
 				}
 			}
 		}
@@ -1175,20 +1261,18 @@ private:
 			if (this_is_added) return;
 		}
 	}
-	void add_to_tree(Characteristics item)
+	bool add_to_tree(Characteristics item)
 	{
 		if (!root)
 		{
 			Expression_node* node = new Expression_node(nullptr, nullptr, nullptr, item);
 			root = node;
-			return;
+			return true;
 		}
 		bool is_added = false;
 		add_to_tree_current(root, item, is_added);
-		if (!is_added)
-		{
-			std::cout << "\nError" << std::endl;
-		}
+		
+		return is_added;
 	}
 	std::size_t index_of_min_priority(Characteristics* array, std::size_t size)
 	{
@@ -1203,23 +1287,7 @@ private:
 			}
 		}
 		return index;
-	}
-	void write_expression_current(Expression_node* node)
-	{
-		if (!node) return;
-		if (node->left) write_expression_current(node->left);
-		node->item.write_open();
-		if ((node->item.type != Arithmetic_type::OPERATION)
-			&&(node->item.value[0] == '-') 
-			&& (node->item.open_parentheses == 0)) std::cout << "( ";
-		std::cout << node->item.value << " ";
-		if ((node->item.type != Arithmetic_type::OPERATION) 
-			&& (node->item.value[0] == '-') 
-			&& (node->item.open_parentheses == 0) 
-			&& (node->item.close_parentheses == 0)) std::cout << ") ";
-		node->item.write_close();
-		if (node->right) write_expression_current(node->right);
-	}
+	}	
 	void separation_of_expression(Characteristics* array, std::size_t size)
 	{
 		if (size == 1)
@@ -1228,7 +1296,12 @@ private:
 			return;
 		}
 		std::size_t index = index_of_min_priority(array, size);
-		add_to_tree(array[index]);
+		if (!add_to_tree(array[index]))
+		{
+			std::cout << "\nExpression is incorrect!" << std::endl;
+			clear_tree();
+			return;
+		}
 		if (index > 2)
 		{
 			Characteristics* new_array = new Characteristics[index];
@@ -1267,13 +1340,52 @@ private:
 		}
 		node->parent = nullptr;
 	}
+	void add_to_paths(std::vector<Path_to_variable>& paths, Expression_node* node)
+	{
+		for (std::size_t i = 0; i < paths.size(); i++)
+		{
+			if (node->item.value == paths[i].variable)
+			{
+				paths[i].add_path(node);
+				return;
+			}
+		}
+		paths.push_back(Path_to_variable(node));
+	}
+	void find_variable_in_tree(Expression_node* node, std::vector<Path_to_variable>& paths)
+	{
+		if (!node) return;
+		if (node->left) find_variable_in_tree(node->left, paths);
+		if (node->item.type == Arithmetic_type::VARIABLE)
+		{
+			add_to_paths(paths,node);
+		}
+		if (node->right) find_variable_in_tree(node->right, paths);
+	}		
+	void set_value_of_variable(std::vector<Path_to_variable>& paths)
+	{
+		for (std::size_t i = 0; i < paths.size(); i++)
+		{
+			double value = correct::read_double("value for " + paths[i].variable);
+			paths[i].edit_types(Arithmetic_type::CONSTANT);
+			std::ostringstream to_string;
+			to_string << value;
+			paths[i].edit_values(to_string.str());
+		}
+	}	
 public:
 	Expression_tree()
 	{
 		root = nullptr;
+		tree_value = 0;
 	}		
 	bool expression_analysis(std::string expression, bool edit = true)
 	{
+		if (expression.size() == 0)
+		{
+			std::cout << "\nExpression didn't enter!" << std::endl;
+			return false;
+		}
 		std::vector<Characteristics> characteristics;
 		if (!add_expression_to_array(expression, characteristics)) return false;
 		if(edit) edit_characteristics(characteristics);
@@ -1281,38 +1393,106 @@ public:
 		Characteristics* array = new Characteristics[size];
 		array = &characteristics[0];
 		separation_of_expression(array, size);
-
+		if (!root) return false;
 		return true;
+	}
+	void write_expression_current(Expression_node* node)
+	{
+		if (!node) return;
+		if (node->left) write_expression_current(node->left);
+		node->item.write_open();
+		std::cout << node->item.value << " ";
+		node->item.write_close();
+		if (node->right) write_expression_current(node->right);
 	}
 	void write_expression()
 	{
-		if (!root) return;
+		if (!root)
+		{
+			std::cout << "\nExpression didn't add to tree!" << std::endl;
+			return;
+		}
 		std::cout << "\nExpression: ";
 		write_expression_current(root);
 		std::cout << std::endl;
 	}
-	void facilitation_of_expression()
+	bool facilitation_of_expression(bool compute = false)
 	{
+		if (!root)
+		{
+			std::cout << "\nExpression didn't add to tree!" << std::endl;
+			return false;
+		}
 		bool is_mistakes = false;
 		Calculation calculation = add_tree_to_calculation(root, is_mistakes);
 		if (is_mistakes)
 		{
-			clear_tree();
-			return;
+			if(!compute) clear_tree();
+			return false;
 		}
 		std::string expression = calculation.create_new_expression();
-		clear_tree();
-		expression_analysis(expression, false);
-		write_expression();
+		if (!compute) 
+		{
+			clear_tree();
+			if (!expression_analysis(expression, false)) return false;
+		}
+		else
+		{
+			char* temp;
+			tree_value = strtod(expression.c_str(), &temp);
+		}
+		
+		return true;
 	}	
+	void set_variable(std::vector<Path_to_variable>& paths)
+	{
+		for (std::size_t i = 0; i < paths.size(); i++)
+		{
+			paths[i].edit_types(Arithmetic_type::VARIABLE);
+			paths[i].edit_values(paths[i].variable);
+		}
+	}
+	std::vector<Path_to_variable> find_variable()
+	{
+		std::vector<Path_to_variable> paths;
+		find_variable_in_tree(root, paths);
+
+		return paths;
+	}
+	void compute_the_expression()
+	{
+		std::vector<Path_to_variable> paths = find_variable();
+		if (paths.size() == 0)
+		{
+			std::cout << "\nThere are no variables in the expression!" << std::endl;
+			return;
+		}
+		std::cout << "\nFound " << paths.size() << " variable(s):" << std::endl;
+		for (std::size_t i = 0; i < paths.size(); i++)
+		{
+			std::cout << paths[i].variable << ", ";
+		}
+		std::cout << std::endl;
+		set_value_of_variable(paths);
+		if (facilitation_of_expression(true))
+		{
+			std::cout << std::endl;
+			write_expression_current(root);
+			std::cout << " = " << tree_value << std::endl;
+		}
+		set_variable(paths);
+		paths.clear();
+	}
 	void clear_tree()
 	{
 		if (!root) return;
 		remove_children(root);
 		delete root;
 		root = nullptr;
+		tree_value = 0;
 	}
 };
+
 std::vector<std::size_t> choose_path(Tree& tree, std::vector<Tree_node*>& pointers)
 {
 	while (true)
@@ -1545,21 +1725,89 @@ void binary_tree_menu(Binary_tree& tree)
 		}
 	}
 }
+std::string create_new_expression()
+{
+	std::string expression = "";
+	std::cout << "\nIntroduction rules:\n"
+		<< "1)There must be a space between each part of the expression,\n"
+		<< "if the number or variable is negative, the minus is written\n"
+		<< "without a space.\n"
+		<< "2)The division is realized only into constants.\n"
+		<< "3)Only nonnegative integers can be power.\n"
+		<< "Example: a ^ 2 + 3 * ( j - 22 ) + 8 * ( -b )" << std::endl;
+	std::cout << "\nEnter the expression: ";
+	expression = "";
+	while (expression.size() == 0) std::getline(std::cin, expression);
+	while (expression[0] == ' ') expression = expression.substr(1);
+	while (expression[expression.size() - 1] == ' ') expression = expression.substr(0, expression.size() - 1);
+
+	return expression;
+}
+void add_the_expression_to_tree(Expression_tree& tree, std::string expression)
+{
+	tree.clear_tree();
+	if (tree.expression_analysis(expression))
+	{
+		std::cout << "\nExpression added to tree!" << std::endl;
+	}
+}
 void expression_tree_menu(Expression_tree& tree)
 {	
-	std::string expression;
-	std::cout << "Enter: ";
-	std::getline(std::cin, expression);
-	if(!tree.expression_analysis(expression)) return;
-	tree.write_expression();
-	tree.facilitation_of_expression();
+	std::string expression = "";
+	while (true)
+	{
+		std::cout << "\nExpression tree:\n1)Create new expression.\n2)Add the expression to tree.\n"
+			<< "3)Facilitation of expression.\n4)Compute the expression.\n5)Write expression.\n0)Back." << std::endl;
+		switch (_getch())
+		{
+		case '1': expression = create_new_expression();
+			break;
+		case '2': add_the_expression_to_tree(tree, expression);
+			break;
+		case '3': if (tree.facilitation_of_expression()) std::cout <<"\nExpression simplified!" << std::endl;
+			break;
+		case '4': tree.compute_the_expression();					
+			break;
+		case '5': tree.write_expression();		
+		break;
+		case'0': return;
+			break;
+		default: std::cout << "\nPress the correct key!" << std::endl;
+		}
+	}
+}
+void create_task_tree(Tree& tree, int array[], std::size_t size)
+{
+	std::vector<size_t> path;
+	for (std::size_t i = 0; i < size - 1; i++)
+	{
+		path = tree.find_pointers(array[i])[0]->get_path();
+		tree.add_value(array[i + 1], path);
+	}
+}
+void create_and_write_task_tree()
+{
+	Tree tree;
+	tree.add_root(1);
+	std::vector<size_t> path;
+	for(int i = 2; i < 7; i++ ) tree.add_value(i, path);
+	int me_array[6] = { 3, 11, 13, 18, 21, 22 };
+	create_task_tree(tree, me_array, 6);
+	int array[5][4] = { { 4, 7, 14, 19 } , { 4, 10, 15, 20 },
+	{ 5, 8, 16, 23}, {6, 12, 25, 26 }, { 6, 9, 17, 24 } };
+	for (std::size_t i = 0; i < 5; i++)
+	{
+		create_task_tree(tree, array[i], 4);
+	}
+	tree.write_tree();
+	tree.clear_tree();
 }
 void interactive_dialog_mode()
 {
 	while (true)
 	{
 		std::cout << "\nMenu:\n1)General tree.\n2)Binary tree.\n"
-			<< "3)Use of trees.\n0)Back."<< std::endl;
+			<< "3)Expression tree.\n4)Create and write task tree.\n0)Back."<< std::endl;
 		switch (_getch())
 		{
 		case '1':
@@ -1582,6 +1830,8 @@ void interactive_dialog_mode()
 			expression_tree_menu(tree);
 			tree.clear_tree();
 		}
+			break;
+		case'4': create_and_write_task_tree();
 			break;
 		case'0':
 		{
@@ -1637,7 +1887,7 @@ namespace all_demo_mode
 	void demo_tree_menu(unsigned delay)
 	{
 		std::cout << "\nMenu:\n1)General tree. <-press\n2)Binary tree.\n"
-			<< "3)Use of trees.\n0)Back." << std::endl;
+			<< "3)Expression tree.\n4)Create and write task tree.\n0)Back." << std::endl;
 		Sleep(delay);
 	}
 	void demo_add_new_item_to_tree(unsigned delay, Tree& tree, int value, std::vector<std::size_t> path, std::vector<Tree_node*>& pointers, std::size_t number, bool create = true, bool is_root = true)
@@ -1723,7 +1973,7 @@ namespace all_demo_mode
 		tree.write_tree();
 		Sleep(delay);
 	}
-	void demo_back(unsigned delay)
+	void demo_tree_back(unsigned delay)
 	{
 		std::cout << "\nGeneral tree:\n1)Add new item to tree.\n2)Get the pointers to item.\n"
 			<< "3)Get the path of item by pointer.\n4)Get the item by path.\n"
@@ -1766,7 +2016,7 @@ namespace all_demo_mode
 			pointers.clear();
 			actions_new_tree(delay);
 			demo_write_all_tree(delay, new_tree);
-			demo_back(delay);
+			demo_tree_back(delay);
 			actions_new_tree(delay, false);
 			new_tree.clear_tree();
 			std::cout << "\nOld Tree:" << std::endl;
@@ -1810,7 +2060,108 @@ namespace all_demo_mode
 	void demo_binary_tree_menu(unsigned delay)
 	{
 		std::cout << "\nMenu:\n1)General tree.\n2)Binary tree. <-press\n"
-			<< "3)Use of trees.\n0)Back." << std::endl;
+			<< "3)Expression tree.\n4)Create and write task tree.\n0)Back." << std::endl;
+		Sleep(delay);
+	}
+	void demo_binary_back(unsigned delay)
+	{
+		std::cout << "\nBinary tree:\n1)Add new item to tree.\n2)Write all tree.\n"
+			<< "3)Create consistent presentation of the tree and write it.\n0)Back. <-press" << std::endl;
+		Sleep(delay);
+	}	
+	void demo_create_new_expression(unsigned delay, std::string expression)
+	{
+		std::cout << "\nExpression tree:\n1)Create new expression. <- press\n2)Add the expression to tree.\n"
+			<< "3)Facilitation of expression.\n4)Compute the expression.\n5)Write expression.\n0)Back." << std::endl;
+		Sleep(delay);
+		std::cout << "\nIntroduction rules:\n"
+			<< "1)There must be a space between each part of the expression,\n"
+			<< "if the number or variable is negative, the minus is written\n"
+			<< "without a space.\n"
+			<< "2)The division is realized only into constants.\n"
+			<< "3)Only nonnegative integers can be power.\n"
+			<< "Example: a ^ 2 + 3 * ( j - 22 ) + 8 * ( -b )" << std::endl;
+		std::cout << "\nEnter the expression: <-write experssion and press <Enter>" << std::endl;
+		Sleep(2*delay);
+		std::cout << "\nEnter the expression: " << expression << std::endl;
+		Sleep(delay);
+	}
+	void demo_add_the_expression_to_tree(unsigned delay, Expression_tree& tree, std::string expression)
+	{
+		std::cout << "\nExpression tree:\n1)Create new expression.\n2)Add the expression to tree. <- press\n"
+			<< "3)Facilitation of expression.\n4)Compute the expression.\n5)Write expression.\n0)Back." << std::endl;
+		Sleep(delay);
+		add_the_expression_to_tree(tree, expression);
+		Sleep(delay);
+	}
+	void demo_facilitation_of_expression(unsigned delay, Expression_tree& tree)
+	{
+		std::cout << "\nExpression tree:\n1)Create new expression.\n2)Add the expression to tree.\n"
+			<< "3)Facilitation of expression. <- press\n4)Compute the expression.\n5)Write expression.\n0)Back." << std::endl;
+		Sleep(delay);
+		if (tree.facilitation_of_expression()) std::cout << "\nExpression simplified!" << std::endl;
+		Sleep(delay);
+	}
+	void demo_compute_the_expression(unsigned delay, Expression_tree& tree, std::vector<Path_to_variable>& paths, std::vector<double> constants)
+	{
+		std::cout << "\nExpression tree:\n1)Create new expression.\n2)Add the expression to tree.\n"
+			<< "3)Facilitation of expression.\n4)Compute the expression. <- press\n5)Write expression.\n0)Back." << std::endl;
+		Sleep(delay);
+		std::cout << "\nFound " << paths.size() << " variable(s):" << std::endl;
+		for (std::size_t i = 0; i < paths.size(); i++)std::cout << paths[i].variable << ", ";
+		std::cout << std::endl;
+		Sleep(delay);
+		for (std::size_t i = 0; i < paths.size(); i++)
+		{
+			std::cout <<"\nEnter value for " + paths[i].variable + ": <-write experssion and press <Enter>" << std::endl;
+			Sleep(delay);
+			std::cout << "Enter value for " + paths[i].variable + ": " << constants[i] << std::endl;
+			Sleep(delay);
+			paths[i].edit_types(Arithmetic_type::CONSTANT);
+			std::ostringstream to_string;
+			to_string << constants[i];
+			paths[i].edit_values(to_string.str());
+		}
+		if (tree.facilitation_of_expression(true))
+		{
+			std::cout << std::endl;
+			tree.write_expression_current(tree.root);
+			std::cout << " = " << tree.tree_value << std::endl;
+		}
+		Sleep(delay);
+		tree.set_variable(paths);
+		paths.clear();
+	}
+	void demo_write_expression(unsigned delay, Expression_tree& tree)
+	{
+		std::cout << "\nExpression tree:\n1)Create new expression.\n2)Add the expression to tree.\n"
+			<< "3)Facilitation of expression.\n4)Compute the expression.\n5)Write expression. <- press\n0)Back." << std::endl;
+		Sleep(delay);
+		tree.write_expression();
+		Sleep(delay);
+	}
+	void demo_expression_tree_menu(unsigned delay)
+	{
+		std::cout << "\nMenu:\n1)General tree.\n2)Binary tree.\n"
+			<< "3)Expression tree. <-press\n4)Create and write task tree.\n0)Back." << std::endl;
+		Sleep(delay);
+	}
+	void demo_expression_back(unsigned delay)
+	{
+		std::cout << "\nMenu:\n1)General tree.\n2)Binary tree.\n"
+			<< "3)Use of trees.\n0)Back. <-press" << std::endl;
+		Sleep(delay);
+	}
+	void demo_exit(unsigned delay)
+	{
+		std::cout << "\nMenu:\n1)General tree.\n2)Binary tree.\n"
+			<< "3)Expression tree.\n4)Create and write task tree.\n0)Back. <-press" << std::endl;
+		Sleep(delay);
+	}
+	void demo_task_tree_menu(unsigned delay)
+	{
+		std::cout << "\nMenu:\n1)General tree.\n2)Binary tree.\n"
+			<< "3)Expression tree.\n4)Create and write task tree. <-press\n0)Back." << std::endl;
 		Sleep(delay);
 	}
 	void binary_demo_mode(unsigned delay)
@@ -1830,7 +2181,8 @@ namespace all_demo_mode
 		demo_binary_add_new_item(delay, tree, 8);
 		demo_binary_write_tree(delay, tree);
 		demo_create_consistent_presentation(delay, tree);
-		demo_back(delay);
+		demo_binary_back(delay);
+		Sleep(2*delay);
 	}
 	void tree_demo_mode(unsigned delay)
 	{
@@ -1857,7 +2209,43 @@ namespace all_demo_mode
 		path.push_back(0);
 		demo_add_new_item_to_tree(delay, tree, 100, path, pointers, number, true);
 		demo_write_all_tree(delay, tree);
-		demo_back(delay);
+		demo_tree_back(delay);
+		Sleep(2 * delay);
+	}
+	void expression_demo_mode(unsigned delay)
+	{
+		Expression_tree tree;
+		std::string expression[3] = { "5 + x * ( y - 3 ^ 4 ) - 10 * z - 3",
+		"( x + y ) * ( x - y ) + 5 ^ 2", "( a - b ) ^ 4 + c * ( d - 5 ) / 2" };
+		std::vector<Path_to_variable> paths;
+		std::vector<double> constants;	
+		demo_expression_tree_menu(delay);
+		for (std::size_t i = 0; i < 3; i++)
+		{
+			demo_create_new_expression(delay, expression[i]);
+			demo_add_the_expression_to_tree(delay, tree, expression[i]);			
+			demo_write_expression(delay, tree);
+			demo_facilitation_of_expression(delay, tree);
+			demo_write_expression(delay, tree);
+			paths = tree.find_variable();
+			constants.clear();
+			for (std::size_t j = 0; j < paths.size(); j++)
+			{
+				constants.push_back(rand() % 1000 * 0.01);
+			}
+			demo_compute_the_expression(delay, tree, paths, constants);
+			demo_write_expression(delay, tree);
+		}	
+		demo_expression_back(delay);
+		tree.clear_tree();
+		Sleep(2 * delay);
+	}	
+	void demo_create_and_write_task_tree(unsigned delay)
+	{
+		demo_task_tree_menu(delay);
+		create_and_write_task_tree();
+		Sleep(3*delay);
+		demo_exit(delay);
 	}
 }
 void demo_mode()
@@ -1865,6 +2253,9 @@ void demo_mode()
 	unsigned delay = correct::read_unsigned("a delay to display data(in milliseconds; normal = 1900)");
 	all_demo_mode::tree_demo_mode(delay);
 	all_demo_mode::binary_demo_mode(delay);
+	all_demo_mode::expression_demo_mode(delay);
+	all_demo_mode::demo_create_and_write_task_tree(delay);
+	std::cout << std::endl;
 }
 int main()
 {
