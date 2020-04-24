@@ -1,3 +1,4 @@
-Nickname=Water
-Points=20
-Element=water
+Nickname=Player2
+Points=77
+Element=white
+

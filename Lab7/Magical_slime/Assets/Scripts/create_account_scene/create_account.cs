@@ -40,7 +40,7 @@ public class create_account : MonoBehaviour
         writer.WriteLine(nickname);
         writer.WriteLine(password);
         writer.WriteLine(mail);
-        writer.WriteLine("Points=0");
+        writer.WriteLine("Points=100");
         writer.WriteLine("Coins=300");
         writer.WriteLine("Slimes=0000000");
         writer.Close();

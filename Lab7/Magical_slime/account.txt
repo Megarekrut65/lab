@@ -1,0 +1,6 @@
+Nickname=Mega
+Password=1111
+Mail=mega@mail.com
+Points=72
+Coins=1869
+Slimes=1111111

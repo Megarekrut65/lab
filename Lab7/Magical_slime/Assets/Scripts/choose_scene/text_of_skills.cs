@@ -27,17 +27,17 @@ public class text_of_skills : MonoBehaviour
     void combo_wood()
     {
         name_of_skill.text = "Wild Nature";
-        about_skill.text = "Wood Slime imposes on the enemy the effect of Wild Nature. The number of effects is equal to the damage dealt. When the number of effects is 12, the next round the enemy will not be able to attack, and the effects of wildlife will disappear.";
+        about_skill.text = "Wood Slime imposes on the enemy the effect of Wild Nature. The number of effects is equal to the damage dealt divided by 4. When the number of effects is 3, the next round the enemy will not be able to attack, and the effects of wildlife will disappear.";
     }
     void combo_dark()
     {
         name_of_skill.text = "Nightmare";
-        about_skill.text = "Dark Slime blocks a normal attack and redirects it to the opponent, if the attack is a combo skill then it will only be blocked.";
+        about_skill.text = "Dark Slime redirects normal attack of enemy.";
     }
     void combo_girl()
     {
         name_of_skill.text = "Defender";
-        about_skill.text = "Girl Slime forms a defender. The defender receives damage inflicted by the enemy. The amount of health of the defender is equal to the amount of damage inflicted by the opponent during the activation of the skill. The defender stops absorbing damage only after his health drops below 0. (For example, the defender's health is 1, the enemy deals 6 damage - the defender dies, but the rest of the 5 damage does not apply to the Girl Slime.";
+        about_skill.text = "Girl Slime forms a defender. The defender receives damage inflicted by the enemy. The amount of health of the defender is equal to the amount of damage inflicted by the opponent during the activation of the skill. The defender stops absorbing damage only after his health drops below 0. (For example, the defender's health is 1, the enemy deals 6 damage - the defender dies, but the rest of the 5 damage does not apply to the Girl Slime.)";
     }
     void combo_white()
     {
@@ -68,12 +68,12 @@ public class text_of_skills : MonoBehaviour
     void passive_fire()
     {
         name_of_skill.text = "Revenge of Fire";
-        about_skill.text = "When an enemy activates a combo skill, Fire Slime deals 2 damage his";
+        about_skill.text = "When an enemy activates a combo skill, Fire Slime deals 2 damage his.";
     }
     void passive_water()
     {
         name_of_skill.text = "Water Justice";
-        about_skill.text = "If the enemy deals more damage, Water Slime regains 1 unit of health";
+        about_skill.text = "If the enemy have more unit of health, Water Slime regains 1 unit himself.";
     }
     void passive_poison()
     {
@@ -83,7 +83,7 @@ public class text_of_skills : MonoBehaviour
     void passive_wood()
     {
         name_of_skill.text = "Last Leaf";
-        about_skill.text = "When an enemy activates a combo skill, it gets 2 more Wild Nature effects.";
+        about_skill.text = "When an enemy activates a combo skill, it gets 1 more Wild Nature effects.";
     }
     void passive_dark()
     {

@@ -7,6 +7,9 @@ using System.IO;
 
 public class slime : MonoBehaviour
 {
+    public string name_of_show;
+    public string name_of_fly;
+    public string name_of_die;
     public string slime_path;
     public Text name_of_player;
     public Text points_text;
@@ -17,13 +20,15 @@ public class slime : MonoBehaviour
     public Text hp_text;
     public Slider hp_slider;
     public GameObject my_camera;
+    public GameObject boll;
     private Sprite passive_skill;
     public int number_of_slimes = 7;
     public int index_of_slime;
     private int passive_index;
     private GameObject[] slimes;
-    private string nickname;
+    public string nickname;
     private string points;
+    private bool again_life = false;
 
     void read_file()
     {
@@ -42,10 +47,24 @@ public class slime : MonoBehaviour
         gameObject.GetComponent<SpriteRenderer>().sprite = slimes[index_of_slime].GetComponent<SpriteRenderer>().sprite;
         passive_skill = my_camera.GetComponent<the_begin>().good_passive[index_of_slime].GetComponent<SpriteRenderer>().sprite;
         passive_index = my_camera.GetComponent<the_begin>().add_effect(passive_skill, side);
-    }   
+        boll.GetComponent<SpriteRenderer>().sprite = my_camera.GetComponent<the_begin>().bolls[index_of_slime].GetComponent<SpriteRenderer>().sprite;
+        GetComponent<Animation>().Play(name_of_show);
+    }
+    void start_fly()
+    {
+        GetComponent<Animation>().Play(name_of_fly);
+        my_camera.GetComponent<the_begin>().show_side(side);
+    }
     public void choose_slime()
     {
-        switch(element)
+        read_file();
+        name_of_player.text = nickname;
+        points_text.text = points;
+        slimes = GameObject.FindGameObjectsWithTag(tag_slime);
+        for (int i = 0; i < number_of_slimes; i++) slimes[i].SetActive(false);
+        hp_text.text = hp.ToString();
+        hp_slider.value = hp;
+        switch (element)
         {
             case "fire": index_of_slime = 0;
                 break;
@@ -64,20 +83,50 @@ public class slime : MonoBehaviour
         }
         set_images();
     }   
-    void Start()
+    public void getting_hp(int health)
     {
-        read_file();
-        name_of_player.text = nickname;
-        points_text.text = points;
-        slimes = GameObject.FindGameObjectsWithTag(tag_slime);
-        for (int i = 0; i < number_of_slimes; i++) slimes[i].SetActive(false);
-        hp_text.text = hp.ToString();
-        hp_slider.value = hp;      
-    }
-    public void getting_damage(int damage)
-    {
-        hp -= damage;
+        hp += health;
+        if (hp > 110) hp = 110;
         hp_text.text = hp.ToString();
         hp_slider.value = hp;
+    }   
+    public void getting_damage(int damage)
+    {
+        if ((index_of_slime == 5)||(index_of_slime == 6))
+        {
+            if (my_camera.GetComponent<the_begin>().edit_girl(side, damage)) return;
+        }
+        hp -= damage;
+        if (hp < -10) hp = -10;
+        hp_text.text = hp.ToString();
+        hp_slider.value = hp;
+        if(side)
+        {
+            transform.localScale -= new Vector3(60, 60, 60);
+        }
+        else
+        {
+            transform.localScale -= new Vector3(60, 60, 60);
+        }
+    }
+    void rise_again()
+    {
+        GetComponent<Animation>().Stop(name_of_fly);
+        gameObject.SetActive(false);
+        if (again_life)
+        {
+            hp = 1;
+            hp_text.text = hp.ToString();
+            GetComponent<Animation>().Play(name_of_show);
+            my_camera.GetComponent<the_begin>().remove_effect(passive_index, side);
+            passive_skill = my_camera.GetComponent<the_begin>().bad_passive[index_of_slime].GetComponent<SpriteRenderer>().sprite;
+            passive_index = my_camera.GetComponent<the_begin>().add_effect(passive_skill, side);
+            gameObject.SetActive(true);
+        }
+    }
+    public void set_die(bool life = false)
+    {
+        again_life = life;
+        GetComponent<Animation>().Play(name_of_die);
     }
 }

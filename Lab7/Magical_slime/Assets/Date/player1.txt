@@ -1,4 +1,0 @@
-Nickname=mega
-Points=0
-Element=fire
-

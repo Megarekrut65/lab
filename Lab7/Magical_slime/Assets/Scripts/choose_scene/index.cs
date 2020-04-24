@@ -11,9 +11,10 @@ public class index : MonoBehaviour
     public Text buy_text;
     private int number_of_slimes;
     public int i = 0;
-    private GameObject[] slimes;
+    public GameObject[] slimes;
     private GameObject[] all_items;
-  
+    public Vector3 vector;
+
     public void setting()
     {
         number_of_slimes = my_camera.GetComponent<the_start>().number_of_slimes;
@@ -52,8 +53,8 @@ public class index : MonoBehaviour
     public void right()
     {
         if (i < number_of_slimes - 1)
-        {            
-            slimes[i].transform.position += new Vector3(0f, 1f, 0f);
+        {
+            slimes[i].transform.position = vector + new Vector3(0f, 0.2f, 0f);
             all_items[i].SetActive(false);
             i++;
             purchase();
@@ -64,7 +65,7 @@ public class index : MonoBehaviour
     {
         if (i > 0)
         {
-            slimes[i].transform.position += new Vector3(0f, 1f, 0f);
+            slimes[i].transform.position = vector + new Vector3(0f, 0.2f, 0f);
             all_items[i].SetActive(false);
             i--;
             purchase();

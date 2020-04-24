@@ -14,6 +14,8 @@ TagManager:
   - bad_combo
   - good_passive
   - bad_passive
+  - bolls
+  - water_combo
   layers:
   - Default
   - TransparentFX
