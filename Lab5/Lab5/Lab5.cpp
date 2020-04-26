@@ -2,6 +2,45 @@
 #include <iostream>
 #include <vector>
 
+struct Path
+{
+    int weight_coefficient;
+    bool is_end;
+    std::size_t begin_vertex;
+    std::size_t end_vertex;
+    Path()
+    {
+        weight_coefficient = 0;
+        is_end = false;
+        begin_vertex = 0;
+        end_vertex = 0;
+    }
+    Path(std::size_t begin_vertex, std::size_t end_vertex)
+    {
+        weight_coefficient = 0;
+        is_end = false;
+        this->begin_vertex = begin_vertex;
+        this->end_vertex = end_vertex;
+    }
+    void add_weight(std::size_t next_vertex, int weight_coefficient)
+    {
+        if (is_end) return;
+        this->weight_coefficient += weight_coefficient;
+        if (next_vertex == end_vertex)
+        {
+            is_end = true;
+        }
+    }
+    void select_min(Path path)
+    {
+        if (!path.is_end) return;
+        if(!is_end) weight_coefficient = path.weight_coefficient;
+        if (weight_coefficient > path.weight_coefficient)
+        {
+            weight_coefficient = path.weight_coefficient;
+        }
+    }
+};
 struct Graph_node
 {
     bool contiguity;
@@ -104,6 +143,46 @@ private:
             return true;
         }
         return false;
+    }  
+    std::size_t min_distance(int* distance, bool* is_set)
+    {
+        int min = INT_MAX;
+        std::size_t index = 0;
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            if (!is_set[i] && distance[i] <= min)
+            {
+                min = distance[i];
+                index = i;
+            }
+        }
+
+        return index;
+    }
+    int* dijkstra(std::size_t vertex)
+    {
+        int* distance = new int[number_of_vertex];
+        bool* is_set = new bool[number_of_vertex];
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            distance[i] = INT_MAX;
+            is_set[i] = false;
+        }
+        distance[vertex] = 0;
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            std::size_t index = min_distance(distance, is_set);
+            is_set[index] = true;
+            for (std::size_t j = 0; j < number_of_vertex; j++)
+            {
+                if (!is_set[j] && array[index][j].contiguity
+                    && distance[index] != INT_MAX
+                    && distance[index] + array[index][j].weight_coefficient < distance[j])
+                    distance[j] = distance[index] + array[index][j].weight_coefficient;
+            }
+        }
+        delete[]is_set;
+        return distance;
     }
 public:
     Graph_matrix(bool orientation)
@@ -198,20 +277,51 @@ public:
             std::cout << "\nThe graph isn't connected!" << std::endl;
         }      
     }
+    void find_paths_between_two_vertexes(std::size_t first_vertex, std::size_t second_vertex)
+    {
+        std::vector<std::size_t> indexes;
+        if (!is_connected(indexes, false))
+        {
+            std::cout << "\nThe graph isn't connected!" << std::endl;
+            return;
+        }
+        int* distance = dijkstra(first_vertex);       
+        std::cout << "\nThe smallest distance from " << first_vertex 
+            << " to " << second_vertex << " = " << distance[second_vertex] << std::endl;
+        delete[]distance;
+    }   
+    void find_path_from_the_vertex_to_everyone_else(std::size_t vertex)
+    {
+        std::vector<std::size_t> indexes;
+        if (!is_connected(indexes, false))
+        {
+            std::cout << "\nThe graph isn't connected!" << std::endl;
+            return;
+        }
+        int* distance = dijkstra(vertex);
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            std::cout << "\nThe smallest distance from " << vertex
+                << " to " << i << " = " << distance[i] << std::endl;
+        }       
+        delete[]distance;
+    }
 };
 int main()
 {
     Graph_matrix graph(6, false);
-    graph.add_edge(0, 1, 0);
-    graph.add_edge(0, 2, 7);
+    graph.add_edge(0, 3, 1);
+    graph.add_edge(0, 2, 2);
+    graph.add_edge(0, 1, 11);
     graph.add_edge(0, 3, 6);
-    graph.add_edge(2, 5, 40);
-    graph.add_edge(3, 4, -7);
-    graph.add_edge(3, 5, 14);
+    graph.add_edge(2, 1, 10);
+    graph.add_edge(3, 4, 2);
+    //graph.add_edge(4, 1, 5);
+    graph.add_edge(4, 5, 3);
+   // graph.add_edge(5, 1, 4);
     graph.write_graph();
-    graph.depth_first_search(false);
-    graph.add_vertex();
-    graph.depth_first_search(true);
+    graph.find_paths_between_two_vertexes(0, 1);
+    graph.find_path_from_the_vertex_to_everyone_else(5);
 
     return 0;
 }
