@@ -1,4 +1,4 @@
-﻿//
+﻿// №1, №2, №5, №11, №14, №17, №19, 
 #include <iostream>
 #include <vector>
 
@@ -184,6 +184,50 @@ private:
         delete[]is_set;
         return distance;
     }
+    bool connected_graph()
+    {
+        std::vector<std::size_t> indexes;
+        if (!is_connected(indexes, false))
+        {
+            std::cout << "\nThe graph isn't connected!" << std::endl;
+            return false;
+        }
+        return true;
+    }
+    std::vector<std::vector<std::size_t>> create_set()
+    {
+        std::vector<std::vector<std::size_t>> set(number_of_vertex);
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            for (std::size_t j = 0; j < number_of_vertex; j++)
+            {
+                if (array[i][j].contiguity) set[j].push_back(i);
+            }
+        }
+        return set;
+    }
+    void edit_set(std::vector<std::vector<std::size_t>>& set, std::size_t index)
+    {
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            for (std::size_t j = 0; j < set[i].size(); j++)
+            {
+                if (set[i][j] == index)
+                {
+                    set[i].erase(set[i].begin() + j);
+                    j--;
+                }
+            }
+        }
+    }
+    bool is_in_vertices(std::vector<std::size_t> vertices, std::size_t index)
+    {
+        for (std::size_t i = 0; i < vertices.size(); i++)
+        {
+            if (vertices[i] == index) return true;
+        }
+        return false;
+    }
 public:
     Graph_matrix(bool orientation)
     {
@@ -250,14 +294,9 @@ public:
     }    
     void checking_the_connectivity_of_graph()
     {
-        std::vector<std::size_t> indexes;
-        if (is_connected(indexes, false))
+        if (connected_graph())
         {
             std::cout << "\nThe graph is connected!" << std::endl;
-        }
-        else
-        {
-            std::cout << "\nThe graph isn't connected!" << std::endl;
         }
     }
     void depth_first_search(bool mode)
@@ -277,51 +316,96 @@ public:
             std::cout << "\nThe graph isn't connected!" << std::endl;
         }      
     }
-    void find_paths_between_two_vertexes(std::size_t first_vertex, std::size_t second_vertex)
+    void find_paths_between_two_vertices(std::size_t first_vertex, std::size_t second_vertex)
     {
-        std::vector<std::size_t> indexes;
-        if (!is_connected(indexes, false))
-        {
-            std::cout << "\nThe graph isn't connected!" << std::endl;
-            return;
-        }
+        if (!connected_graph()) return;
         int* distance = dijkstra(first_vertex);       
-        std::cout << "\nThe smallest distance from " << first_vertex 
-            << " to " << second_vertex << " = " << distance[second_vertex] << std::endl;
+        if (distance[second_vertex] == INT_MAX)
+        {
+            std::cout << "\nThe graph is poorly oriented so it cannot be reached from " << first_vertex
+                << " to " << second_vertex << "." << std::endl;
+        }
+        else
+        {
+            std::cout << "\nThe smallest distance from " << first_vertex
+                << " to " << second_vertex << " = " << distance[second_vertex] << "." << std::endl;
+        }
         delete[]distance;
     }   
     void find_path_from_the_vertex_to_everyone_else(std::size_t vertex)
     {
-        std::vector<std::size_t> indexes;
-        if (!is_connected(indexes, false))
-        {
-            std::cout << "\nThe graph isn't connected!" << std::endl;
-            return;
-        }
+        if (!connected_graph()) return;
         int* distance = dijkstra(vertex);
         for (std::size_t i = 0; i < number_of_vertex; i++)
         {
-            std::cout << "\nThe smallest distance from " << vertex
-                << " to " << i << " = " << distance[i] << std::endl;
+            if (distance[i] == INT_MAX)
+            {
+                std::cout << "\nThe graph is poorly oriented so it cannot be reached from " << vertex
+                    << " to " << i << "." << std::endl;
+            }
+            else
+            {
+                std::cout << "\nThe smallest distance from " << vertex
+                    << " to " << i << " = " << distance[i] << "." << std::endl;
+            }
         }       
         delete[]distance;
+    }
+    void find_paths_between_all_vertices()
+    {
+        if (!connected_graph()) return;
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            std::cout << "\nVertex: " << i << "." << std::endl;
+            find_path_from_the_vertex_to_everyone_else(i);
+        }
+    }
+    void topological_sorting()
+    {
+        if (!orientation)
+        {
+            std::cout << "\nTopological sorting for directed graph only" << std::endl;
+            return;
+        }
+        if (!connected_graph()) return;
+        std::vector<std::size_t> vertices;
+        std::vector<std::vector<std::size_t>> set = create_set();
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            if ((set[i].size() == 0 ) && (!is_in_vertices(vertices, i)))
+            {
+                vertices.push_back(i);
+                edit_set(set, i);
+                i = 0;
+            }
+        }
+        if (vertices.size() != number_of_vertex)
+        {
+            std::cout << "\nThe graph has a cycle!" << std::endl;
+            return;
+        }
+        std::cout << "\nResult: ";
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            std::cout << vertices[i] << " ";
+        }
+        std::cout << std::endl;
     }
 };
 int main()
 {
-    Graph_matrix graph(6, false);
-    graph.add_edge(0, 3, 1);
-    graph.add_edge(0, 2, 2);
-    graph.add_edge(0, 1, 11);
-    graph.add_edge(0, 3, 6);
-    graph.add_edge(2, 1, 10);
-    graph.add_edge(3, 4, 2);
-    //graph.add_edge(4, 1, 5);
-    graph.add_edge(4, 5, 3);
-   // graph.add_edge(5, 1, 4);
+    Graph_matrix graph(5, false);
+    graph.add_edge(0, 0, 10);
+    graph.add_edge(0, 1, 1);
+    graph.add_edge(1, 1, 12);
+    graph.add_edge(1, 2, 1);
+    graph.add_edge(2, 2, 13);
+    graph.add_edge(2, 3, 1);
+    graph.add_edge(3, 3, 11);
+    graph.add_edge(3, 4, 1);
+    graph.add_edge(4, 4, 17);
     graph.write_graph();
-    graph.find_paths_between_two_vertexes(0, 1);
-    graph.find_path_from_the_vertex_to_everyone_else(5);
+    graph.find_paths_between_all_vertices();
 
     return 0;
 }
