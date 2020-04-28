@@ -1,4 +1,4 @@
-﻿// №1, №2, №5, №11, №14, №17, №19, 
+﻿// №1, №2, №5, №11, №14, №17, №19, №21
 #include <iostream>
 #include <vector>
 
@@ -64,6 +64,8 @@ private:
     std::size_t number_of_vertex;
     std::size_t number_of_edge;
     bool orientation;
+    int total_weight;
+
     bool is_index(std::size_t index)
     {
         if (index >= number_of_vertex)
@@ -137,11 +139,16 @@ private:
     }
     bool is_connected(std::vector<std::size_t>& indexes, bool mode)
     {
-        is_connected_current(indexes, 0, mode);
-        if (indexes.size() == number_of_vertex)
+        for (std::size_t i = 0; i < number_of_vertex; i++)
         {
-            return true;
+            is_connected_current(indexes, i, mode);
+            if (indexes.size() == number_of_vertex)
+            {
+                return true;
+            }
+            indexes.clear();
         }
+        
         return false;
     }  
     std::size_t min_distance(int* distance, bool* is_set)
@@ -228,12 +235,74 @@ private:
         }
         return false;
     }
+    void create_spanning_tree_current(Graph_matrix& spanning_tree, std::vector<std::size_t>& indexes, std::size_t index, bool mode, int& total_weight)
+    {
+        std::vector<std::size_t> numbers = create_numbers(index, mode);
+        for (std::size_t j = 0; j < number_of_vertex; j++)
+        {
+            if (array[index][numbers[j]].contiguity)
+            {
+                add_index(indexes, index);
+                if (index == numbers[j]) continue;
+                if (add_vertex(indexes, index, numbers[j]))
+                {
+                    add_index(indexes, numbers[j]);
+                    spanning_tree.add_edge(index, numbers[j], array[index][numbers[j]].weight_coefficient, false);
+                    total_weight += array[index][numbers[j]].weight_coefficient;
+                    create_spanning_tree_current(spanning_tree, indexes, numbers[j], mode, total_weight);
+                }
+            }
+        }
+    }
+    Graph_matrix kruskal()
+    {
+        Graph_matrix spanning_tree(number_of_vertex, false);
+        std::vector<std::size_t> belongs(number_of_vertex);
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            belongs[i] = i;
+        }
+        std::size_t first_index;
+        std::size_t second_index;
+        for (std::size_t vertices = 1; vertices < number_of_vertex; vertices++)
+        {
+            int min = INT_MAX;
+            for (std::size_t i = 0; i < number_of_vertex; i++)
+            {
+                for (std::size_t j = 0; j < number_of_vertex; j++)
+                {
+                    if (array[i][j].contiguity && (min > array[i][j].weight_coefficient)
+                        && (belongs[i] != belongs[j]))
+                    {
+                        min = array[i][j].weight_coefficient;
+                        first_index = i;
+                        second_index = j;
+                    }
+                }
+            }
+            if (belongs[first_index] != belongs[second_index])
+            {
+                spanning_tree.add_edge(first_index, second_index, min, false);
+                std::size_t temp = belongs[second_index];
+                belongs[second_index] = belongs[first_index];
+                for (std::size_t i = 0; i < number_of_vertex; i++)
+                {
+                    if (belongs[i] == temp)
+                    {
+                        belongs[i] = belongs[first_index];
+                    }
+                }
+            }
+        }
+        return spanning_tree;
+    }
 public:
     Graph_matrix(bool orientation)
     {
         number_of_vertex = 0;
         number_of_edge = 0;
         this->orientation = orientation;
+        total_weight = 0;
     }
     Graph_matrix(std::size_t number_of_vertex, bool orientation)
     {
@@ -245,6 +314,7 @@ public:
         {
             array.push_back(new_line);
         }
+        total_weight = 0;
     }    
     void add_vertex()
     {
@@ -262,19 +332,20 @@ public:
         std::vector<Graph_node> new_line(number_of_vertex, Graph_node());
         array.push_back(new_line);
     }
-    void add_edge(std::size_t i_vertex, std::size_t j_vertex, int weight_coefficient)
+    void add_edge(std::size_t i_vertex, std::size_t j_vertex, int weight_coefficient, bool show = true)
     {
         if (!is_index(i_vertex) || !is_index(j_vertex)) return;
         if (array[i_vertex][j_vertex].contiguity)
         {
-            std::cout << "\nThe edge already exists between the vertices!" << std::endl;
+            if (show) std::cout << "\nThe edge already exists between the vertices!" << std::endl;
             return;
         }
         Graph_node node = Graph_node(true, weight_coefficient);
         array[i_vertex][j_vertex] = node;
         if(!orientation) array[j_vertex][i_vertex] = node;
         number_of_edge++;
-        std::cout <<"\nThe edge added!" << std::endl;
+        total_weight += weight_coefficient;
+        if(show) std::cout <<"\nThe edge added!" << std::endl;
     }
     void write_graph()
     {
@@ -291,7 +362,38 @@ public:
         }
         std::cout << "\nVertex: " << number_of_vertex << std::endl;
         std::cout << "Edge: " << number_of_edge << std::endl;
+        std::cout << "Total weight: " << total_weight << std::endl;
     }    
+    void create_random_graph(std::size_t number_of_vertex, std::size_t number_of_edge, bool orientation, int max_weight)
+    {
+        clear();
+        this->orientation = orientation;
+        this->number_of_vertex = number_of_vertex;
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            for (std::size_t j = 0; j < number_of_vertex; j++)
+            {
+                if (this->number_of_edge >= number_of_edge) return;
+                if ((i != j) && !array[i][j].contiguity)
+                {
+                    add_edge(i, j, rand() % max_weight, false);
+                }
+                
+            }
+        }
+        if (this->number_of_edge < number_of_edge)
+        {
+            for (std::size_t i = 0; i < number_of_vertex; i++)
+            {
+                if (this->number_of_edge >= number_of_edge) return;
+                if (!array[i][i].contiguity)
+                {
+                    add_edge(i, i, rand() % max_weight, false);
+                }
+            }
+        }
+
+    }
     void checking_the_connectivity_of_graph()
     {
         if (connected_graph())
@@ -369,14 +471,14 @@ public:
         }
         if (!connected_graph()) return;
         std::vector<std::size_t> vertices;
-        std::vector<std::vector<std::size_t>> set = create_set();
+        std::vector<std::vector<std::size_t>> set = create_set(); 
         for (std::size_t i = 0; i < number_of_vertex; i++)
-        {
+        {           
             if ((set[i].size() == 0 ) && (!is_in_vertices(vertices, i)))
             {
                 vertices.push_back(i);
                 edit_set(set, i);
-                i = 0;
+                i = -1;
             }
         }
         if (vertices.size() != number_of_vertex)
@@ -391,21 +493,68 @@ public:
         }
         std::cout << std::endl;
     }
+    void create_spanning_tree(bool mode)
+    {
+        if (orientation)
+        {
+            std::cout << "\nSpanning tree for undirected graph only" << std::endl;
+            return;
+        }
+        Graph_matrix spanning_tree(number_of_vertex, false);
+        std::vector<std::size_t> indexes;        
+        int total_weight = 0;
+        create_spanning_tree_current(spanning_tree, indexes, 0, mode, total_weight);
+        if (indexes.size() != number_of_vertex)
+        {
+            std::cout << "\nThe graph isn't connected!" << std::endl;
+            return;
+        }
+        std::cout << "\nThe spanning tree is created!" << std::endl;
+        spanning_tree.write_graph();    
+        spanning_tree.clear();
+    }
+    void create_the_smallest_spanning_tree()
+    {
+        if (orientation)
+        {
+            std::cout << "\nSpanning tree for undirected graph only" << std::endl;
+            return;
+        }
+        if (!connected_graph()) return;
+        Graph_matrix spanning_tree = kruskal();
+        std::cout << "\nThe spanning tree is created!" << std::endl;
+        spanning_tree.write_graph();
+        spanning_tree.clear();
+    }
+    void clear()
+    {
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            array[i].clear();
+        }
+        array.clear();
+        number_of_vertex = 0;
+        number_of_edge = 0;
+        orientation = false;
+        total_weight = 0;
+    }
 };
 int main()
 {
-    Graph_matrix graph(5, false);
-    graph.add_edge(0, 0, 10);
-    graph.add_edge(0, 1, 1);
-    graph.add_edge(1, 1, 12);
-    graph.add_edge(1, 2, 1);
-    graph.add_edge(2, 2, 13);
-    graph.add_edge(2, 3, 1);
-    graph.add_edge(3, 3, 11);
-    graph.add_edge(3, 4, 1);
-    graph.add_edge(4, 4, 17);
+    Graph_matrix graph(6, false);
+    graph.add_edge(5, 0, 50);
+    graph.add_edge(5, 3, 1000);
+    graph.add_edge(0, 1, 100);  
+    graph.add_edge(0, 2, 90);
+    graph.add_edge(0, 3, 80);
+    graph.add_edge(0, 4, 70);
+    graph.add_edge(1, 2, 5000);
+    graph.add_edge(4, 1, 2000);
+    graph.add_edge(3, 4, 1000);
     graph.write_graph();
-    graph.find_paths_between_all_vertices();
-
+    graph.create_spanning_tree(false);
+    graph.create_spanning_tree(true);
+    graph.create_the_smallest_spanning_tree();
+    graph.clear();
     return 0;
 }
