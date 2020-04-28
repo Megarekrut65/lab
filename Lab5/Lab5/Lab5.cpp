@@ -306,6 +306,10 @@ public:
     }
     Graph_matrix(std::size_t number_of_vertex, bool orientation)
     {
+        create_graph(number_of_vertex, orientation);
+    }    
+    void create_graph(std::size_t number_of_vertex, bool orientation)
+    {
         this->number_of_vertex = number_of_vertex;
         number_of_edge = 0;
         this->orientation = orientation;
@@ -315,7 +319,7 @@ public:
             array.push_back(new_line);
         }
         total_weight = 0;
-    }    
+    }
     void add_vertex()
     {
         for (std::size_t i = 0; i < number_of_vertex; i++)
@@ -364,35 +368,46 @@ public:
         std::cout << "Edge: " << number_of_edge << std::endl;
         std::cout << "Total weight: " << total_weight << std::endl;
     }    
-    void create_random_graph(std::size_t number_of_vertex, std::size_t number_of_edge, bool orientation, int max_weight)
+    bool create_random(std::size_t number_of_vertex, std::size_t number_of_edge, bool orientation, int max_weight)
     {
         clear();
-        this->orientation = orientation;
-        this->number_of_vertex = number_of_vertex;
+        create_graph(number_of_vertex, orientation);
         for (std::size_t i = 0; i < number_of_vertex; i++)
         {
             for (std::size_t j = 0; j < number_of_vertex; j++)
             {
-                if (this->number_of_edge >= number_of_edge) return;
+                if (this->number_of_edge >= number_of_edge) return true;
                 if ((i != j) && !array[i][j].contiguity)
                 {
                     add_edge(i, j, rand() % max_weight, false);
-                }
-                
+                }               
             }
         }
         if (this->number_of_edge < number_of_edge)
         {
             for (std::size_t i = 0; i < number_of_vertex; i++)
             {
-                if (this->number_of_edge >= number_of_edge) return;
+                if (this->number_of_edge >= number_of_edge) return true;
                 if (!array[i][i].contiguity)
                 {
                     add_edge(i, i, rand() % max_weight, false);
                 }
             }
         }
-
+        if (this->number_of_edge < number_of_edge)
+        {
+            std::cout << "\nThere are too many edges!" << std::endl;
+            clear();
+            return false;
+        }
+    }
+    void create_random_graph(std::size_t number_of_vertex, std::size_t number_of_edge, bool orientation, int max_weight)
+    {
+        if (create_random(number_of_vertex, number_of_edge, orientation, max_weight))
+        {
+            std::cout << "\nThe graph is created!" << std::endl;
+            write_graph();
+        }        
     }
     void checking_the_connectivity_of_graph()
     {
@@ -541,20 +556,8 @@ public:
 };
 int main()
 {
-    Graph_matrix graph(6, false);
-    graph.add_edge(5, 0, 50);
-    graph.add_edge(5, 3, 1000);
-    graph.add_edge(0, 1, 100);  
-    graph.add_edge(0, 2, 90);
-    graph.add_edge(0, 3, 80);
-    graph.add_edge(0, 4, 70);
-    graph.add_edge(1, 2, 5000);
-    graph.add_edge(4, 1, 2000);
-    graph.add_edge(3, 4, 1000);
-    graph.write_graph();
-    graph.create_spanning_tree(false);
-    graph.create_spanning_tree(true);
-    graph.create_the_smallest_spanning_tree();
+    Graph_matrix graph(true);
+    graph.create_random_graph(10, 100, true, 100);
     graph.clear();
     return 0;
 }
