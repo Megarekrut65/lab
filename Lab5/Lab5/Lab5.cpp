@@ -2,6 +2,9 @@
 #include <iostream>
 #include <vector>
 #include <ctime>
+#include <conio.h>
+#include <Windows.h>
+#include "my_correct_read.h"
 
 struct Edge;
 struct Graph_matrix;
@@ -296,6 +299,8 @@ private:
             clear();
             return false;
         }
+
+        return false;
     }
 public:
     Graph_matrix(bool orientation)
@@ -309,7 +314,7 @@ public:
     {
         create_graph(number_of_vertices, orientation);
     }       
-    void add_vertex()
+    void add_vertex(bool show = true)
     {
         for (std::size_t i = 0; i < number_of_vertices; i++)
         {
@@ -318,6 +323,7 @@ public:
         number_of_vertices++;
         std::vector<Edge> new_line(number_of_vertices, Edge());
         matrix.push_back(new_line);
+        if (show) std::cout << "\nThe vertex is added!" << std::endl;
     }
     void add_edge(std::size_t begin_index, std::size_t end_index, int weight_coefficient, bool show = true)
     {
@@ -811,7 +817,7 @@ private:
         total_weight = 0;
         for (std::size_t i = 0; i < number_of_vertices; i++)
         {
-            add_vertex();
+            add_vertex(false);
         }
     }
     bool create_random(std::size_t number_of_vertices, std::size_t number_of_edges, bool orientation, int max_weight)
@@ -847,6 +853,8 @@ private:
             clear();
             return false;
         }
+
+        return false;
     }
 public:
     Graph_structure(bool orientation)
@@ -860,10 +868,11 @@ public:
     {        
         create_graph(number_of_vertices, orientation);
     }
-    void add_vertex()
+    void add_vertex(bool show = true)
     {
         list.push_back(new Vertex_node(number_of_vertices, nullptr));
         number_of_vertices++;
+        if (show) std::cout << "\nThe vertex is added!" << std::endl;
     }   
     void add_edge(std::size_t begin_index, std::size_t end_index, int weight_coefficient, bool show = true)
     {
@@ -1109,24 +1118,144 @@ Graph_matrix transformation_into_an_adjacency_matrix(Graph_structure& graph)
     graph.clear();
     return new_graph;
 }
+template<class T>
+void add_edge(T& graph)
+{
+    std::size_t begin_index = correct::read_size_t("the index of begin vertex");
+    std::size_t end_index = correct::read_size_t("the index of end vertex");
+    int weight_coefficient = correct::read_int("weight coefficient of edge");
+    graph.add_edge(begin_index, end_index, weight_coefficient);
+}
+template<class T>
+void create_random_graph(T& graph)
+{
+    std::size_t number_of_vertices = correct::read_size_t("the number of vertices");
+    std::size_t number_of_edges = correct::read_size_t("the number of edges");
+    bool orientation = correct::read_bool("True to graph will be directed or False to it will be undirected");
+    int weight_coefficient = correct::read_int("maximum weight coefficient of edge");
+    graph.create_random_graph(number_of_vertices, number_of_edges, orientation, weight_coefficient);
+}
+template<class T>
+void depth_first_search(T& graph)
+{    
+    bool mode = correct::read_bool("True to bypass is performed on the edges taking into account the weight coefficient or False to bypass is performed on the edges of any order");
+    graph.depth_first_search(mode);
+}
+
+template<class T>
+void graph_menu(T& graph)
+{
+    while (true)
+    {
+        std::cout << "\nMenu:\n1)Add vertex.\n2)Add edge.\n3)Create random graph.\n"
+            << "4)Write graph.\n5)Checking the connectivity of graph.\n6)Depth-first search.\n"
+            << "7)Find paths between two vertices.\n8)Find path from the vertex to everyone else.\n"
+            << "9)Find paths between all vertices.\n10)Topological sorting.\n"
+            << "11)Create spanning tree.\n12)Create the smallest spanning tree.\n0)Back.\n";
+        switch (_getch())
+        {
+        case '1': graph.add_vertex();
+            break;
+        case '2': add_edge(graph);
+            break;
+        case '3': create_random_graph(graph);
+            break;
+        case '4': graph.write_graph();
+            break;
+        case '5': graph.checking_the_connectivity_of_graph();
+            break;
+        case '6': depth_first_search(graph);
+            break;
+        case '7': ;
+            break;
+        case '8': ;
+            break;
+        case '9': ;
+            break;
+        case '10': ;
+            break;
+        case '11': ;
+            break;
+        case '12': ;
+            break;
+        case'0': 
+        {
+            //T.clear();
+            return;
+        }
+        break;
+        default: std::cout << "\nPress the correct key!" << std::endl;
+        }
+    }
+}
+void graph_matrix_menu()
+{
+    std::size_t number_of_vertex = correct::read_size_t("the initial number of vertices in the graph");
+    bool orientation = correct::read_bool("True to graph will be directed or False to it will be undirected");
+    Graph_matrix graph(number_of_vertex, orientation);
+    graph_menu(graph);
+}
+void graph_structure_menu()
+{
+    std::size_t number_of_vertex = correct::read_size_t("the initial number of vertices in the graph");
+    bool orientation = correct::read_bool("True to graph will be directed or False to it will be undirected");
+    Graph_structure graph(number_of_vertex, orientation);
+    graph_menu(graph);
+}
+void interactive_dialog_mode()
+{
+    
+    while (true)
+    {
+        std::cout << "\nSelect one:\n1)Graph based on adjacency matrix.\n"
+            << "2)Graph based on adjacency structure.\n0)Back.\n";
+        switch (_getch())
+        {
+        case '1': graph_matrix_menu();
+            break;
+        case '2': graph_structure_menu();
+            break;
+        case'0':
+        {
+            std::cout << std::endl;
+            return;
+        }
+        break;
+        default: std::cout << "\nPress the correct key!" << std::endl;
+        }
+    }
+}
+void demo_mode()
+{
+    std::cout << std::endl;
+}
+void benchmark_mode()
+{
+    std::cout << std::endl;
+}
 int main()
 {
-    Graph_structure graph(9, false);
-    graph.add_edge(0, 1, 10);
-    graph.add_edge(1, 2, 10);
-    graph.add_edge(2, 3, 10);
-    graph.add_edge(3, 4, 30);
-    graph.add_edge(4, 5, 60);
-    graph.add_edge(5, 6, 20);
-    graph.add_edge(5, 8, 2);
-    graph.add_edge(6, 7, 20);
-    graph.add_edge(7, 8, 2);
-    graph.add_edge(7, 0, 20);
-    graph.add_edge(1, 8, 2);
-    graph.add_edge(3, 8, 2);
-    graph.write_graph();
-    Graph_matrix new_graph = transformation_into_an_adjacency_matrix(graph);
-    new_graph.write_graph();
-    graph.write_graph();
+    while (true)
+    {
+        std::cout << "Select the application mode:\n1)Interactive dialog mode.\n"
+            << "2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
+        switch (_getch())
+        {
+        case '1': interactive_dialog_mode();
+            break;
+        case '2': demo_mode();
+            break;
+        case '3': benchmark_mode();
+            break;
+        case'0':
+        {
+            std::cout << "\nExit..." << std::endl;
+            return 0;
+        }
+        break;
+        default: std::cout << "\nPress the correct key!\n" << std::endl;
+        }
+    }
+
     return 0;
 }

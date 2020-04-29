@@ -148,6 +148,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Lab5.cpp" />
+    <ClCompile Include="my_correct_read.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="my_correct_read.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
