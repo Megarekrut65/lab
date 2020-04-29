@@ -652,6 +652,56 @@ private:
         }
         return true;
     }
+    int give_weight(std::size_t index_i, std::size_t index_j)
+    {
+        for (Graph_node* current = list[index_i]; current; current = current->next)
+        {
+            if (current->vertex == index_j) return current->weight_coefficient;
+        }
+
+        return INT_MAX;
+    }
+    std::size_t min_distance(int* distance, bool* is_set)
+    {
+        int min = INT_MAX;
+        std::size_t index = 0;
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            if (!is_set[i] && distance[i] <= min)
+            {
+                min = distance[i];
+                index = i;
+            }
+        }
+
+        return index;
+    }
+    int* dijkstra(std::size_t vertex)
+    {
+        int* distance = new int[number_of_vertex];
+        bool* is_set = new bool[number_of_vertex];
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            distance[i] = INT_MAX;
+            is_set[i] = false;
+        }
+        distance[vertex] = 0;
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            std::size_t index = min_distance(distance, is_set);
+            is_set[index] = true;
+            for (std::size_t j = 0; j < number_of_vertex; j++)
+            {
+                int weight_coefficient = give_weight(index, j);
+                if (!is_set[j] && is_edge(index, j)
+                    && distance[index] != INT_MAX
+                    && distance[index] + weight_coefficient < distance[j])
+                    distance[j] = distance[index] + weight_coefficient;
+            }
+        }
+        delete[]is_set;
+        return distance;
+    }
 public:
     Graph_list(bool orientation)
     {
@@ -719,17 +769,79 @@ public:
             std::cout << "\nThe graph is connected!" << std::endl;
         }
     }
-
+    void depth_first_search(bool mode)
+    {
+        std::vector<std::size_t> indexes;
+        if (is_connected(indexes, mode))
+        {
+            std::cout << "\nSearch is finished!\nVertex: " << std::endl;
+            for (std::size_t i = 0; i < number_of_vertex; i++)
+            {
+                std::cout << indexes[i] << " ";
+            }
+            std::cout << std::endl;
+        }
+        else
+        {
+            std::cout << "\nThe graph isn't connected!" << std::endl;
+        }
+    }
+    void find_paths_between_two_vertices(std::size_t first_vertex, std::size_t second_vertex)
+    {
+        if (!connected_graph()) return;
+        int* distance = dijkstra(first_vertex);
+        if (distance[second_vertex] == INT_MAX)
+        {
+            std::cout << "\nThe graph is poorly oriented so it cannot be reached from " << first_vertex
+                << " to " << second_vertex << "." << std::endl;
+        }
+        else
+        {
+            std::cout << "\nThe smallest distance from " << first_vertex
+                << " to " << second_vertex << " = " << distance[second_vertex] << "." << std::endl;
+        }
+        delete[]distance;
+    }
+    void find_path_from_the_vertex_to_everyone_else(std::size_t vertex)
+    {
+        if (!connected_graph()) return;
+        int* distance = dijkstra(vertex);
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            if (distance[i] == INT_MAX)
+            {
+                std::cout << "\nThe graph is poorly oriented so it cannot be reached from " << vertex
+                    << " to " << i << "." << std::endl;
+            }
+            else
+            {
+                std::cout << "\nThe smallest distance from " << vertex
+                    << " to " << i << " = " << distance[i] << "." << std::endl;
+            }
+        }
+        delete[]distance;
+    }
+    void find_paths_between_all_vertices()
+    {
+        if (!connected_graph()) return;
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            std::cout << "\nVertex: " << i << "." << std::endl;
+            find_path_from_the_vertex_to_everyone_else(i);
+        }
+    }
 };
 int main()
 {
     Graph_list graph(5, true);
-    graph.add_edge(0, 1, 2);
-    graph.add_edge(0, 2, 2);
+    graph.add_edge(0, 1, 10000);
+    graph.add_edge(1, 0, 1);
+    graph.add_edge(0, 2, 1);
     graph.add_edge(2, 4, 3);
-    graph.add_edge(4, 3, 3);
-    graph.add_edge(0, 3, 1);
+    graph.add_edge(4, 3, 6);
+    graph.add_edge(3, 1, 2000);
     graph.write_graph();
-    graph.checking_the_connectivity_of_graph();
+
+
     return 0;
 }
