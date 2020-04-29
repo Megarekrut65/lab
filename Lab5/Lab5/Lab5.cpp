@@ -1,6 +1,12 @@
 ﻿// №1, №2, №5, №11, №14, №17, №19, №21
 #include <iostream>
 #include <vector>
+#include <ctime>
+
+struct Edge;
+struct Graph_matrix;
+struct Vertex_node;
+struct Graph_structure;
 
 struct Edge
 {
@@ -20,13 +26,12 @@ struct Edge
 };
 struct Graph_matrix
 {
-private:
     std::vector<std::vector<Edge>> matrix;
     std::size_t number_of_vertices;
     std::size_t number_of_edges;
     bool orientation;
     int total_weight;
-
+private:
     bool is_index(std::size_t index)
     {
         if (index >= number_of_vertices)
@@ -262,6 +267,7 @@ private:
     {
         clear();
         create_graph(number_of_vertices, orientation);
+        srand(unsigned(time(0)));
         for (std::size_t i = 0; i < number_of_vertices; i++)
         {
             for (std::size_t j = 0; j < number_of_vertices; j++)
@@ -330,6 +336,11 @@ public:
     }
     void write_graph()
     {
+        if (number_of_vertices == 0)
+        {
+            std::cout << "\nThe graph is empty!" << std::endl;
+            return;
+        }
         std::cout << "\nGraph:\n" << std::endl;
         for (std::size_t i = 0; i < number_of_vertices; i++)
         {
@@ -484,7 +495,7 @@ public:
         std::cout << "\nThe spanning tree is created!" << std::endl;
         spanning_tree.write_graph();
         spanning_tree.clear();
-    }
+    }   
     void clear()
     {
         for (std::size_t i = 0; i < number_of_vertices; i++)
@@ -523,15 +534,14 @@ struct Vertex_node
         this->weight_coefficient = weight_coefficient;
     }
 };
-struct Graph_list
+struct Graph_structure
 {
-private:
     std::vector<Vertex_node*> list;
     std::size_t number_of_vertices;
     std::size_t number_of_edges;
     bool orientation;
     int total_weight;
-
+private:
     bool is_index(std::size_t index)
     {
         if (index >= number_of_vertices)
@@ -573,15 +583,7 @@ private:
         temp_node->next = new Vertex_node(end_index, nullptr, weight_coefficient);
         
         return true;
-    }
-    bool is_edge(std::size_t begin_index, std::size_t end_index)
-    {
-        for (Vertex_node* current = list[begin_index]; current; current = current->next)
-        {
-            if (current->index == end_index) return true;
-        }
-        return false;
-    }
+    }   
     template<class T>
     void swap(T& a, T& b)
     {
@@ -651,16 +653,7 @@ private:
             return false;
         }
         return true;
-    }
-    int give_weight(std::size_t index_i, std::size_t index_j)
-    {
-        for (Vertex_node* current = list[index_i]; current; current = current->next)
-        {
-            if (current->index == index_j) return current->weight_coefficient;
-        }
-
-        return INT_MAX;
-    }
+    }   
     std::size_t min_distance(int* distance, bool* is_set)
     {
         int min = INT_MAX;
@@ -736,7 +729,7 @@ private:
         }
         return false;
     }
-    void create_spanning_tree_current(Graph_list& spanning_tree, std::vector<std::size_t>& indexes, std::size_t index, bool mode, int& total_weight)
+    void create_spanning_tree_current(Graph_structure& spanning_tree, std::vector<std::size_t>& indexes, std::size_t index, bool mode, int& total_weight)
     {
         std::vector<std::size_t> numbers = create_numbers(index, mode);
         for (std::size_t j = 0; j < numbers.size(); j++)
@@ -767,9 +760,9 @@ private:
             temp_node = nullptr;
         }
     }
-    Graph_list kruskal()
+    Graph_structure kruskal()
     {
-        Graph_list spanning_tree(number_of_vertices, false);
+        Graph_structure spanning_tree(number_of_vertices, false);
         std::vector<std::size_t> belongs(number_of_vertices);
         for (std::size_t i = 0; i < number_of_vertices; i++)
         {
@@ -825,6 +818,7 @@ private:
     {
         clear();
         create_graph(number_of_vertices, orientation);
+        srand(unsigned(time(0)));
         for (std::size_t i = 0; i < number_of_vertices; i++)
         {
             for (std::size_t j = 0; j < number_of_vertices; j++)
@@ -855,14 +849,14 @@ private:
         }
     }
 public:
-    Graph_list(bool orientation)
+    Graph_structure(bool orientation)
     {
         number_of_vertices = 0;
         number_of_edges = 0;
         this->orientation = orientation;
         total_weight = 0;
     }
-    Graph_list(std::size_t number_of_vertices, bool orientation)
+    Graph_structure(std::size_t number_of_vertices, bool orientation)
     {        
         create_graph(number_of_vertices, orientation);
     }
@@ -893,6 +887,11 @@ public:
     }
     void write_graph()
     {
+        if (number_of_vertices == 0)
+        {
+            std::cout << "\nThe graph is empty!" << std::endl;
+            return;
+        }
         std::cout << "\nGraph:\n" << std::endl;
         for (std::size_t i = 0; i < number_of_vertices; i++)
         {            
@@ -1021,7 +1020,7 @@ public:
             std::cout << "\nSpanning tree for undirected graph only" << std::endl;
             return;
         }
-        Graph_list spanning_tree(number_of_vertices, false);
+        Graph_structure spanning_tree(number_of_vertices, false);
         std::vector<std::size_t> indexes;
         int total_weight = 0;
         create_spanning_tree_current(spanning_tree, indexes, 0, mode, total_weight);
@@ -1042,10 +1041,27 @@ public:
             return;
         }
         if (!connected_graph()) return;
-        Graph_list spanning_tree = kruskal();
+        Graph_structure spanning_tree = kruskal();
         std::cout << "\nThe spanning tree is created!" << std::endl;
         spanning_tree.write_graph();
         spanning_tree.clear();
+    }
+    bool is_edge(std::size_t begin_index, std::size_t end_index)
+    {
+        for (Vertex_node* current = list[begin_index]->next; current; current = current->next)
+        {
+            if (current->index == end_index) return true;
+        }
+        return false;
+    }
+    int give_weight(std::size_t index_i, std::size_t index_j)
+    {
+        for (Vertex_node* current = list[index_i]->next; current; current = current->next)
+        {
+            if (current->index == index_j) return current->weight_coefficient;
+        }
+
+        return INT_MAX;
     }
     void clear()
     {
@@ -1060,9 +1076,42 @@ public:
         total_weight = 0;
     }
 };
+
+Graph_structure transformation_into_an_adjacency_structure(Graph_matrix& graph)
+{
+    Graph_structure new_graph(graph.number_of_vertices, graph.orientation);
+    for (std::size_t i = 0; i < graph.number_of_vertices; i++)
+    {
+        for (std::size_t j = 0; j < graph.number_of_vertices; j++)
+        {
+            if (graph.matrix[i][j].contiguity)
+            {
+                new_graph.add_edge(i, j, graph.matrix[i][j].weight_coefficient, false);
+            }
+        }
+    }
+    graph.clear();
+    return new_graph;
+}
+Graph_matrix transformation_into_an_adjacency_matrix(Graph_structure& graph)
+{
+    Graph_matrix new_graph(graph.number_of_vertices, graph.orientation);
+    for (std::size_t i = 0; i < graph.number_of_vertices; i++)
+    {
+        for (std::size_t j = 0; j < graph.number_of_vertices; j++)
+        {
+            if (graph.is_edge(i, j))
+            {
+                new_graph.add_edge(i, j, graph.give_weight(i, j), false);
+            }
+        }
+    }
+    graph.clear();
+    return new_graph;
+}
 int main()
 {
-    Graph_list graph(9, false);
+    Graph_structure graph(9, false);
     graph.add_edge(0, 1, 10);
     graph.add_edge(1, 2, 10);
     graph.add_edge(2, 3, 10);
@@ -1076,10 +1125,8 @@ int main()
     graph.add_edge(1, 8, 2);
     graph.add_edge(3, 8, 2);
     graph.write_graph();
-    graph.create_spanning_tree(true);
-    graph.create_the_smallest_spanning_tree();
-    graph.create_random_graph(30, 45, false, 100);
-    graph.create_the_smallest_spanning_tree();
-
+    Graph_matrix new_graph = transformation_into_an_adjacency_matrix(graph);
+    new_graph.write_graph();
+    graph.write_graph();
     return 0;
 }
