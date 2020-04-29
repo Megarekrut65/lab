@@ -2,56 +2,17 @@
 #include <iostream>
 #include <vector>
 
-struct Path
-{
-    int weight_coefficient;
-    bool is_end;
-    std::size_t begin_vertex;
-    std::size_t end_vertex;
-    Path()
-    {
-        weight_coefficient = 0;
-        is_end = false;
-        begin_vertex = 0;
-        end_vertex = 0;
-    }
-    Path(std::size_t begin_vertex, std::size_t end_vertex)
-    {
-        weight_coefficient = 0;
-        is_end = false;
-        this->begin_vertex = begin_vertex;
-        this->end_vertex = end_vertex;
-    }
-    void add_weight(std::size_t next_vertex, int weight_coefficient)
-    {
-        if (is_end) return;
-        this->weight_coefficient += weight_coefficient;
-        if (next_vertex == end_vertex)
-        {
-            is_end = true;
-        }
-    }
-    void select_min(Path path)
-    {
-        if (!path.is_end) return;
-        if(!is_end) weight_coefficient = path.weight_coefficient;
-        if (weight_coefficient > path.weight_coefficient)
-        {
-            weight_coefficient = path.weight_coefficient;
-        }
-    }
-};
-struct Graph_node
+struct Edge
 {
     bool contiguity;
     int weight_coefficient;
 
-    Graph_node()
+    Edge()
     {
         contiguity = false;
         weight_coefficient = 0;
     }
-    Graph_node(bool contiguity, int weight_coefficient)
+    Edge(bool contiguity, int weight_coefficient)
     {
         this->contiguity = contiguity;
         this->weight_coefficient = weight_coefficient;
@@ -60,7 +21,7 @@ struct Graph_node
 struct Graph_matrix
 {
 private:
-    std::vector<std::vector<Graph_node>> array;
+    std::vector<std::vector<Edge>> matrix;
     std::size_t number_of_vertex;
     std::size_t number_of_edge;
     bool orientation;
@@ -75,13 +36,15 @@ private:
         }
         return true;
     }
-    void add_index(std::vector<std::size_t>& indexes, std::size_t index)
+    bool do_add_index(std::vector<std::size_t>& indexes, std::size_t index)
     {
         for (std::size_t i = 0; i < indexes.size(); i++)
         {
-            if (indexes[i] == index) return;
+            if (indexes[i] == index) return false;
         }
         indexes.push_back(index);
+
+        return true;
     }
     template<class T>
     void swap(T& a, T& b)
@@ -93,10 +56,10 @@ private:
     std::vector<std::size_t> create_numbers(std::size_t index, bool mode)
     {
         std::vector<std::size_t> numbers;
-        std::vector<Graph_node> line = array[index];
+        std::vector<Edge> line = matrix[index];
         for (std::size_t i = 0; i < number_of_vertex; i++) numbers.push_back(i);
         if(!mode) return numbers;
-        for (std::size_t i = 0; i < number_of_vertex - 1; i++)
+        for (std::size_t i = 0; i < number_of_vertex; i++)
         {
             for (std::size_t j = 0; j < (number_of_vertex - 1 - i); j++)
             {
@@ -109,29 +72,17 @@ private:
         }
         return numbers;
     }
-    bool add_vertex(std::vector<std::size_t> indexes, std::size_t index_i, std::size_t index_j)
-    {
-        for (std::size_t i = 0; i < indexes.size(); i++)
-        {
-            if (indexes[i] == index_j)
-            {
-                return false;
-            }
-        }       
-        return true;
-    }
     void is_connected_current(std::vector<std::size_t>& indexes, std::size_t index, bool mode)
     {
         std::vector<std::size_t> numbers = create_numbers(index, mode);
         for (std::size_t j = 0; j < number_of_vertex; j++)
         {            
-            if (array[index][numbers[j]].contiguity)
+            if (matrix[index][numbers[j]].contiguity)
             {
-                add_index(indexes, index);              
+                do_add_index(indexes, index);
                 if (index == numbers[j]) continue;
-                if (add_vertex(indexes, index, numbers[j]))
+                if (do_add_index(indexes, numbers[j]))
                 {
-                    add_index(indexes, numbers[j]);
                     is_connected_current(indexes, numbers[j], mode);
                 }
             }
@@ -182,10 +133,10 @@ private:
             is_set[index] = true;
             for (std::size_t j = 0; j < number_of_vertex; j++)
             {
-                if (!is_set[j] && array[index][j].contiguity
+                if (!is_set[j] && matrix[index][j].contiguity
                     && distance[index] != INT_MAX
-                    && distance[index] + array[index][j].weight_coefficient < distance[j])
-                    distance[j] = distance[index] + array[index][j].weight_coefficient;
+                    && distance[index] + matrix[index][j].weight_coefficient < distance[j])
+                    distance[j] = distance[index] + matrix[index][j].weight_coefficient;
             }
         }
         delete[]is_set;
@@ -208,7 +159,7 @@ private:
         {
             for (std::size_t j = 0; j < number_of_vertex; j++)
             {
-                if (array[i][j].contiguity) set[j].push_back(i);
+                if (matrix[i][j].contiguity) set[j].push_back(i);
             }
         }
         return set;
@@ -240,15 +191,14 @@ private:
         std::vector<std::size_t> numbers = create_numbers(index, mode);
         for (std::size_t j = 0; j < number_of_vertex; j++)
         {
-            if (array[index][numbers[j]].contiguity)
+            if (matrix[index][numbers[j]].contiguity)
             {
-                add_index(indexes, index);
+                do_add_index(indexes, index);
                 if (index == numbers[j]) continue;
-                if (add_vertex(indexes, index, numbers[j]))
+                if (do_add_index(indexes, numbers[j]))
                 {
-                    add_index(indexes, numbers[j]);
-                    spanning_tree.add_edge(index, numbers[j], array[index][numbers[j]].weight_coefficient, false);
-                    total_weight += array[index][numbers[j]].weight_coefficient;
+                    spanning_tree.add_edge(index, numbers[j], matrix[index][numbers[j]].weight_coefficient, false);
+                    total_weight += matrix[index][numbers[j]].weight_coefficient;
                     create_spanning_tree_current(spanning_tree, indexes, numbers[j], mode, total_weight);
                 }
             }
@@ -271,10 +221,10 @@ private:
             {
                 for (std::size_t j = 0; j < number_of_vertex; j++)
                 {
-                    if (array[i][j].contiguity && (min > array[i][j].weight_coefficient)
+                    if (matrix[i][j].contiguity && (min > matrix[i][j].weight_coefficient)
                         && (belongs[i] != belongs[j]))
                     {
-                        min = array[i][j].weight_coefficient;
+                        min = matrix[i][j].weight_coefficient;
                         first_index = i;
                         second_index = j;
                     }
@@ -296,78 +246,18 @@ private:
         }
         return spanning_tree;
     }
-public:
-    Graph_matrix(bool orientation)
-    {
-        number_of_vertex = 0;
-        number_of_edge = 0;
-        this->orientation = orientation;
-        total_weight = 0;
-    }
-    Graph_matrix(std::size_t number_of_vertex, bool orientation)
-    {
-        create_graph(number_of_vertex, orientation);
-    }    
     void create_graph(std::size_t number_of_vertex, bool orientation)
     {
         this->number_of_vertex = number_of_vertex;
         number_of_edge = 0;
         this->orientation = orientation;
-        std::vector<Graph_node> new_line(number_of_vertex, Graph_node());
+        std::vector<Edge> new_line(number_of_vertex, Edge());
         for (std::size_t i = 0; i < number_of_vertex; i++)
         {
-            array.push_back(new_line);
+            matrix.push_back(new_line);
         }
         total_weight = 0;
     }
-    void add_vertex()
-    {
-        for (std::size_t i = 0; i < number_of_vertex; i++)
-        {
-            array[i].push_back(Graph_node());
-        }
-        number_of_vertex++;
-        if (array.size() == 0)
-        {
-            std::vector<Graph_node> new_line(1, Graph_node());
-            array.push_back(new_line);
-            return;
-        }
-        std::vector<Graph_node> new_line(number_of_vertex, Graph_node());
-        array.push_back(new_line);
-    }
-    void add_edge(std::size_t i_vertex, std::size_t j_vertex, int weight_coefficient, bool show = true)
-    {
-        if (!is_index(i_vertex) || !is_index(j_vertex)) return;
-        if (array[i_vertex][j_vertex].contiguity)
-        {
-            if (show) std::cout << "\nThe edge already exists between the vertices!" << std::endl;
-            return;
-        }
-        Graph_node node = Graph_node(true, weight_coefficient);
-        array[i_vertex][j_vertex] = node;
-        if(!orientation) array[j_vertex][i_vertex] = node;
-        number_of_edge++;
-        total_weight += weight_coefficient;
-        if(show) std::cout <<"\nThe edge added!" << std::endl;
-    }
-    void write_graph()
-    {
-        std::cout << "\nGraph:\n" << std::endl;
-        for (std::size_t i = 0; i < number_of_vertex; i++)
-        {
-            std::cout << "| ";
-            for (std::size_t j = 0; j < number_of_vertex; j++)
-            {
-                if (array[i][j].contiguity) std::cout << "1 ";
-                else std::cout << "0 ";
-            }
-            std::cout << "|" << std::endl;
-        }
-        std::cout << "\nVertex: " << number_of_vertex << std::endl;
-        std::cout << "Edge: " << number_of_edge << std::endl;
-        std::cout << "Total weight: " << total_weight << std::endl;
-    }    
     bool create_random(std::size_t number_of_vertex, std::size_t number_of_edge, bool orientation, int max_weight)
     {
         clear();
@@ -377,10 +267,10 @@ public:
             for (std::size_t j = 0; j < number_of_vertex; j++)
             {
                 if (this->number_of_edge >= number_of_edge) return true;
-                if ((i != j) && !array[i][j].contiguity)
+                if ((i != j) && !matrix[i][j].contiguity)
                 {
                     add_edge(i, j, rand() % max_weight, false);
-                }               
+                }
             }
         }
         if (this->number_of_edge < number_of_edge)
@@ -388,7 +278,7 @@ public:
             for (std::size_t i = 0; i < number_of_vertex; i++)
             {
                 if (this->number_of_edge >= number_of_edge) return true;
-                if (!array[i][i].contiguity)
+                if (!matrix[i][i].contiguity)
                 {
                     add_edge(i, i, rand() % max_weight, false);
                 }
@@ -401,6 +291,60 @@ public:
             return false;
         }
     }
+public:
+    Graph_matrix(bool orientation)
+    {
+        number_of_vertex = 0;
+        number_of_edge = 0;
+        this->orientation = orientation;
+        total_weight = 0;
+    }
+    Graph_matrix(std::size_t number_of_vertex, bool orientation)
+    {
+        create_graph(number_of_vertex, orientation);
+    }       
+    void add_vertex()
+    {
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            matrix[i].push_back(Edge());
+        }
+        number_of_vertex++;
+        std::vector<Edge> new_line(number_of_vertex, Edge());
+        matrix.push_back(new_line);
+    }
+    void add_edge(std::size_t i_vertex, std::size_t j_vertex, int weight_coefficient, bool show = true)
+    {
+        if (!is_index(i_vertex) || !is_index(j_vertex)) return;
+        if (matrix[i_vertex][j_vertex].contiguity)
+        {
+            if (show) std::cout << "\nThe edge already exists between the vertices!" << std::endl;
+            return;
+        }
+        Edge node = Edge(true, weight_coefficient);
+        matrix[i_vertex][j_vertex] = node;
+        if(!orientation) matrix[j_vertex][i_vertex] = node;
+        number_of_edge++;
+        total_weight += weight_coefficient;
+        if(show) std::cout <<"\nThe edge added!" << std::endl;
+    }
+    void write_graph()
+    {
+        std::cout << "\nGraph:\n" << std::endl;
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            std::cout << "| ";
+            for (std::size_t j = 0; j < number_of_vertex; j++)
+            {
+                if (matrix[i][j].contiguity) std::cout << "1 ";
+                else std::cout << "0 ";
+            }
+            std::cout << "|" << std::endl;
+        }
+        std::cout << "\nVertices: " << number_of_vertex << std::endl;
+        std::cout << "Edges: " << number_of_edge << std::endl;
+        std::cout << "Total weight: " << total_weight << std::endl;
+    }    
     void create_random_graph(std::size_t number_of_vertex, std::size_t number_of_edge, bool orientation, int max_weight)
     {
         if (create_random(number_of_vertex, number_of_edge, orientation, max_weight))
@@ -545,19 +489,247 @@ public:
     {
         for (std::size_t i = 0; i < number_of_vertex; i++)
         {
-            array[i].clear();
+            matrix[i].clear();
         }
-        array.clear();
+        matrix.clear();
         number_of_vertex = 0;
         number_of_edge = 0;
         orientation = false;
         total_weight = 0;
     }
 };
+struct Graph_node
+{
+    std::size_t vertex;
+    Graph_node* next;
+    int weight_coefficient;
+
+    Graph_node()
+    {
+        vertex = 0;
+        next = nullptr;
+        weight_coefficient = 0;
+    }
+    Graph_node(std::size_t vertex, Graph_node* next)
+    {
+        this->vertex = vertex;
+        this->next = next;
+        weight_coefficient = 0;
+    }
+    Graph_node(std::size_t vertex, Graph_node* next, int weight_coefficient)
+    {
+        this->vertex = vertex;
+        this->next = next;
+        this->weight_coefficient = weight_coefficient;
+    }
+};
+struct Graph_list
+{
+private:
+    std::vector<Graph_node*> list;
+    std::size_t number_of_vertex;
+    std::size_t number_of_edge;
+    bool orientation;
+    int total_weight;
+
+    bool is_index(std::size_t index)
+    {
+        if (index >= number_of_vertex)
+        {
+            std::cout << "\nVertex with index: " << index << " isn't in Graph!" << std::endl;
+            return false;
+        }
+        return true;
+    }
+    bool do_add_index(std::vector<std::size_t>& indexes, std::size_t index)
+    {
+        for (std::size_t i = 0; i < indexes.size(); i++)
+        {
+            if (indexes[i] == index) return false;
+        }
+        indexes.push_back(index);
+
+        return true;
+    }
+    bool add_node(std::size_t first_vertex, std::size_t second_vertex, int weight_coefficient)
+    {
+        if (is_edge(first_vertex, second_vertex)) return false;
+        Graph_node* current = list[first_vertex]->next;
+        if (!current)
+        {
+            list[first_vertex]->next = new Graph_node(second_vertex, nullptr, weight_coefficient);
+            return true;
+        }
+        Graph_node* temp_node = list[first_vertex];
+        for (; current; current = current->next)
+        {
+            if (current->vertex > second_vertex)
+            {
+                temp_node->next = new Graph_node(second_vertex, current, weight_coefficient);
+                return true;
+            }
+            temp_node = current;
+        }
+        temp_node->next = new Graph_node(second_vertex, nullptr, weight_coefficient);
+        
+        return true;
+    }
+    bool is_edge(std::size_t first_vertex, std::size_t second_vertex)
+    {
+        for (Graph_node* current = list[first_vertex]; current; current = current->next)
+        {
+            if (current->vertex == second_vertex) return true;
+        }
+        return false;
+    }
+    template<class T>
+    void swap(T& a, T& b)
+    {
+        T temp = a;
+        a = b;
+        b = temp;
+    }
+    std::vector<std::size_t> create_numbers(std::size_t index, bool mode)
+    {
+        std::vector<std::size_t> numbers;
+        std::vector<int> line;
+        for (Graph_node* current = list[index]->next; current; current = current->next)
+        {
+            line.push_back(current->weight_coefficient);
+            numbers.push_back(current->vertex);
+        }
+        if (!mode) return numbers;       
+        for (std::size_t i = 0; i < line.size(); i++)
+        {
+            for (std::size_t j = 0; j < (line.size() - 1 - i); j++)
+            {
+                if (line[j] > line[j + 1])
+                {
+                    swap(line[j], line[j + 1]);
+                    swap(numbers[j], numbers[j + 1]);
+                }
+            }
+        }
+        return numbers;
+    }
+    void is_connected_current(std::vector<std::size_t>& indexes, std::size_t index, bool mode)
+    {
+        std::vector<std::size_t> numbers = create_numbers(index, mode);
+        for (std::size_t j = 0; j < numbers.size(); j++)
+        {
+            if (is_edge(index, numbers[j]))
+            {
+                do_add_index(indexes, index);
+                if (index == numbers[j]) continue;
+                if (do_add_index(indexes, numbers[j]))
+                {
+                    is_connected_current(indexes, numbers[j], mode);
+                }
+            }
+        }
+    }
+    bool is_connected(std::vector<std::size_t>& indexes, bool mode)
+    {
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            is_connected_current(indexes, i, mode);
+            if (indexes.size() == number_of_vertex)
+            {
+                return true;
+            }
+            indexes.clear();
+        }
+
+        return false;
+    }
+    bool connected_graph()
+    {
+        std::vector<std::size_t> indexes;
+        if (!is_connected(indexes, false))
+        {
+            std::cout << "\nThe graph isn't connected!" << std::endl;
+            return false;
+        }
+        return true;
+    }
+public:
+    Graph_list(bool orientation)
+    {
+        number_of_vertex = 0;
+        number_of_edge = 0;
+        this->orientation = orientation;
+        total_weight = 0;
+    }
+    Graph_list(std::size_t number_of_vertex, bool orientation)
+    {        
+        number_of_edge = 0;
+        this->number_of_vertex = 0;
+        this->orientation = orientation;
+        total_weight = 0;
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {
+            add_vertex();
+        }
+    }
+    void add_vertex()
+    {
+        list.push_back(new Graph_node(number_of_vertex, nullptr));
+        number_of_vertex++;
+    }   
+    void add_edge(std::size_t i_vertex, std::size_t j_vertex, int weight_coefficient, bool show = true)
+    {
+        if (!is_index(i_vertex) || !is_index(j_vertex)) return;
+        if (!add_node(i_vertex, j_vertex, weight_coefficient))
+        {
+            if (show) std::cout << "\nThe edge already exists between the vertices!" << std::endl;
+            return;
+        }
+        if (!orientation && (i_vertex != j_vertex))
+        {
+            if (!add_node(j_vertex, i_vertex, weight_coefficient))
+            {
+                if (show) std::cout << "\nThe edge already exists between the vertices!" << std::endl;
+                return;
+            }
+        }
+        total_weight += weight_coefficient;
+        if (show) std::cout << "\nThe edge added!" << std::endl;
+        number_of_edge++;
+    }
+    void write_graph()
+    {
+        std::cout << "\nGraph:" << std::endl;
+        for (std::size_t i = 0; i < number_of_vertex; i++)
+        {            
+            std::cout << "Vertex: [" << list[i]->vertex << "]-> { ";
+            for (Graph_node* current = list[i]->next; current; current = current->next)
+            {
+                std::cout << current->vertex << "-> ";
+            }
+            std::cout << "# }" << std::endl;
+        }
+        std::cout << "\nVertices: " << number_of_vertex << std::endl;
+        std::cout << "Edges: " << number_of_edge << std::endl;
+        std::cout << "Total weight: " << total_weight << std::endl;
+    }
+    void checking_the_connectivity_of_graph()
+    {
+        if (connected_graph())
+        {
+            std::cout << "\nThe graph is connected!" << std::endl;
+        }
+    }
+
+};
 int main()
 {
-    Graph_matrix graph(true);
-    graph.create_random_graph(10, 100, true, 100);
-    graph.clear();
+    Graph_list graph(5, true);
+    graph.add_edge(0, 1, 2);
+    graph.add_edge(0, 2, 2);
+    graph.add_edge(2, 4, 3);
+    graph.add_edge(4, 3, 3);
+    graph.add_edge(0, 3, 1);
+    graph.write_graph();
+    graph.checking_the_connectivity_of_graph();
     return 0;
 }
