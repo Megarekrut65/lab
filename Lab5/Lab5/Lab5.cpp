@@ -10,6 +10,8 @@ struct Edge;
 struct Graph_matrix;
 struct Vertex_node;
 struct Graph_structure;
+template<class T1, class T2>
+void graph_menu(T1&, T2&);
 
 struct Edge
 {
@@ -1086,7 +1088,7 @@ public:
     }
 };
 
-Graph_structure transformation_into_an_adjacency_structure(Graph_matrix& graph)
+Graph_structure graph_transformation(Graph_matrix& graph)
 {
     Graph_structure new_graph(graph.number_of_vertices, graph.orientation);
     for (std::size_t i = 0; i < graph.number_of_vertices; i++)
@@ -1102,7 +1104,7 @@ Graph_structure transformation_into_an_adjacency_structure(Graph_matrix& graph)
     graph.clear();
     return new_graph;
 }
-Graph_matrix transformation_into_an_adjacency_matrix(Graph_structure& graph)
+Graph_matrix graph_transformation(Graph_structure& graph)
 {
     Graph_matrix new_graph(graph.number_of_vertices, graph.orientation);
     for (std::size_t i = 0; i < graph.number_of_vertices; i++)
@@ -1138,20 +1140,81 @@ void create_random_graph(T& graph)
 template<class T>
 void depth_first_search(T& graph)
 {    
-    bool mode = correct::read_bool("True to bypass is performed on the edges taking into account the weight coefficient or False to bypass is performed on the edges of any order");
+    bool mode = correct::read_bool("True to bypass is performed on the edges taking into account the weight coefficient\nor False to bypass is performed on the edges of any order");
     graph.depth_first_search(mode);
 }
-
 template<class T>
-void graph_menu(T& graph)
+void find_paths_between_two_vertices(T& graph)
+{
+    std::size_t begin_index = correct::read_size_t("the index of begin vertex");
+    std::size_t end_index = correct::read_size_t("the index of end vertex");
+    graph.find_paths_between_two_vertices(begin_index, end_index);
+}
+template<class T>
+void find_path_from_the_vertex_to_everyone_else(T& graph)
+{
+    std::size_t begin_index = correct::read_size_t("the index of begin vertex");
+    graph.find_path_from_the_vertex_to_everyone_else(begin_index);
+}
+template<class T>
+void create_spanning_tree(T& graph)
+{
+    bool mode = correct::read_bool("True to bypass is performed on the edges taking into account the weight coefficient\nor False to bypass is performed on the edges of any order");
+    graph.create_spanning_tree(mode);
+}
+template<class T>
+void find_path_menu(T& graph)
+{
+    while (true)
+    {                     
+        std::cout << "\n\n------------------------------------------------"
+            << "\nFind path:\n1)Find path between two vertices.\n"
+            << "2)Find paths from the vertex to everyone else.\n"
+            << "3)Find paths between all vertices.\n0)Back.\n"
+            << "------------------------------------------------\n\n";
+        switch (_getch())
+        {
+        case '1': find_paths_between_two_vertices(graph);
+            break;
+        case '2': find_path_from_the_vertex_to_everyone_else(graph);
+            break;
+        case '3': graph.find_paths_between_all_vertices();
+            break;        
+        case '0': return;       
+        default: std::cout << "\nPress the correct key!" << std::endl;
+        }
+    }
+}
+template<class T>
+void create_spanning_tree_menu(T& graph)
 {
     while (true)
     {
-        std::cout << "\nMenu:\n1)Add vertex.\n2)Add edge.\n3)Create random graph.\n"
-            << "4)Write graph.\n5)Checking the connectivity of graph.\n6)Depth-first search.\n"
-            << "7)Find paths between two vertices.\n8)Find path from the vertex to everyone else.\n"
-            << "9)Find paths between all vertices.\n10)Topological sorting.\n"
-            << "11)Create spanning tree.\n12)Create the smallest spanning tree.\n0)Back.\n";
+        std::cout << "\n\n------------------------------------------------"
+            << "\nSpanning tree:\n1)Create spanning tree.\n"
+            << "2)Create the smallest spanning tree.\n0)Back.\n"
+            << "------------------------------------------------\n\n";
+        switch (_getch())
+        {
+        case '1': create_spanning_tree(graph);
+            break;
+        case '2': graph.create_the_smallest_spanning_tree();
+            break;
+        case '0': return;        
+        break;
+        default: std::cout << "\nPress the correct key!" << std::endl;
+        }
+    }
+}
+template<class T1, class T2>
+void edit_menu(T1& graph, T2& new_graph)
+{
+    while (true)
+    {
+        std::cout << "\n\n------------------------------------------------"
+            << "\nEdit menu:\n1)Add vertex.\n2)Add edge.\n3)Create random graph.\n"
+            << "4).\n0)Back.\n"
+            << "------------------------------------------------\n\n";
         switch (_getch())
         {
         case '1': graph.add_vertex();
@@ -1160,27 +1223,50 @@ void graph_menu(T& graph)
             break;
         case '3': create_random_graph(graph);
             break;
-        case '4': graph.write_graph();
+        case '4': 
+        {
+            new_graph.clear();
+            new_graph = graph_transformation(graph);
+            std::cout << "\nTransformation is finished!" << std::endl;
+            graph_menu(new_graph, graph);
+            std::cout << "\nThe old graph was cleared!" << std::endl;
+            return;
+        }
+            break;       
+        case'0': return;       
+        default: std::cout << "\nPress the correct key!" << std::endl;
+        }
+    }
+}
+template<class T1, class T2>
+void graph_menu(T1& graph, T2& new_graph)
+{
+    while (true)
+    {
+        std::cout << "\n\n################################################" 
+            << "\nMenu:\n1)Edit graph.\n2)Write graph.\n3)Checking the connectivity of graph.\n"
+            << "4)Depth-first search.\n5)Find paths.\n6)Topological sorting.\n"
+            << "7)Create spanning tree.\n0)Back.\n"
+            << "################################################\n\n";
+        switch (_getch())
+        {
+        case '1': edit_menu(graph, new_graph);
             break;
-        case '5': graph.checking_the_connectivity_of_graph();
+        case '2': graph.write_graph();
             break;
-        case '6': depth_first_search(graph);
+        case '3': graph.checking_the_connectivity_of_graph();
             break;
-        case '7': ;
+        case '4': depth_first_search(graph);
             break;
-        case '8': ;
+        case '5': find_path_menu(graph);
             break;
-        case '9': ;
+        case '6': graph.topological_sorting();
             break;
-        case '10': ;
-            break;
-        case '11': ;
-            break;
-        case '12': ;
+        case '7': create_spanning_tree_menu(graph);
             break;
         case'0': 
         {
-            //T.clear();
+            graph.clear();
             return;
         }
         break;
@@ -1193,14 +1279,16 @@ void graph_matrix_menu()
     std::size_t number_of_vertex = correct::read_size_t("the initial number of vertices in the graph");
     bool orientation = correct::read_bool("True to graph will be directed or False to it will be undirected");
     Graph_matrix graph(number_of_vertex, orientation);
-    graph_menu(graph);
+    Graph_structure new_graph(orientation);
+    graph_menu(graph, new_graph);
 }
 void graph_structure_menu()
 {
     std::size_t number_of_vertex = correct::read_size_t("the initial number of vertices in the graph");
     bool orientation = correct::read_bool("True to graph will be directed or False to it will be undirected");
     Graph_structure graph(number_of_vertex, orientation);
-    graph_menu(graph);
+    Graph_matrix new_graph(orientation);
+    graph_menu(graph, new_graph);
 }
 void interactive_dialog_mode()
 {
