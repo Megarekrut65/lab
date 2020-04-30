@@ -1,0 +1,90 @@
+Number of vertices = 5.
+Number of edges = 5.
+Time = 0.000121264.
+Size = 49.
+Orientation = directed.
+
+Number of vertices = 5.
+Number of edges = 5.
+Time = 0.000184141.
+Size = 69.
+Orientation = undirected.
+
+Number of vertices = 10.
+Number of edges = 10.
+Time = 0.000224563.
+Size = 69.
+Orientation = directed.
+
+Number of vertices = 10.
+Number of edges = 10.
+Time = 0.00031118.
+Size = 109.
+Orientation = undirected.
+
+Number of vertices = 20.
+Number of edges = 20.
+Time = 0.000417046.
+Size = 109.
+Orientation = directed.
+
+Number of vertices = 20.
+Number of edges = 20.
+Time = 0.000664065.
+Size = 189.
+Orientation = undirected.
+
+Number of vertices = 40.
+Number of edges = 40.
+Time = 0.000984227.
+Size = 189.
+Orientation = directed.
+
+Number of vertices = 40.
+Number of edges = 40.
+Time = 0.00183372.
+Size = 349.
+Orientation = undirected.
+
+Number of vertices = 80.
+Number of edges = 80.
+Time = 0.00237908.
+Size = 349.
+Orientation = directed.
+
+Number of vertices = 80.
+Number of edges = 80.
+Time = 0.00382527.
+Size = 669.
+Orientation = undirected.
+
+Number of vertices = 160.
+Number of edges = 160.
+Time = 0.00525862.
+Size = 669.
+Orientation = directed.
+
+Number of vertices = 160.
+Number of edges = 160.
+Time = 0.00697942.
+Size = 1309.
+Orientation = undirected.
+
+Number of vertices = 320.
+Number of edges = 320.
+Time = 0.0192553.
+Size = 1309.
+Orientation = directed.
+
+Number of vertices = 320.
+Number of edges = 320.
+Time = 0.0323197.
+Size = 2589.
+Orientation = undirected.
+
+Number of vertices = 480.
+Number of edges = 480.
+Time = 0.056715.
+Size = 1949.
+Orientation = directed.
+

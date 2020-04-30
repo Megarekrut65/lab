@@ -4,6 +4,8 @@
 #include <ctime>
 #include <conio.h>
 #include <Windows.h>
+#include <fstream>
+#include <chrono>
 #include "my_correct_read.h"
 
 struct Edge;
@@ -13,6 +15,14 @@ struct Graph_structure;
 template<class T1, class T2>
 void graph_menu(T1&, T2&);
 
+struct measurement_result
+{
+    std::size_t number_of_vertices;
+    std::size_t number_of_edges;
+    float time;
+    std::size_t size;
+    bool orientation;
+};
 struct Edge
 {
     bool contiguity;
@@ -152,12 +162,12 @@ private:
         delete[]is_set;
         return distance;
     }
-    bool connected_graph()
+    bool connected_graph(bool show)
     {
         std::vector<std::size_t> indexes;
         if (!is_connected(indexes, false))
         {
-            std::cout << "\nThe graph isn't connected!" << std::endl;
+            if(show) std::cout << "\nThe graph isn't connected!" << std::endl;
             return false;
         }
         return true;
@@ -364,26 +374,28 @@ public:
         std::cout << "Edges: " << number_of_edges << std::endl;
         std::cout << "Total weight: " << total_weight << std::endl;
     }    
-    void create_random_graph(std::size_t number_of_vertices, std::size_t number_of_edges, bool orientation, int max_weight)
+    void create_random_graph(std::size_t number_of_vertices, std::size_t number_of_edges, bool orientation, int max_weight, bool show = true)
     {
         if (create_random(number_of_vertices, number_of_edges, orientation, max_weight))
         {
+            if (!show) return;
             std::cout << "\nThe graph is created!" << std::endl;
             write_graph();
         }        
     }
-    void checking_the_connectivity_of_graph()
+    void checking_the_connectivity_of_graph(bool show = true)
     {
-        if (connected_graph())
+        if (connected_graph(show))
         {
-            std::cout << "\nThe graph is connected!" << std::endl;
+            if(show) std::cout << "\nThe graph is connected!" << std::endl;
         }
     }
-    void depth_first_search(bool mode)
+    void depth_first_search(bool mode, bool show = true)
     {
         std::vector<std::size_t> indexes;
         if (is_connected(indexes, mode))
         {
+            if (!show) return;
             std::cout << "\nSearch is finished!\nVertex: " << std::endl;
             for (std::size_t i = 0; i < number_of_vertices; i++)
             {
@@ -393,61 +405,61 @@ public:
         }
         else
         {
-            std::cout << "\nThe graph isn't connected!" << std::endl;
+            if (show) std::cout << "\nThe graph isn't connected!" << std::endl;
         }      
     }
-    void find_paths_between_two_vertices(std::size_t begin_index, std::size_t end_index)
+    void find_paths_between_two_vertices(std::size_t begin_index, std::size_t end_index, bool show = true)
     {
-        if (!connected_graph()) return;
+        if (!connected_graph(show)) return;
         int* distance = dijkstra(begin_index);       
         if (distance[end_index] == INT_MAX)
         {
-            std::cout << "\nThe graph is poorly oriented so it cannot be reached from " << begin_index
+            if(show) std::cout << "\nThe graph is poorly oriented so it cannot be reached from " << begin_index
                 << " to " << end_index << "." << std::endl;
         }
         else
         {
-            std::cout << "\nThe smallest distance from " << begin_index
+            if (show) std::cout << "\nThe smallest distance from " << begin_index
                 << " to " << end_index << " = " << distance[end_index] << "." << std::endl;
         }
         delete[]distance;
     }   
-    void find_path_from_the_vertex_to_everyone_else(std::size_t begin_index)
+    void find_path_from_the_vertex_to_everyone_else(std::size_t begin_index, bool show = true)
     {
-        if (!connected_graph()) return;
+        if (!connected_graph(show)) return;
         int* distance = dijkstra(begin_index);
         for (std::size_t i = 0; i < number_of_vertices; i++)
         {
             if (distance[i] == INT_MAX)
             {
-                std::cout << "\nThe graph is poorly oriented so it cannot be reached from " << begin_index
+                if(show) std::cout << "\nThe graph is poorly oriented so it cannot be reached from " << begin_index
                     << " to " << i << "." << std::endl;
             }
             else
             {
-                std::cout << "\nThe smallest distance from " << begin_index
+                if (show) std::cout << "\nThe smallest distance from " << begin_index
                     << " to " << i << " = " << distance[i] << "." << std::endl;
             }
         }       
         delete[]distance;
     }
-    void find_paths_between_all_vertices()
+    void find_paths_between_all_vertices(bool show = true)
     {
-        if (!connected_graph()) return;
+        if (!connected_graph(show)) return;
         for (std::size_t i = 0; i < number_of_vertices; i++)
         {
-            std::cout << "\nVertex: " << i << "." << std::endl;
-            find_path_from_the_vertex_to_everyone_else(i);
+            if(show) std::cout << "\nVertex: " << i << "." << std::endl;
+            find_path_from_the_vertex_to_everyone_else(i, show);
         }
     }
-    void topological_sorting()
+    void topological_sorting(bool show = true)
     {
         if (!orientation)
         {
-            std::cout << "\nTopological sorting for directed graph only" << std::endl;
+            if(show) std::cout << "\nTopological sorting for directed graph only" << std::endl;
             return;
         }
-        if (!connected_graph()) return;
+        if (!connected_graph(show)) return;
         std::vector<std::size_t> indexes;
         std::vector<std::vector<std::size_t>> set = create_set(); 
         for (std::size_t i = 0; i < number_of_vertices; i++)
@@ -461,9 +473,10 @@ public:
         }
         if (indexes.size() != number_of_vertices)
         {
-            std::cout << "\nThe graph has a cycle!" << std::endl;
+            if (show) std::cout << "\nThe graph has a cycle!" << std::endl;
             return;
         }
+        if (!show) return;
         std::cout << "\nResult: ";
         for (std::size_t i = 0; i < number_of_vertices; i++)
         {
@@ -471,11 +484,11 @@ public:
         }
         std::cout << std::endl;
     }
-    void create_spanning_tree(bool mode)
+    void create_spanning_tree(bool mode, bool show = true)
     {
         if (orientation)
         {
-            std::cout << "\nSpanning tree for undirected graph only" << std::endl;
+            if(show) std::cout << "\nSpanning tree for undirected graph only" << std::endl;
             return;
         }
         Graph_matrix spanning_tree(number_of_vertices, false);
@@ -484,26 +497,35 @@ public:
         create_spanning_tree_current(spanning_tree, indexes, 0, mode, total_weight);
         if (indexes.size() != number_of_vertices)
         {
-            std::cout << "\nThe graph isn't connected!" << std::endl;
+            if (show) std::cout << "\nThe graph isn't connected!" << std::endl;
             return;
         }
-        std::cout << "\nThe spanning tree is created!" << std::endl;
-        spanning_tree.write_graph();    
+        if (show) std::cout << "\nThe spanning tree is created!" << std::endl;
+        if (show) spanning_tree.write_graph();
         spanning_tree.clear();
     }
-    void create_the_smallest_spanning_tree()
+    void create_the_smallest_spanning_tree(bool show = true)
     {
         if (orientation)
         {
-            std::cout << "\nSpanning tree for undirected graph only" << std::endl;
+            if (show) std::cout << "\nSpanning tree for undirected graph only" << std::endl;
             return;
         }
-        if (!connected_graph()) return;
+        if (!connected_graph(show)) return;
         Graph_matrix spanning_tree = kruskal();
-        std::cout << "\nThe spanning tree is created!" << std::endl;
-        spanning_tree.write_graph();
+        if (show) std::cout << "\nThe spanning tree is created!" << std::endl;
+        if (show) spanning_tree.write_graph();
         spanning_tree.clear();
-    }   
+    }  
+    std::size_t get_size()
+    {
+        std::size_t size = 0;
+        size += sizeof(matrix) + number_of_vertices * number_of_vertices * sizeof(Edge)
+            + sizeof(number_of_vertices) + sizeof(number_of_edges) 
+            + sizeof(orientation) + sizeof(total_weight);
+
+        return size;
+    }
     void clear()
     {
         for (std::size_t i = 0; i < number_of_vertices; i++)
@@ -652,12 +674,12 @@ private:
 
         return false;
     }
-    bool connected_graph()
+    bool connected_graph(bool show)
     {
         std::vector<std::size_t> indexes;
         if (!is_connected(indexes, false))
         {
-            std::cout << "\nThe graph isn't connected!" << std::endl;
+            if(show) std::cout << "\nThe graph isn't connected!" << std::endl;
             return false;
         }
         return true;
@@ -917,26 +939,28 @@ public:
         std::cout << "Edges: " << number_of_edges << std::endl;
         std::cout << "Total weight: " << total_weight << std::endl;
     }
-    void create_random_graph(std::size_t number_of_vertices, std::size_t number_of_edges, bool orientation, int max_weight)
+    void create_random_graph(std::size_t number_of_vertices, std::size_t number_of_edges, bool orientation, int max_weight, bool show = true)
     {
         if (create_random(number_of_vertices, number_of_edges, orientation, max_weight))
         {
+            if (!show) return;
             std::cout << "\nThe graph is created!" << std::endl;
             write_graph();
         }
     }
-    void checking_the_connectivity_of_graph()
+    void checking_the_connectivity_of_graph(bool show = true)
     {
-        if (connected_graph())
+        if (connected_graph(show))
         {
-            std::cout << "\nThe graph is connected!" << std::endl;
+            if(show) std::cout << "\nThe graph is connected!" << std::endl;
         }
     }
-    void depth_first_search(bool mode)
+    void depth_first_search(bool mode, bool show = true)
     {
         std::vector<std::size_t> indexes;
         if (is_connected(indexes, mode))
         {
+            if (!show) return;
             std::cout << "\nSearch is finished!\nVertex: " << std::endl;
             for (std::size_t i = 0; i < number_of_vertices; i++)
             {
@@ -946,61 +970,61 @@ public:
         }
         else
         {
-            std::cout << "\nThe graph isn't connected!" << std::endl;
+            if(show) std::cout << "\nThe graph isn't connected!" << std::endl;
         }
     }
-    void find_paths_between_two_vertices(std::size_t begin_index, std::size_t end_index)
+    void find_paths_between_two_vertices(std::size_t begin_index, std::size_t end_index, bool show = true)
     {
-        if (!connected_graph()) return;
+        if (!connected_graph(show)) return;
         int* distance = dijkstra(begin_index);
         if (distance[end_index] == INT_MAX)
         {
-            std::cout << "\nThe graph is poorly oriented so it cannot be reached from " << begin_index
+            if(show) std::cout << "\nThe graph is poorly oriented so it cannot be reached from " << begin_index
                 << " to " << end_index << "." << std::endl;
         }
         else
         {
-            std::cout << "\nThe smallest distance from " << begin_index
+            if(show) std::cout << "\nThe smallest distance from " << begin_index
                 << " to " << end_index << " = " << distance[end_index] << "." << std::endl;
         }
         delete[]distance;
     }
-    void find_path_from_the_vertex_to_everyone_else(std::size_t begin_index)
+    void find_path_from_the_vertex_to_everyone_else(std::size_t begin_index, bool show = true)
     {
-        if (!connected_graph()) return;
+        if (!connected_graph(show)) return;
         int* distance = dijkstra(begin_index);
         for (std::size_t i = 0; i < number_of_vertices; i++)
         {
             if (distance[i] == INT_MAX)
             {
-                std::cout << "\nThe graph is poorly oriented so it cannot be reached from " << begin_index
+                if(show) std::cout << "\nThe graph is poorly oriented so it cannot be reached from " << begin_index
                     << " to " << i << "." << std::endl;
             }
             else
             {
-                std::cout << "\nThe smallest distance from " << begin_index
+                if (show) std::cout << "\nThe smallest distance from " << begin_index
                     << " to " << i << " = " << distance[i] << "." << std::endl;
             }
         }
         delete[]distance;
     }
-    void find_paths_between_all_vertices()
+    void find_paths_between_all_vertices(bool show = true)
     {
-        if (!connected_graph()) return;
+        if (!connected_graph(show)) return;
         for (std::size_t i = 0; i < number_of_vertices; i++)
         {
-            std::cout << "\nVertex: " << i << "." << std::endl;
-            find_path_from_the_vertex_to_everyone_else(i);
+            if(show) std::cout << "\nVertex: " << i << "." << std::endl;
+            find_path_from_the_vertex_to_everyone_else(i, show);
         }
     }
-    void topological_sorting()
+    void topological_sorting(bool show = true)
     {
         if (!orientation)
         {
-            std::cout << "\nTopological sorting for directed graph only" << std::endl;
+            if(show) std::cout << "\nTopological sorting for directed graph only" << std::endl;
             return;
         }
-        if (!connected_graph()) return;
+        if (!connected_graph(show)) return;
         std::vector<std::size_t> indexes;
         std::vector<std::vector<std::size_t>> set = create_set();
         for (std::size_t i = 0; i < number_of_vertices; i++)
@@ -1014,9 +1038,10 @@ public:
         }
         if (indexes.size() != number_of_vertices)
         {
-            std::cout << "\nThe graph has a cycle!" << std::endl;
+            if (show) std::cout << "\nThe graph has a cycle!" << std::endl;
             return;
         }
+        if (!show) return;
         std::cout << "\nResult: ";
         for (std::size_t i = 0; i < number_of_vertices; i++)
         {
@@ -1024,11 +1049,11 @@ public:
         }
         std::cout << std::endl;
     }
-    void create_spanning_tree(bool mode)
+    void create_spanning_tree(bool mode, bool show = true)
     {
         if (orientation)
         {
-            std::cout << "\nSpanning tree for undirected graph only" << std::endl;
+            if(show) std::cout << "\nSpanning tree for undirected graph only" << std::endl;
             return;
         }
         Graph_structure spanning_tree(number_of_vertices, false);
@@ -1037,24 +1062,24 @@ public:
         create_spanning_tree_current(spanning_tree, indexes, 0, mode, total_weight);
         if (indexes.size() != number_of_vertices)
         {
-            std::cout << "\nThe graph isn't connected!" << std::endl;
+            if (show) std::cout << "\nThe graph isn't connected!" << std::endl;
             return;
         }
-        std::cout << "\nThe spanning tree is created!" << std::endl;
-        spanning_tree.write_graph();
+        if (show) std::cout << "\nThe spanning tree is created!" << std::endl;
+        if (show) spanning_tree.write_graph();
         spanning_tree.clear();
     }
-    void create_the_smallest_spanning_tree()
+    void create_the_smallest_spanning_tree(bool show = true)
     {
         if (orientation)
         {
-            std::cout << "\nSpanning tree for undirected graph only" << std::endl;
+            if(show) std::cout << "\nSpanning tree for undirected graph only" << std::endl;
             return;
         }
-        if (!connected_graph()) return;
+        if (!connected_graph(show)) return;
         Graph_structure spanning_tree = kruskal();
-        std::cout << "\nThe spanning tree is created!" << std::endl;
-        spanning_tree.write_graph();
+        if (show) std::cout << "\nThe spanning tree is created!" << std::endl;
+        if (show) spanning_tree.write_graph();
         spanning_tree.clear();
     }
     bool is_edge(std::size_t begin_index, std::size_t end_index)
@@ -1073,6 +1098,22 @@ public:
         }
 
         return INT_MAX;
+    }
+    std::size_t get_size()
+    {
+        std::size_t size = 0;
+        std::size_t number_of_node = 0;
+        for (std::size_t i = 0; i < number_of_vertices; i++)
+        {
+            for (Vertex_node* current = list[i]->next; current; current = current->next)
+            {
+                number_of_node++;
+            }
+        }
+        size += sizeof(list) + number_of_node*sizeof(Vertex_node*) + sizeof(number_of_vertices)
+            + sizeof(number_of_edges) + sizeof(orientation) + sizeof(total_weight);
+
+        return size;
     }
     void clear()
     {
@@ -1317,8 +1358,218 @@ void demo_mode()
 {
     std::cout << std::endl;
 }
+void clear_result_files(std::string paths[], int number_of_files, std::string name_of_type)
+{   
+    for (int i = 0; i < number_of_files; i++)
+    {
+        std::ofstream file(name_of_type + paths[i] + ".txt");
+        file.close();
+    }
+}
+Graph_matrix copy_graph(Graph_matrix& graph)
+{
+    Graph_matrix new_graph(graph.number_of_vertices, graph.orientation);
+    for (std::size_t i = 0; i < graph.number_of_vertices; i++)
+    {
+        for (std::size_t j = 0; j < graph.number_of_vertices; j++)
+        {
+            if (graph.matrix[i][j].contiguity)
+            {
+                new_graph.add_edge(i, j, graph.matrix[i][j].weight_coefficient, false);
+            }
+        }
+    }
+    return new_graph;
+}
+Graph_structure copy_graph(Graph_structure& graph)
+{
+    Graph_structure new_graph(graph.number_of_vertices, graph.orientation);
+    for (std::size_t i = 0; i < graph.number_of_vertices; i++)
+    {
+        for (std::size_t j = 0; j < graph.number_of_vertices; j++)
+        {
+            if (graph.is_edge(i, j))
+            {
+                new_graph.add_edge(i, j, graph.give_weight(i, j), false);
+            }
+        }
+    }
+    return new_graph;
+}
+std::size_t set_number(bool is_one_second, std::size_t& copy_size, std::size_t& coefficient)//resizes depending on condition
+{
+    if (is_one_second)
+    {
+        return coefficient++ * copy_size;
+    }
+    else
+    {
+        return copy_size *= 2;
+    }
+}
+void add_result_to_file(measurement_result result, const std::string& name_of_files)
+{
+    std::ofstream file(name_of_files + ".txt", std::ios_base::app);
+    file << "Number of vertices = " << result.number_of_vertices << "." << std::endl;
+    file << "Number of edges = " << result.number_of_edges << "." << std::endl;
+    file << "Time = " << result.time << "." << std::endl;
+    file << "Size = " << result.size << "." << std::endl;
+    file << "Orientation = ";
+    if (result.orientation) file << "directed";
+    else file << "undirected";
+    file << ".\n" << std::endl;
+    file.close();
+}
+template<class T>
+void measurement_add_vertex(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+{
+    graph.add_vertex(false);
+}
+template<class T>
+void measurement_add_edge(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+{
+    graph.add_edge(rand() % number_of_vertices, rand() % number_of_vertices, rand() % number_of_edges, false);
+}
+template<class T>
+void measurement_create_random(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+{
+    graph.create_random_graph(number_of_vertices, number_of_edges, false, rand() % number_of_edges,  false);
+}
+template<class T>
+void measurement_checking_the_connectivity_of_graph(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+{
+    graph.checking_the_connectivity_of_graph(false);
+}
+template<class T>
+void measurement_depth_first_search(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+{
+    graph.depth_first_search(true, false);
+}
+template<class T>
+void measurement_find_paths_between_two_vertices(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+{
+    graph.find_paths_between_two_vertices(rand() % number_of_vertices, rand() % number_of_vertices, false);
+}
+template<class T>
+void measurement_find_path_from_the_vertex_to_everyone_else(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+{
+    graph.find_path_from_the_vertex_to_everyone_else(rand() % number_of_vertices, false);
+}
+template<class T>
+void measurement_find_paths_between_all_vertices(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+{
+    graph.find_paths_between_all_vertices(false);
+}
+template<class T>
+void measurement_topological_sorting(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+{
+    graph.topological_sorting(false);
+}
+template<class T>
+void measurement_create_spanning_tree(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+{
+    graph.create_spanning_tree(true, false);
+}
+template<class T>
+void measurement_create_the_smallest_spanning_tree(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+{
+    graph.create_the_smallest_spanning_tree(false);
+}
+template<class T>
+void measurement_clear(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+{
+    graph.clear();
+}
+template<class T>
+float measurement(T& graph, std::size_t index, bool orientation, std::size_t number_of_vertices, std::size_t number_of_edges, const std::string& name_of_functions, const std::string& name_of_type)//measures the sort time of an array
+{
+    srand(unsigned(time(0)));
+    const int number_of_functions = 12;
+    void(*all_functions[number_of_functions])(T&, std::size_t, std::size_t) = { 
+        measurement_add_vertex, measurement_add_edge, measurement_create_random,
+        measurement_checking_the_connectivity_of_graph,
+        measurement_depth_first_search, measurement_find_paths_between_two_vertices,
+        measurement_find_path_from_the_vertex_to_everyone_else, 
+        measurement_find_paths_between_all_vertices, measurement_topological_sorting,
+        measurement_create_spanning_tree, measurement_create_the_smallest_spanning_tree,
+        measurement_clear };
+    T new_graph = copy_graph(graph);
+    auto the_start = std::chrono::high_resolution_clock::now();
+    auto the_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> duration;
+    the_start = std::chrono::high_resolution_clock::now();
+    all_functions[index](new_graph, number_of_vertices, number_of_edges);
+    the_end = std::chrono::high_resolution_clock::now();
+    duration = the_end - the_start;
+    measurement_result result;
+    result.number_of_vertices = number_of_vertices;
+    result.number_of_edges = number_of_edges;
+    result.size = graph.get_size();
+    result.time = duration.count();
+    result.orientation = orientation;
+    add_result_to_file(result, name_of_type + name_of_functions);
+    std::cout << "\nTime of " << name_of_functions << " = " << result.time << std::endl;
+    std::cout << "Size = " << result.size << std::endl;
+
+    return result.time;
+}
+template<class T>
+void benchmark_mode_menu(T& graph, const std::string& name_of_type)
+{    
+    const int number_of_functions = 12;
+    std::string name_of_functions[number_of_functions] = { "Add vertex", "Add edge", "Create random graph",
+        "Checking the connectivity of graph", "Depth-first search",
+    "Find path between two vertices", "Find paths from the vertex to everyone else",
+    "Find paths between all vertices", "Topological sorting",
+    "Create spanning tree", "Create the smallest spanning tree", "Clear graph" };
+    clear_result_files(name_of_functions, number_of_functions, name_of_type);
+    bool is_one_second = false, are_ten_seconds = false;
+    std::size_t number_of_vertices = 5, number_of_edges = number_of_vertices;
+    std::size_t copy_number = number_of_vertices, coefficient = 2;
+    bool orientation = false;
+    while (true)
+    {
+        float time;
+        std::cout << "\nNumber of vertices = " << number_of_vertices << std::endl;
+        std::cout << "Number of edges = " << number_of_edges << std::endl;
+        for (int j = 0; j < 2; j++)
+        {
+            orientation = !orientation;            
+            std::cout << "\nOrientation = ";
+            if (orientation) std::cout << "directed";
+            else std::cout << "undirected";
+            std::cout << "." << std::endl;
+            graph.create_random_graph(number_of_vertices, number_of_edges, orientation, number_of_edges, false);
+            for (std::size_t i = 0; i < number_of_functions; i++)
+            {
+                time = measurement(graph, i, orientation, number_of_vertices, number_of_edges, name_of_functions[i], name_of_type);
+                if (time > 1) is_one_second = true;
+                if (time > 10) are_ten_seconds = true;
+            }
+            graph.clear();            
+            if (are_ten_seconds) break;
+        }        
+        if (are_ten_seconds) break;
+        number_of_vertices = set_number(is_one_second, copy_number, coefficient);
+        number_of_edges = number_of_vertices;
+    }
+    std::cout << "\nResults of measurements of program in the following files:\n"
+        << name_of_type + name_of_functions[0] + ".txt\n" << name_of_type + name_of_functions[1] + ".txt\n"
+        << name_of_type + name_of_functions[2] + ".txt\n" << name_of_type + name_of_functions[3] + ".txt\n"
+        << name_of_type + name_of_functions[4] + ".txt\n" << name_of_type + name_of_functions[5] + ".txt\n"
+        << name_of_type + name_of_functions[6] + ".txt\n" << name_of_type + name_of_functions[7] + ".txt\n"
+        << name_of_type + name_of_functions[8] + ".txt\n" << name_of_type + name_of_functions[9] + ".txt\n"
+        << name_of_type + name_of_functions[10] + ".txt\n" << name_of_type + name_of_functions[11] + ".txt\n"
+        << std::endl;
+}
 void benchmark_mode()
 {
+    Graph_matrix matrix(false);
+    std::cout << "\nAdjacency Matrix." << std::endl;
+    benchmark_mode_menu(matrix, "Adjacency Matrix ");
+    Graph_structure structure(false);
+    std::cout << "\nAdjacency Structure." << std::endl;
+    benchmark_mode_menu(structure, "Adjacency Structure ");
     std::cout << std::endl;
 }
 int main()
