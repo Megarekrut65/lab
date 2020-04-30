@@ -1213,7 +1213,7 @@ void edit_menu(T1& graph, T2& new_graph)
     {
         std::cout << "\n\n------------------------------------------------"
             << "\nEdit menu:\n1)Add vertex.\n2)Add edge.\n3)Create random graph.\n"
-            << "4).\n0)Back.\n"
+            << "4)Transformation.\n0)Back.\n"
             << "------------------------------------------------\n\n";
         switch (_getch())
         {
