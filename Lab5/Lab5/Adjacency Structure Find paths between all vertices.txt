@@ -1,90 +1,90 @@
 Number of vertices = 5.
 Number of edges = 5.
-Time = 0.000631342.
-Size = 49.
+Time = 0.000674331.
+Size = 53.
 Orientation = directed.
 
 Number of vertices = 5.
 Number of edges = 5.
-Time = 0.000948939.
-Size = 69.
+Time = 0.00088542.
+Size = 73.
 Orientation = undirected.
 
 Number of vertices = 10.
 Number of edges = 10.
-Time = 0.00234251.
-Size = 69.
+Time = 0.00217184.
+Size = 93.
 Orientation = directed.
 
 Number of vertices = 10.
 Number of edges = 10.
-Time = 0.00337743.
-Size = 109.
+Time = 0.00265048.
+Size = 133.
 Orientation = undirected.
 
 Number of vertices = 20.
 Number of edges = 20.
-Time = 0.00834155.
-Size = 109.
+Time = 0.00956317.
+Size = 173.
 Orientation = directed.
 
 Number of vertices = 20.
 Number of edges = 20.
-Time = 0.0131748.
-Size = 189.
+Time = 0.0137092.
+Size = 253.
 Orientation = undirected.
 
 Number of vertices = 40.
 Number of edges = 40.
-Time = 0.0382816.
-Size = 189.
+Time = 0.0272215.
+Size = 333.
 Orientation = directed.
 
 Number of vertices = 40.
 Number of edges = 40.
-Time = 0.0541614.
-Size = 349.
+Time = 0.0396501.
+Size = 493.
 Orientation = undirected.
 
 Number of vertices = 80.
 Number of edges = 80.
-Time = 0.161714.
-Size = 349.
+Time = 0.155154.
+Size = 653.
 Orientation = directed.
 
 Number of vertices = 80.
 Number of edges = 80.
-Time = 0.241411.
-Size = 669.
+Time = 0.293191.
+Size = 973.
 Orientation = undirected.
 
 Number of vertices = 160.
 Number of edges = 160.
-Time = 1.04998.
-Size = 669.
+Time = 1.02743.
+Size = 1293.
 Orientation = directed.
 
 Number of vertices = 160.
 Number of edges = 160.
-Time = 1.40908.
-Size = 1309.
+Time = 1.378.
+Size = 1933.
 Orientation = undirected.
 
 Number of vertices = 320.
 Number of edges = 320.
-Time = 7.1445.
-Size = 1309.
+Time = 6.58889.
+Size = 2573.
 Orientation = directed.
 
 Number of vertices = 320.
 Number of edges = 320.
-Time = 8.82521.
-Size = 2589.
+Time = 9.3812.
+Size = 3853.
 Orientation = undirected.
 
 Number of vertices = 480.
 Number of edges = 480.
-Time = 21.4923.
-Size = 1949.
+Time = 21.381.
+Size = 3853.
 Orientation = directed.
 

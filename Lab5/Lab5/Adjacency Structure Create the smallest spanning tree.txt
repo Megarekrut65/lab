@@ -1,90 +1,90 @@
 Number of vertices = 5.
 Number of edges = 5.
-Time = 6.42e-07.
-Size = 49.
+Time = 1.284e-06.
+Size = 53.
 Orientation = directed.
 
 Number of vertices = 5.
 Number of edges = 5.
-Time = 0.000249586.
-Size = 69.
+Time = 0.000224563.
+Size = 73.
 Orientation = undirected.
 
 Number of vertices = 10.
 Number of edges = 10.
 Time = 6.42e-07.
-Size = 69.
+Size = 93.
 Orientation = directed.
 
 Number of vertices = 10.
 Number of edges = 10.
-Time = 0.000617227.
-Size = 109.
+Time = 0.000588996.
+Size = 133.
 Orientation = undirected.
 
 Number of vertices = 20.
 Number of edges = 20.
-Time = 1.283e-06.
-Size = 109.
+Time = 6.42e-07.
+Size = 173.
 Orientation = directed.
 
 Number of vertices = 20.
 Number of edges = 20.
-Time = 0.00269411.
-Size = 189.
+Time = 0.0027679.
+Size = 253.
 Orientation = undirected.
 
 Number of vertices = 40.
 Number of edges = 40.
+Time = 6.42e-07.
+Size = 333.
+Orientation = directed.
+
+Number of vertices = 40.
+Number of edges = 40.
+Time = 0.0124729.
+Size = 493.
+Orientation = undirected.
+
+Number of vertices = 80.
+Number of edges = 80.
+Time = 1.284e-06.
+Size = 653.
+Orientation = directed.
+
+Number of vertices = 80.
+Number of edges = 80.
+Time = 0.08948.
+Size = 973.
+Orientation = undirected.
+
+Number of vertices = 160.
+Number of edges = 160.
+Time = 1.283e-06.
+Size = 1293.
+Orientation = directed.
+
+Number of vertices = 160.
+Number of edges = 160.
+Time = 0.810799.
+Size = 1933.
+Orientation = undirected.
+
+Number of vertices = 320.
+Number of edges = 320.
 Time = 6.41e-07.
-Size = 189.
-Orientation = directed.
-
-Number of vertices = 40.
-Number of edges = 40.
-Time = 0.0129066.
-Size = 349.
-Orientation = undirected.
-
-Number of vertices = 80.
-Number of edges = 80.
-Time = 1.283e-06.
-Size = 349.
-Orientation = directed.
-
-Number of vertices = 80.
-Number of edges = 80.
-Time = 0.087602.
-Size = 669.
-Orientation = undirected.
-
-Number of vertices = 160.
-Number of edges = 160.
-Time = 6.42e-07.
-Size = 669.
-Orientation = directed.
-
-Number of vertices = 160.
-Number of edges = 160.
-Time = 0.771628.
-Size = 1309.
-Orientation = undirected.
-
-Number of vertices = 320.
-Number of edges = 320.
-Time = 1.283e-06.
-Size = 1309.
+Size = 2573.
 Orientation = directed.
 
 Number of vertices = 320.
 Number of edges = 320.
-Time = 5.63297.
-Size = 2589.
+Time = 5.69745.
+Size = 3853.
 Orientation = undirected.
 
 Number of vertices = 480.
 Number of edges = 480.
-Time = 6.42e-07.
-Size = 1949.
+Time = 6.41e-07.
+Size = 3853.
 Orientation = directed.
 

@@ -8,12 +8,38 @@
 #include <chrono>
 #include "my_correct_read.h"
 
+struct measurement_result;
 struct Edge;
 struct Graph_matrix;
 struct Vertex_node;
 struct Graph_structure;
 template<class T1, class T2>
 void graph_menu(T1&, T2&);
+Graph_structure graph_transformation(Graph_matrix&);
+Graph_matrix graph_transformation(Graph_structure&);
+template<class T>
+void add_edge(T&);
+template<class T>
+void create_random_graph(T&);
+template<class T>
+void depth_first_search(T&);
+template<class T>
+void find_paths_between_two_vertices(T&);
+template<class T>
+void find_path_from_the_vertex_to_everyone_else(T&);
+template<class T>
+void create_spanning_tree(T&);
+template<class T>
+void find_path_menu(T&);
+template<class T>
+void create_spanning_tree_menu(T&);
+template<class T1, class T2>
+bool edit_menu(T1&, T2&);
+template<class T1, class T2>
+void graph_menu(T1&, T2&);
+void graph_matrix_menu();
+void graph_structure_menu();
+void interactive_dialog_mode();
 
 struct measurement_result
 {
@@ -520,7 +546,7 @@ public:
     std::size_t get_size()
     {
         std::size_t size = 0;
-        size += sizeof(matrix) + number_of_vertices * number_of_vertices * sizeof(Edge)
+        size += number_of_vertices * number_of_vertices * sizeof(Edge)
             + sizeof(number_of_vertices) + sizeof(number_of_edges) 
             + sizeof(orientation) + sizeof(total_weight);
 
@@ -1105,12 +1131,12 @@ public:
         std::size_t number_of_node = 0;
         for (std::size_t i = 0; i < number_of_vertices; i++)
         {
-            for (Vertex_node* current = list[i]->next; current; current = current->next)
+            for (Vertex_node* current = list[i]; current; current = current->next)
             {
                 number_of_node++;
             }
         }
-        size += sizeof(list) + number_of_node*sizeof(Vertex_node*) + sizeof(number_of_vertices)
+        size += number_of_node*sizeof(Vertex_node*) + sizeof(number_of_vertices)
             + sizeof(number_of_edges) + sizeof(orientation) + sizeof(total_weight);
 
         return size;
@@ -1211,7 +1237,7 @@ void find_path_menu(T& graph)
         std::cout << "\n\n------------------------------------------------"
             << "\nFind path:\n1)Find path between two vertices.\n"
             << "2)Find paths from the vertex to everyone else.\n"
-            << "3)Find paths between all vertices.\n0)Back.\n"
+            << "3)Find paths between all vertices.\n0)Back." << std::endl
             << "------------------------------------------------\n\n";
         switch (_getch())
         {
@@ -1233,7 +1259,7 @@ void create_spanning_tree_menu(T& graph)
     {
         std::cout << "\n\n------------------------------------------------"
             << "\nSpanning tree:\n1)Create spanning tree.\n"
-            << "2)Create the smallest spanning tree.\n0)Back.\n"
+            << "2)Create the smallest spanning tree.\n0)Back." << std::endl
             << "------------------------------------------------\n\n";
         switch (_getch())
         {
@@ -1248,13 +1274,13 @@ void create_spanning_tree_menu(T& graph)
     }
 }
 template<class T1, class T2>
-void edit_menu(T1& graph, T2& new_graph)
+bool edit_menu(T1& graph, T2& new_graph)
 {
     while (true)
     {
         std::cout << "\n\n------------------------------------------------"
             << "\nEdit menu:\n1)Add vertex.\n2)Add edge.\n3)Create random graph.\n"
-            << "4)Transformation.\n0)Back.\n"
+            << "4)Transformation.\n0)Back." << std::endl
             << "------------------------------------------------\n\n";
         switch (_getch())
         {
@@ -1270,11 +1296,10 @@ void edit_menu(T1& graph, T2& new_graph)
             new_graph = graph_transformation(graph);
             std::cout << "\nTransformation is finished!" << std::endl;
             graph_menu(new_graph, graph);
-            std::cout << "\nThe old graph was cleared!" << std::endl;
-            return;
+            return true;
         }
             break;       
-        case'0': return;       
+        case'0': return false;       
         default: std::cout << "\nPress the correct key!" << std::endl;
         }
     }
@@ -1287,11 +1312,11 @@ void graph_menu(T1& graph, T2& new_graph)
         std::cout << "\n\n################################################" 
             << "\nMenu:\n1)Edit graph.\n2)Write graph.\n3)Checking the connectivity of graph.\n"
             << "4)Depth-first search.\n5)Find paths.\n6)Topological sorting.\n"
-            << "7)Create spanning tree.\n0)Back.\n"
+            << "7)Create spanning tree.\n0)Back." << std::endl
             << "################################################\n\n";
         switch (_getch())
         {
-        case '1': edit_menu(graph, new_graph);
+        case '1': if (edit_menu(graph, new_graph)) return;
             break;
         case '2': graph.write_graph();
             break;
@@ -1317,27 +1342,26 @@ void graph_menu(T1& graph, T2& new_graph)
 }
 void graph_matrix_menu()
 {
-    std::size_t number_of_vertex = correct::read_size_t("the initial number of vertices in the graph");
+    std::size_t number_of_vertices = correct::read_size_t("the initial number of vertices in the graph");
     bool orientation = correct::read_bool("True to graph will be directed or False to it will be undirected");
-    Graph_matrix graph(number_of_vertex, orientation);
+    Graph_matrix graph(number_of_vertices, orientation);
     Graph_structure new_graph(orientation);
     graph_menu(graph, new_graph);
 }
 void graph_structure_menu()
 {
-    std::size_t number_of_vertex = correct::read_size_t("the initial number of vertices in the graph");
+    std::size_t number_of_vertices = correct::read_size_t("the initial number of vertices in the graph");
     bool orientation = correct::read_bool("True to graph will be directed or False to it will be undirected");
-    Graph_structure graph(number_of_vertex, orientation);
+    Graph_structure graph(number_of_vertices, orientation);
     Graph_matrix new_graph(orientation);
     graph_menu(graph, new_graph);
 }
 void interactive_dialog_mode()
-{
-    
+{  
     while (true)
     {
         std::cout << "\nSelect one:\n1)Graph based on adjacency matrix.\n"
-            << "2)Graph based on adjacency structure.\n0)Back.\n";
+            << "2)Graph based on adjacency structure.\n0)Back." << std::endl;
         switch (_getch())
         {
         case '1': graph_matrix_menu();
@@ -1354,237 +1378,573 @@ void interactive_dialog_mode()
         }
     }
 }
-void demo_mode()
+namespace all_benchmark_mode
 {
-    std::cout << std::endl;
-}
-void clear_result_files(std::string paths[], int number_of_files, std::string name_of_type)
-{   
-    for (int i = 0; i < number_of_files; i++)
+    void clear_result_files(std::string paths[], int number_of_files, std::string name_of_type)
     {
-        std::ofstream file(name_of_type + paths[i] + ".txt");
+        for (int i = 0; i < number_of_files; i++)
+        {
+            std::ofstream file(name_of_type + paths[i] + ".txt");
+            file.close();
+        }
+    }
+    Graph_matrix copy_graph(Graph_matrix& graph)
+    {
+        Graph_matrix new_graph(graph.number_of_vertices, graph.orientation);
+        for (std::size_t i = 0; i < graph.number_of_vertices; i++)
+        {
+            for (std::size_t j = 0; j < graph.number_of_vertices; j++)
+            {
+                if (graph.matrix[i][j].contiguity)
+                {
+                    new_graph.add_edge(i, j, graph.matrix[i][j].weight_coefficient, false);
+                }
+            }
+        }
+        return new_graph;
+    }
+    Graph_structure copy_graph(Graph_structure& graph)
+    {
+        Graph_structure new_graph(graph.number_of_vertices, graph.orientation);
+        for (std::size_t i = 0; i < graph.number_of_vertices; i++)
+        {
+            for (std::size_t j = 0; j < graph.number_of_vertices; j++)
+            {
+                if (graph.is_edge(i, j))
+                {
+                    new_graph.add_edge(i, j, graph.give_weight(i, j), false);
+                }
+            }
+        }
+        return new_graph;
+    }
+    std::size_t set_number(bool is_one_second, std::size_t& copy_size, std::size_t& coefficient)//resizes depending on condition
+    {
+        if (is_one_second)
+        {
+            return coefficient++ * copy_size;
+        }
+        else
+        {
+            return copy_size *= 2;
+        }
+    }
+    void add_result_to_file(measurement_result result, const std::string& name_of_files)
+    {
+        std::ofstream file(name_of_files + ".txt", std::ios_base::app);
+        file << "Number of vertices = " << result.number_of_vertices << "." << std::endl;
+        file << "Number of edges = " << result.number_of_edges << "." << std::endl;
+        file << "Time = " << result.time << "." << std::endl;
+        file << "Size = " << result.size << "." << std::endl;
+        file << "Orientation = ";
+        if (result.orientation) file << "directed";
+        else file << "undirected";
+        file << ".\n" << std::endl;
         file.close();
     }
-}
-Graph_matrix copy_graph(Graph_matrix& graph)
-{
-    Graph_matrix new_graph(graph.number_of_vertices, graph.orientation);
-    for (std::size_t i = 0; i < graph.number_of_vertices; i++)
+    template<class T>
+    void measurement_add_vertex(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
     {
-        for (std::size_t j = 0; j < graph.number_of_vertices; j++)
-        {
-            if (graph.matrix[i][j].contiguity)
-            {
-                new_graph.add_edge(i, j, graph.matrix[i][j].weight_coefficient, false);
-            }
-        }
+        graph.add_vertex(false);
     }
-    return new_graph;
-}
-Graph_structure copy_graph(Graph_structure& graph)
-{
-    Graph_structure new_graph(graph.number_of_vertices, graph.orientation);
-    for (std::size_t i = 0; i < graph.number_of_vertices; i++)
+    template<class T>
+    void measurement_add_edge(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
     {
-        for (std::size_t j = 0; j < graph.number_of_vertices; j++)
-        {
-            if (graph.is_edge(i, j))
-            {
-                new_graph.add_edge(i, j, graph.give_weight(i, j), false);
-            }
-        }
+        graph.add_edge(rand() % number_of_vertices, rand() % number_of_vertices, rand() % number_of_edges, false);
     }
-    return new_graph;
-}
-std::size_t set_number(bool is_one_second, std::size_t& copy_size, std::size_t& coefficient)//resizes depending on condition
-{
-    if (is_one_second)
+    template<class T>
+    void measurement_create_random(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
     {
-        return coefficient++ * copy_size;
+        graph.create_random_graph(number_of_vertices, number_of_edges, false, number_of_edges, false);
     }
-    else
+    template<class T>
+    void measurement_checking_the_connectivity_of_graph(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
     {
-        return copy_size *= 2;
+        graph.checking_the_connectivity_of_graph(false);
     }
-}
-void add_result_to_file(measurement_result result, const std::string& name_of_files)
-{
-    std::ofstream file(name_of_files + ".txt", std::ios_base::app);
-    file << "Number of vertices = " << result.number_of_vertices << "." << std::endl;
-    file << "Number of edges = " << result.number_of_edges << "." << std::endl;
-    file << "Time = " << result.time << "." << std::endl;
-    file << "Size = " << result.size << "." << std::endl;
-    file << "Orientation = ";
-    if (result.orientation) file << "directed";
-    else file << "undirected";
-    file << ".\n" << std::endl;
-    file.close();
-}
-template<class T>
-void measurement_add_vertex(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
-{
-    graph.add_vertex(false);
-}
-template<class T>
-void measurement_add_edge(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
-{
-    graph.add_edge(rand() % number_of_vertices, rand() % number_of_vertices, rand() % number_of_edges, false);
-}
-template<class T>
-void measurement_create_random(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
-{
-    graph.create_random_graph(number_of_vertices, number_of_edges, false, rand() % number_of_edges,  false);
-}
-template<class T>
-void measurement_checking_the_connectivity_of_graph(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
-{
-    graph.checking_the_connectivity_of_graph(false);
-}
-template<class T>
-void measurement_depth_first_search(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
-{
-    graph.depth_first_search(true, false);
-}
-template<class T>
-void measurement_find_paths_between_two_vertices(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
-{
-    graph.find_paths_between_two_vertices(rand() % number_of_vertices, rand() % number_of_vertices, false);
-}
-template<class T>
-void measurement_find_path_from_the_vertex_to_everyone_else(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
-{
-    graph.find_path_from_the_vertex_to_everyone_else(rand() % number_of_vertices, false);
-}
-template<class T>
-void measurement_find_paths_between_all_vertices(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
-{
-    graph.find_paths_between_all_vertices(false);
-}
-template<class T>
-void measurement_topological_sorting(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
-{
-    graph.topological_sorting(false);
-}
-template<class T>
-void measurement_create_spanning_tree(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
-{
-    graph.create_spanning_tree(true, false);
-}
-template<class T>
-void measurement_create_the_smallest_spanning_tree(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
-{
-    graph.create_the_smallest_spanning_tree(false);
-}
-template<class T>
-void measurement_clear(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
-{
-    graph.clear();
-}
-template<class T>
-float measurement(T& graph, std::size_t index, bool orientation, std::size_t number_of_vertices, std::size_t number_of_edges, const std::string& name_of_functions, const std::string& name_of_type)//measures the sort time of an array
-{
-    srand(unsigned(time(0)));
-    const int number_of_functions = 12;
-    void(*all_functions[number_of_functions])(T&, std::size_t, std::size_t) = { 
-        measurement_add_vertex, measurement_add_edge, measurement_create_random,
-        measurement_checking_the_connectivity_of_graph,
-        measurement_depth_first_search, measurement_find_paths_between_two_vertices,
-        measurement_find_path_from_the_vertex_to_everyone_else, 
-        measurement_find_paths_between_all_vertices, measurement_topological_sorting,
-        measurement_create_spanning_tree, measurement_create_the_smallest_spanning_tree,
-        measurement_clear };
-    T new_graph = copy_graph(graph);
-    auto the_start = std::chrono::high_resolution_clock::now();
-    auto the_end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<float> duration;
-    the_start = std::chrono::high_resolution_clock::now();
-    all_functions[index](new_graph, number_of_vertices, number_of_edges);
-    the_end = std::chrono::high_resolution_clock::now();
-    duration = the_end - the_start;
-    measurement_result result;
-    result.number_of_vertices = number_of_vertices;
-    result.number_of_edges = number_of_edges;
-    result.size = graph.get_size();
-    result.time = duration.count();
-    result.orientation = orientation;
-    add_result_to_file(result, name_of_type + name_of_functions);
-    std::cout << "\nTime of " << name_of_functions << " = " << result.time << std::endl;
-    std::cout << "Size = " << result.size << std::endl;
+    template<class T>
+    void measurement_depth_first_search(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+    {
+        graph.depth_first_search(true, false);
+    }
+    template<class T>
+    void measurement_find_paths_between_two_vertices(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+    {
+        graph.find_paths_between_two_vertices(rand() % number_of_vertices, rand() % number_of_vertices, false);
+    }
+    template<class T>
+    void measurement_find_path_from_the_vertex_to_everyone_else(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+    {
+        graph.find_path_from_the_vertex_to_everyone_else(rand() % number_of_vertices, false);
+    }
+    template<class T>
+    void measurement_find_paths_between_all_vertices(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+    {
+        graph.find_paths_between_all_vertices(false);
+    }
+    template<class T>
+    void measurement_topological_sorting(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+    {
+        graph.topological_sorting(false);
+    }
+    template<class T>
+    void measurement_create_spanning_tree(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+    {
+        graph.create_spanning_tree(true, false);
+    }
+    template<class T>
+    void measurement_create_the_smallest_spanning_tree(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+    {
+        graph.create_the_smallest_spanning_tree(false);
+    }
+    template<class T>
+    void measurement_clear(T& graph, std::size_t number_of_vertices, std::size_t number_of_edges)
+    {
+        graph.clear();
+    }
+    template<class T>
+    float measurement(T& graph, std::size_t index, bool orientation, std::size_t number_of_vertices, std::size_t number_of_edges, const std::string& name_of_functions, const std::string& name_of_type)//measures the sort time of an array
+    {
+        srand(unsigned(time(0)));
+        const int number_of_functions = 12;
+        void(*all_functions[number_of_functions])(T&, std::size_t, std::size_t) = {
+            measurement_add_vertex, measurement_add_edge, measurement_create_random,
+            measurement_checking_the_connectivity_of_graph,
+            measurement_depth_first_search, measurement_find_paths_between_two_vertices,
+            measurement_find_path_from_the_vertex_to_everyone_else,
+            measurement_find_paths_between_all_vertices, measurement_topological_sorting,
+            measurement_create_spanning_tree, measurement_create_the_smallest_spanning_tree,
+            measurement_clear };
+        T new_graph = copy_graph(graph);
+        auto the_start = std::chrono::high_resolution_clock::now();
+        auto the_end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float> duration;
+        the_start = std::chrono::high_resolution_clock::now();
+        all_functions[index](new_graph, number_of_vertices, number_of_edges);
+        the_end = std::chrono::high_resolution_clock::now();
+        duration = the_end - the_start;
+        measurement_result result;
+        result.number_of_vertices = number_of_vertices;
+        result.number_of_edges = number_of_edges;
+        result.size = graph.get_size();
+        result.time = duration.count();
+        result.orientation = orientation;
+        add_result_to_file(result, name_of_type + name_of_functions);
+        std::cout << "\nTime of " << name_of_functions << " = " << result.time << std::endl;
+        std::cout << "Size = " << result.size << std::endl;
 
-    return result.time;
-}
-template<class T>
-void benchmark_mode_menu(T& graph, const std::string& name_of_type)
-{    
-    const int number_of_functions = 12;
-    std::string name_of_functions[number_of_functions] = { "Add vertex", "Add edge", "Create random graph",
-        "Checking the connectivity of graph", "Depth-first search",
-    "Find path between two vertices", "Find paths from the vertex to everyone else",
-    "Find paths between all vertices", "Topological sorting",
-    "Create spanning tree", "Create the smallest spanning tree", "Clear graph" };
-    clear_result_files(name_of_functions, number_of_functions, name_of_type);
-    bool is_one_second = false, are_ten_seconds = false;
-    std::size_t number_of_vertices = 5, number_of_edges = number_of_vertices;
-    std::size_t copy_number = number_of_vertices, coefficient = 2;
-    bool orientation = false;
-    while (true)
-    {
-        float time;
-        std::cout << "\nNumber of vertices = " << number_of_vertices << std::endl;
-        std::cout << "Number of edges = " << number_of_edges << std::endl;
-        for (int j = 0; j < 2; j++)
-        {
-            orientation = !orientation;            
-            std::cout << "\nOrientation = ";
-            if (orientation) std::cout << "directed";
-            else std::cout << "undirected";
-            std::cout << "." << std::endl;
-            graph.create_random_graph(number_of_vertices, number_of_edges, orientation, number_of_edges, false);
-            for (std::size_t i = 0; i < number_of_functions; i++)
-            {
-                time = measurement(graph, i, orientation, number_of_vertices, number_of_edges, name_of_functions[i], name_of_type);
-                if (time > 1) is_one_second = true;
-                if (time > 10) are_ten_seconds = true;
-            }
-            graph.clear();            
-            if (are_ten_seconds) break;
-        }        
-        if (are_ten_seconds) break;
-        number_of_vertices = set_number(is_one_second, copy_number, coefficient);
-        number_of_edges = number_of_vertices;
+        return result.time;
     }
-    std::cout << "\nResults of measurements of program in the following files:\n"
-        << name_of_type + name_of_functions[0] + ".txt\n" << name_of_type + name_of_functions[1] + ".txt\n"
-        << name_of_type + name_of_functions[2] + ".txt\n" << name_of_type + name_of_functions[3] + ".txt\n"
-        << name_of_type + name_of_functions[4] + ".txt\n" << name_of_type + name_of_functions[5] + ".txt\n"
-        << name_of_type + name_of_functions[6] + ".txt\n" << name_of_type + name_of_functions[7] + ".txt\n"
-        << name_of_type + name_of_functions[8] + ".txt\n" << name_of_type + name_of_functions[9] + ".txt\n"
-        << name_of_type + name_of_functions[10] + ".txt\n" << name_of_type + name_of_functions[11] + ".txt\n"
-        << std::endl;
+    template<class T>
+    void benchmark_mode_menu(T& graph, const std::string& name_of_type)
+    {
+        const int number_of_functions = 12;
+        std::string name_of_functions[number_of_functions] = { "Add vertex", "Add edge", 
+        "Create random graph", "Checking the connectivity of graph", "Depth-first search",
+        "Find path between two vertices", "Find paths from the vertex to everyone else",
+        "Find paths between all vertices", "Topological sorting",
+        "Create spanning tree", "Create the smallest spanning tree", "Clear graph" };
+        clear_result_files(name_of_functions, number_of_functions, name_of_type);
+        bool is_one_second = false, are_ten_seconds = false;
+        std::size_t number_of_vertices = 5, number_of_edges = number_of_vertices;
+        std::size_t copy_number = number_of_vertices, coefficient = 2;
+        bool orientation = false;
+        while (true)
+        {
+            float time;
+            std::cout << "\nNumber of vertices = " << number_of_vertices << std::endl;
+            std::cout << "Number of edges = " << number_of_edges << std::endl;
+            for (int j = 0; j < 2; j++)
+            {
+                orientation = !orientation;
+                std::cout << "\nOrientation = ";
+                if (orientation) std::cout << "directed";
+                else std::cout << "undirected";
+                std::cout << "." << std::endl;
+                graph.create_random_graph(number_of_vertices, number_of_edges, orientation, number_of_edges, false);
+                for (std::size_t i = 0; i < number_of_functions; i++)
+                {
+                    time = measurement(graph, i, orientation, number_of_vertices, number_of_edges, name_of_functions[i], name_of_type);
+                    if (time > 1) is_one_second = true;
+                    if (time > 10) are_ten_seconds = true;
+                }
+                graph.clear();
+                if (are_ten_seconds) break;
+            }
+            if (are_ten_seconds) break;
+            number_of_vertices = set_number(is_one_second, copy_number, coefficient);
+            number_of_edges = number_of_vertices;
+        }
+        std::cout << "\nResults of measurements of program in the following files:\n"
+            << name_of_type + name_of_functions[0] + ".txt\n" << name_of_type + name_of_functions[1] + ".txt\n"
+            << name_of_type + name_of_functions[2] + ".txt\n" << name_of_type + name_of_functions[3] + ".txt\n"
+            << name_of_type + name_of_functions[4] + ".txt\n" << name_of_type + name_of_functions[5] + ".txt\n"
+            << name_of_type + name_of_functions[6] + ".txt\n" << name_of_type + name_of_functions[7] + ".txt\n"
+            << name_of_type + name_of_functions[8] + ".txt\n" << name_of_type + name_of_functions[9] + ".txt\n"
+            << name_of_type + name_of_functions[10] + ".txt\n" << name_of_type + name_of_functions[11] + ".txt\n"
+            << std::endl;
+    }
+    void benchmark_mode()
+    {
+        Graph_matrix matrix(false);
+        std::cout << "\nAdjacency Matrix." << std::endl;
+        benchmark_mode_menu(matrix, "Adjacency Matrix ");
+        Graph_structure structure(false);
+        std::cout << "\nAdjacency Structure." << std::endl;
+        benchmark_mode_menu(structure, "Adjacency Structure ");
+        std::cout << std::endl;
+    }
 }
-void benchmark_mode()
+namespace all_demo_mode
 {
-    Graph_matrix matrix(false);
-    std::cout << "\nAdjacency Matrix." << std::endl;
-    benchmark_mode_menu(matrix, "Adjacency Matrix ");
-    Graph_structure structure(false);
-    std::cout << "\nAdjacency Structure." << std::endl;
-    benchmark_mode_menu(structure, "Adjacency Structure ");
-    std::cout << std::endl;
+    void demo_interactive(unsigned delay)
+    {
+        std::cout << "\nSelect the application mode:\n1)Interactive dialog mode.\n"
+            << "2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
+        Sleep(delay);
+        std::cout << "\nSelect the application mode:\n1)Interactive dialog mode. <-press\n"
+            << "2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
+        Sleep(delay);
+    }
+    template<class T>
+    void demo_read_value(unsigned delay, T value, std::string sentence)
+    {
+        std::cout << "\nEnter " << sentence << ": <-write and press <Enter>" << std::endl;
+        Sleep(delay);
+        std::cout << "Enter " << sentence << ": " << value << std::endl;
+        Sleep(delay);
+    }
+    void demo_select(unsigned delay, bool mode, std::string sentence)
+    {
+        if (mode) std::cout << "\nSelect " << sentence << ":\n1)True. <-press\n2)False." << std::endl;
+        else std::cout << "\nSelect " << sentence << ":\n1)True.\n2)False. <-press" << std::endl;
+        Sleep(delay);
+    }
+    void demo_matrix_menu(unsigned delay, Graph_matrix& graph, bool orientation, std::size_t number_of_vertices)
+    {
+        std::cout << "\nSelect one:\n1)Graph based on adjacency matrix. <-press\n"
+            << "2)Graph based on adjacency structure.\n0)Back.\n";
+        Sleep(delay);
+        demo_read_value(delay, number_of_vertices, "the initial number of vertices in the graph");
+        demo_select(delay, orientation, "True to graph will be directed or False to it will be undirected");
+        graph = Graph_matrix(number_of_vertices, orientation);
+    }
+    void demo_structure_menu(unsigned delay, Graph_structure& graph, bool orientation, std::size_t number_of_vertices)
+    {
+        std::cout << "\nSelect one:\n1)Graph based on adjacency matrix.\n"
+            << "2)Graph based on adjacency structure. <-press\n0)Back.\n";
+        Sleep(delay);
+        demo_read_value(delay, number_of_vertices, "the initial number of vertices in the graph");
+        demo_select(delay, orientation, "True to graph will be directed or False to it will be undirected");
+        graph = Graph_structure(number_of_vertices, orientation);
+    }
+    void demo_edit_menu(unsigned delay)
+    {
+        std::cout << "\n\n################################################"
+            << "\nMenu:\n1)Edit graph. <-press\n2)Write graph.\n3)Checking the connectivity of graph.\n"
+            << "4)Depth-first search.\n5)Find paths.\n6)Topological sorting.\n"
+            << "7)Create spanning tree.\n0)Back." << std::endl
+            << "################################################\n\n";
+        Sleep(delay);
+    }
+    template<class T>
+    void demo_add_vertex(unsigned delay, T& graph)
+    {
+        std::cout << "\n\n------------------------------------------------"
+            << "\nEdit menu:\n1)Add vertex. <-press\n2)Add edge.\n3)Create random graph.\n"
+            << "4)Transformation.\n0)Back." << std::endl
+            << "------------------------------------------------\n\n";
+        Sleep(delay);
+        graph.add_vertex();
+        Sleep(delay);
+    }
+    template<class T>
+    void demo_add_edge(unsigned delay, T& graph, std::size_t begin_index, std::size_t end_index, int weight_coefficient)
+    {
+        std::cout << "\n\n------------------------------------------------"
+            << "\nEdit menu:\n1)Add vertex.\n2)Add edge. <-press\n3)Create random graph.\n"
+            << "4)Transformation.\n0)Back." << std::endl
+            << "------------------------------------------------\n\n";
+        Sleep(delay);
+        demo_read_value(delay, begin_index, "the index of begin vertex");
+        demo_read_value(delay, end_index, "the index of end vertex");
+        demo_read_value(delay, weight_coefficient, "weight coefficient of edge");
+        graph.add_edge(begin_index, end_index, weight_coefficient);
+        Sleep(delay);
+    }
+    template<class T>
+    void demo_create_random(unsigned delay, T& graph, bool orientation, std::size_t number_of_vertices, std::size_t number_of_edges, int max_weight_coefficient)
+    {
+        std::cout << "\n\n------------------------------------------------"
+            << "\nEdit menu:\n1)Add vertex.\n2)Add edge.\n3)Create random graph. <-press\n"
+            << "4)Transformation.\n0)Back." << std::endl
+            << "------------------------------------------------\n\n";
+        Sleep(delay);
+        demo_read_value(delay, number_of_vertices, "the number of vertices");
+        demo_read_value(delay, number_of_edges, "the number of edges");
+        demo_select(delay, orientation, "True to graph will be directed or False to it will be undirected");
+        demo_read_value(delay, max_weight_coefficient, "maximum weight coefficient of edge");
+        graph.create_random_graph(number_of_vertices, number_of_edges, orientation, max_weight_coefficient);
+        Sleep(delay);
+    }
+    template<class T1, class T2>
+    void demo_graph_transformation(unsigned delay, T1& graph, T2& new_graph)
+    {
+        std::cout << "\n\n------------------------------------------------"
+            << "\nEdit menu:\n1)Add vertex.\n2)Add edge.\n3)Create random graph.\n"
+            << "4)Transformation. <-press\n0)Back." << std::endl
+            << "------------------------------------------------\n\n";
+        Sleep(delay);
+        new_graph.clear();
+        new_graph = graph_transformation(graph);
+        std::cout << "\nTransformation is finished!" << std::endl;
+        Sleep(delay);
+    }
+    void demo_back_from_edit_menu(unsigned delay)
+    {
+        std::cout << "\n\n------------------------------------------------"
+            << "\nEdit menu:\n1)Add vertex.\n2)Add edge.\n3)Create random graph.\n"
+            << "4)Transformation.\n0)Back. <-press" << std::endl
+            << "------------------------------------------------\n\n";
+        Sleep(delay);
+    }
+    template<class T>
+    void demo_write_graph(unsigned delay, T& graph)
+    {
+        std::cout << "\n\n################################################"
+            << "\nMenu:\n1)Edit graph.\n2)Write graph. <-press\n3)Checking the connectivity of graph.\n"
+            << "4)Depth-first search.\n5)Find paths.\n6)Topological sorting.\n"
+            << "7)Create spanning tree.\n0)Back." << std::endl
+            << "################################################\n\n";
+        Sleep(delay);
+        graph.write_graph();
+        Sleep(delay);
+    }
+    template<class T>
+    void demo_checking_the_connectivity(unsigned delay, T& graph)
+    {
+        std::cout << "\n\n################################################"
+            << "\nMenu:\n1)Edit graph.\n2)Write graph.\n3)Checking the connectivity of graph. <-press\n"
+            << "4)Depth-first search.\n5)Find paths.\n6)Topological sorting.\n"
+            << "7)Create spanning tree.\n0)Back." << std::endl
+            << "################################################\n\n";
+        Sleep(delay);
+        graph.checking_the_connectivity_of_graph();
+        Sleep(delay);
+    }
+    template<class T>
+    void demo_depth_first_search(unsigned delay, T& graph, bool mode)
+    {
+        std::cout << "\n\n################################################"
+            << "\nMenu:\n1)Edit graph.\n2)Write graph.\n3)Checking the connectivity of graph.\n"
+            << "4)Depth-first search. <-press\n5)Find paths.\n6)Topological sorting.\n"
+            << "7)Create spanning tree.\n0)Back." << std::endl
+            << "################################################\n\n";
+        Sleep(delay);
+        demo_select(delay, mode, "True to bypass is performed on the edges taking into account the weight coefficient\nor False to bypass is performed on the edges of any order");      
+        graph.depth_first_search(mode);
+        Sleep(delay);
+    }
+    void demo_find_path_menu(unsigned delay)
+    {
+        std::cout << "\n\n################################################"
+            << "\nMenu:\n1)Edit graph.\n2)Write graph.\n3)Checking the connectivity of graph.\n"
+            << "4)Depth-first search.\n5)Find paths. <-press\n6)Topological sorting.\n"
+            << "7)Create spanning tree.\n0)Back." << std::endl
+            << "################################################\n\n";
+        Sleep(delay);
+    }
+    template<class T>
+    void demo_find_paths_between_two_vertices(unsigned delay, T& graph, std::size_t begin_index, std::size_t end_index)
+    {
+        std::cout << "\n\n------------------------------------------------"
+            << "\nFind path:\n1)Find path between two vertices. <-press\n"
+            << "2)Find paths from the vertex to everyone else.\n"
+            << "3)Find paths between all vertices.\n0)Back." << std::endl
+            << "------------------------------------------------\n\n";
+        Sleep(delay);
+        demo_read_value(delay, begin_index, "the index of begin vertex");
+        demo_read_value(delay, end_index, "the index of end vertex");
+        graph.find_paths_between_two_vertices(begin_index, end_index);
+        Sleep(delay);
+    }
+    template<class T>
+    void demo_find_path_from_the_vertex_to_everyone_else(unsigned delay, T& graph, std::size_t begin_index)
+    {
+        std::cout << "\n\n------------------------------------------------"
+            << "\nFind path:\n1)Find path between two vertices.\n"
+            << "2)Find paths from the vertex to everyone else. <-press\n"
+            << "3)Find paths between all vertices.\n0)Back." << std::endl
+            << "------------------------------------------------\n\n";
+        Sleep(delay);
+        demo_read_value(delay, begin_index, "the index of begin vertex");
+        graph.find_path_from_the_vertex_to_everyone_else(begin_index);
+        Sleep(delay);
+    }
+    template<class T>
+    void demo_find_paths_between_all_vertices(unsigned delay, T& graph)
+    {
+        std::cout << "\n\n------------------------------------------------"
+            << "\nFind path:\n1)Find path between two vertices.\n"
+            << "2)Find paths from the vertex to everyone else.\n"
+            << "3)Find paths between all vertices. <-press\n0)Back." << std::endl
+            << "------------------------------------------------\n\n";
+        Sleep(delay);
+        graph.find_paths_between_all_vertices();
+        Sleep(4*delay);
+    }
+    void demo_find_path_back(unsigned delay)
+    {
+        std::cout << "\n\n------------------------------------------------"
+            << "\nFind path:\n1)Find path between two vertices.\n"
+            << "2)Find paths from the vertex to everyone else.\n"
+            << "3)Find paths between all vertices.\n0)Back. <-press" << std::endl
+            << "------------------------------------------------\n\n";
+        Sleep(delay);
+    }
+    template<class T>
+    void demo_topological_sorting(unsigned delay, T& graph)
+    {
+        std::cout << "\n\n################################################"
+            << "\nMenu:\n1)Edit graph.\n2)Write graph.\n3)Checking the connectivity of graph.\n"
+            << "4)Depth-first search.\n5)Find paths.\n6)Topological sorting. <-press\n"
+            << "7)Create spanning tree.\n0)Back." << std::endl
+            << "################################################\n\n";
+        Sleep(delay);
+        graph.topological_sorting();
+        Sleep(delay);
+    }
+    void demo_create_spanning_tree_menu(unsigned delay)
+    {
+        std::cout << "\n\n################################################"
+            << "\nMenu:\n1)Edit graph.\n2)Write graph.\n3)Checking the connectivity of graph.\n"
+            << "4)Depth-first search.\n5)Find paths.\n6)Topological sorting.\n"
+            << "7)Create spanning tree. <-press\n0)Back." << std::endl
+            << "################################################\n\n";
+        Sleep(delay);
+    }
+    template<class T>
+    void create_spanning_tree(unsigned delay, T& graph, bool mode)
+    {
+        std::cout << "\n\n------------------------------------------------"
+            << "\nSpanning tree:\n1)Create spanning tree. <-press\n"
+            << "2)Create the smallest spanning tree.\n0)Back." << std::endl
+            << "------------------------------------------------\n\n";
+        Sleep(delay);
+        demo_select(delay, mode, "True to bypass is performed on the edges taking into account the weight coefficient\nor False to bypass is performed on the edges of any order");
+        graph.create_spanning_tree(mode); 
+        Sleep(2*delay);
+    }
+    template<class T>
+    void demo_create_the_smallest_spanning_tree(unsigned delay, T& graph)
+    {
+        std::cout << "\n\n------------------------------------------------"
+            << "\nSpanning tree:\n1)Create spanning tree.\n"
+            << "2)Create the smallest spanning tree. <-press\n0)Back." << std::endl
+            << "------------------------------------------------\n\n";
+        Sleep(delay);
+        graph.create_the_smallest_spanning_tree();
+        Sleep(2 * delay);
+    }
+    void demo_spanning_tree_menu_back(unsigned delay)
+    {
+        std::cout << "\n\n------------------------------------------------"
+            << "\nSpanning tree:\n1)Create spanning tree.\n"
+            << "2)Create the smallest spanning tree.\n0)Back. <-press" << std::endl
+            << "------------------------------------------------\n\n";
+        Sleep(delay);
+    }
+    void demo_back(unsigned delay)
+    {
+        std::cout << "\n\n################################################"
+            << "\nMenu:\n1)Edit graph.\n2)Write graph.\n3)Checking the connectivity of graph.\n"
+            << "4)Depth-first search.\n5)Find paths.\n6)Topological sorting.\n"
+            << "7)Create spanning tree.\n0)Back. <-press" << std::endl
+            << "################################################\n\n";
+        Sleep(delay);
+        std::cout << "\nSelect one:\n1)Graph based on adjacency matrix.\n"
+            << "2)Graph based on adjacency structure.\n0)Back. <-press" << std::endl;
+        Sleep(delay);
+    }
+    void demo_mode()
+    {
+        unsigned delay = correct::read_unsigned("a delay to display data(in milliseconds; normal = 1900)");
+        std::cout << "\nThe start of the demo mode(press <Ctrl + C> to exit)" << std::endl;
+        Graph_matrix graph_matrix(false);
+        Graph_structure graph_structure(false);
+        demo_interactive(delay);
+        demo_matrix_menu(delay, graph_matrix, false, 5);
+        demo_edit_menu(delay);
+        demo_add_vertex(delay, graph_matrix);
+        demo_add_vertex(delay, graph_matrix);
+        demo_add_edge(delay, graph_matrix, 3, 1, 10);
+        demo_add_edge(delay, graph_matrix, 0, 4, 14);
+        demo_add_edge(delay, graph_matrix, 4, 2, 61);
+        demo_back_from_edit_menu(delay);
+        demo_write_graph(delay, graph_matrix);
+        demo_checking_the_connectivity(delay, graph_matrix);
+        demo_edit_menu(delay);
+        demo_add_edge(delay, graph_matrix, 2, 3, 13);
+        demo_add_edge(delay, graph_matrix, 1, 6, 29);
+        demo_add_edge(delay, graph_matrix, 0, 5, 1);
+        demo_add_edge(delay, graph_matrix, 6, 5, 73);
+        demo_add_edge(delay, graph_matrix, 4, 5, 47);
+        demo_back_from_edit_menu(delay);
+        demo_write_graph(delay, graph_matrix);
+        demo_checking_the_connectivity(delay, graph_matrix);
+        demo_find_path_menu(delay);
+        demo_find_paths_between_two_vertices(delay, graph_matrix, 3, 5);
+        demo_find_paths_between_two_vertices(delay, graph_matrix, 1, 4);
+        demo_find_path_from_the_vertex_to_everyone_else(delay, graph_matrix, 0);
+        demo_find_paths_between_all_vertices(delay, graph_matrix);
+        demo_find_path_back(delay);
+        demo_topological_sorting(delay, graph_matrix);
+        demo_create_spanning_tree_menu(delay);
+        create_spanning_tree(delay, graph_matrix, true);
+        demo_create_the_smallest_spanning_tree(delay, graph_matrix);
+        demo_spanning_tree_menu_back(delay);
+        demo_edit_menu(delay);
+        demo_create_random(delay, graph_matrix, true, 6, 3, 100);
+        demo_back_from_edit_menu(delay);
+        demo_edit_menu(delay);
+        demo_add_edge(delay, graph_matrix, 2, 4, 13);
+        demo_add_edge(delay, graph_matrix, 1, 5, 17);
+        demo_add_edge(delay, graph_matrix, 2, 5, 11);
+        demo_add_edge(delay, graph_matrix, 3, 4, 99);
+        demo_add_edge(delay, graph_matrix, 4, 5, 47);
+        demo_back_from_edit_menu(delay);
+        demo_write_graph(delay, graph_matrix);
+        demo_checking_the_connectivity(delay, graph_matrix);
+        demo_topological_sorting(delay, graph_matrix);
+        demo_edit_menu(delay);
+        demo_graph_transformation(delay, graph_matrix, graph_structure);
+        demo_write_graph(delay, graph_structure);
+        demo_edit_menu(delay);
+        demo_add_edge(delay, graph_structure, 5, 0, 77);
+        demo_add_edge(delay, graph_structure, 3, 1, 142);
+        demo_back_from_edit_menu(delay);
+        demo_write_graph(delay, graph_structure);
+        demo_find_path_menu(delay);
+        demo_find_paths_between_all_vertices(delay, graph_structure);
+        demo_find_path_back(delay);
+        demo_back(delay);
+        std::cout << "\nThe end of the demo mode\n" << std::endl;
+        Sleep(delay);
+    }
 }
 int main()
 {
     while (true)
     {
         std::cout << "Select the application mode:\n1)Interactive dialog mode.\n"
-            << "2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit.\n";
+            << "2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit." << std::endl;
         switch (_getch())
         {
         case '1': interactive_dialog_mode();
             break;
-        case '2': demo_mode();
+        case '2': all_demo_mode::demo_mode();
             break;
-        case '3': benchmark_mode();
+        case '3': all_benchmark_mode::benchmark_mode();
             break;
         case'0':
         {
