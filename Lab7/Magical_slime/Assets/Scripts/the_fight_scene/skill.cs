@@ -16,6 +16,7 @@ public class skill : MonoBehaviour
         right = side;
         show_skill = show_skills;
         GetComponent<Animation>().Play(name_of_animation);
+        GetComponent<AudioSource>().Play();
     }
     void check_skills()
     {

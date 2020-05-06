@@ -24,6 +24,8 @@ public class the_begin : MonoBehaviour
     public GameObject left_click_text;
     public GameObject right_click;
     public GameObject left_click;
+    public GameObject right_time_slider;
+    public GameObject left_time_slider;
     public int left_attack = 0;
     public int right_attack = 0;
     public bool left_combo = false;
@@ -179,10 +181,10 @@ public class the_begin : MonoBehaviour
         StreamReader reader = new StreamReader(file);
         while (!reader.EndOfStream)
         {
-            string points = reader.ReadLine();
-            if ((points.Length > 5) && (points.Substring(0, 5) == "Mode="))
+            string mode = reader.ReadLine();
+            if ((mode.Length > 5) && (mode.Substring(0, 5) == "Mode="))
             {
-                if (points.Substring(5) == "bot")
+                if (mode.Substring(5) == "bot")
                 {
                     reader.Close();
                     is_bot = true;
@@ -411,7 +413,7 @@ public class the_begin : MonoBehaviour
     }
     void white_combo(bool side)
     {
-        int new_index = 2;// UnityEngine.Random.Range(0, 5);
+        int new_index = UnityEngine.Random.Range(0, 5);
         if (side)
         {
             right_passive_index = new_index;
@@ -490,7 +492,7 @@ public class the_begin : MonoBehaviour
         {
             add_leaf(1, side, ref wood_indexes);
             number_of_leaf++;
-            if (side)
+            if (!side)
             {
                 right_edit_combos();
             }
@@ -569,8 +571,7 @@ public class the_begin : MonoBehaviour
         }
     }
     void left_edit_combos()
-    {
-        right_passive_for_combo();
+    {       
         edit_wood(left_big_skill, right_wood_combo_skill, ref left_indexes_of_skills[3], ref left_wood_indexes, true, ref left_number_of_leaf);
         edit_poison(right_poison_combo_skill, ref left_poison_attack, ref left_number_of_poison, true, left_indexes_of_skills[2]);
         if (left_slime.GetComponent<slime>().index_of_slime == 4) edit_dark(left_boll);
@@ -578,7 +579,6 @@ public class the_begin : MonoBehaviour
     }
     void right_edit_combos()
     {
-        left_passive_for_combo();
         edit_wood(right_big_skill, left_wood_combo_skill, ref right_indexes_of_skills[3], ref right_wood_indexes, false, ref right_number_of_leaf);
         edit_poison(left_poison_combo_skill, ref right_poison_attack, ref right_number_of_poison, false, right_indexes_of_skills[2]);
         if (right_slime.GetComponent<slime>().index_of_slime == 4) edit_dark(right_boll);
@@ -616,6 +616,7 @@ public class the_begin : MonoBehaviour
         }
         if (edit)
         {
+            right_passive_for_combo();
             left_edit_combos();         
         }
     }
@@ -631,13 +632,17 @@ public class the_begin : MonoBehaviour
             }
             else
             {
-                left_big_skill.GetComponent<SpriteRenderer>().sprite = good_combo[left_index_of_slime].GetComponent<SpriteRenderer>().sprite;               
+                left_big_skill.GetComponent<SpriteRenderer>().sprite = good_combo[left_index_of_slime].GetComponent<SpriteRenderer>().sprite;
             }
             left_big_skill.SetActive(true);
             if (left_index_of_slime == 6) edit = false;
             left_big_skill.GetComponent<skill>().show(false, true, edit);
-        }        
-        else left_edit_combos();
+        }
+        else
+        {
+            right_passive_for_combo();
+            left_edit_combos();
+        }
     }
     public void right_skills(bool edit)
     {
@@ -671,6 +676,7 @@ public class the_begin : MonoBehaviour
         }
         if (edit)
         {
+            left_passive_for_combo();
             right_edit_combos();
         }
     }
@@ -686,13 +692,17 @@ public class the_begin : MonoBehaviour
             }
             else
             {
-                right_big_skill.GetComponent<SpriteRenderer>().sprite = good_combo[right_index_of_slime].GetComponent<SpriteRenderer>().sprite;                
+                right_big_skill.GetComponent<SpriteRenderer>().sprite = good_combo[right_index_of_slime].GetComponent<SpriteRenderer>().sprite;
             }
             right_big_skill.SetActive(true);
             if (right_index_of_slime == 6) edit = false;
             right_big_skill.GetComponent<skill>().show(true, true, edit);
-        }      
-        else right_edit_combos();
+        }
+        else
+        {
+            left_passive_for_combo();
+            right_edit_combos();
+        }
     }
     void left_hit()
     {
@@ -809,12 +819,16 @@ public class the_begin : MonoBehaviour
         if (left_can_click)
         {
             left_click_text.SetActive(true);
+            left_time_slider.SetActive(true);
+            left_time_slider.GetComponent<time_slider>().start_time();
             left_click.GetComponent<click>().is_clicked = false;
         }
         else no_click = true;
         if (right_can_click)
         {
             right_click_text.SetActive(true);
+            right_time_slider.SetActive(true);
+            right_time_slider.GetComponent<time_slider>().start_time();
             right_click.GetComponent<click>().is_clicked = false;
             if(is_bot) game_bot();
         }
@@ -833,15 +847,15 @@ public class the_begin : MonoBehaviour
         else right_wait = 0f;
         right_combos(true);
         yield return new WaitForSeconds(right_wait);
+        left_passive();
+        right_passive();
+        if (left_number_of_poison > 0) left_wait = 0.3f;
+        if (right_number_of_poison > 0) right_wait = 0.3f;
         if ((right_wood_combo_skill.activeInHierarchy) && (left_wood_combo_skill.activeInHierarchy))
         {
             left_edit_combos();
             right_edit_combos();
         }
-        left_passive();
-        right_passive();
-        if (left_number_of_poison > 0) left_wait = 0.3f;
-        if (right_number_of_poison > 0) right_wait = 0.3f;
         yield return new WaitForSeconds(0.6f + 8*left_wait + 8*right_wait);
         can_click();
         StopCoroutine("check_combo");

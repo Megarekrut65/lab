@@ -19,6 +19,7 @@ public class the_boll : MonoBehaviour
         double_attack = combo;
         right = side;
         animatoin.Play(name_of_animation);
+        GetComponent<AudioSource>().Play();
     }
     public void hit()
     {

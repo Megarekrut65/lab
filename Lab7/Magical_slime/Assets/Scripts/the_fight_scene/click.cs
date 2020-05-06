@@ -9,6 +9,7 @@ public class click : MonoBehaviour
     public GameObject first_dice;
     public GameObject second_dice;
     public GameObject text_click;
+    public GameObject time_slider;
     public bool right = false;
     public int attack;
     public bool combo;
@@ -18,7 +19,7 @@ public class click : MonoBehaviour
 
     IEnumerator show_random_dices()
     {
-        int number_of_shows = 18;
+        int number_of_shows = 10;
         for (int i = 0; i < number_of_shows; i++)
         {
             int first_index = Random.Range(0, 5);
@@ -43,7 +44,9 @@ public class click : MonoBehaviour
     public void OnMouseDown()
     {
         if (is_clicked) return;
+        GetComponent<AudioSource>().Play();
         text_click.SetActive(false);
+        time_slider.SetActive(false);
         is_clicked = true;
         first_attack = Random.Range(1, 6);
         second_attack = Random.Range(1, 6);
@@ -53,12 +56,12 @@ public class click : MonoBehaviour
         if (right)
         {
             my_camera.GetComponent<the_begin>().right_attack = attack;
-            my_camera.GetComponent<the_begin>().right_combo = true;//combo;
+            my_camera.GetComponent<the_begin>().right_combo = combo;
         }
         else
         {
             my_camera.GetComponent<the_begin>().left_attack = attack;
-            my_camera.GetComponent<the_begin>().left_combo = true;//combo;
+            my_camera.GetComponent<the_begin>().left_combo = combo;
         }
         StartCoroutine("show_random_dices");       
     }

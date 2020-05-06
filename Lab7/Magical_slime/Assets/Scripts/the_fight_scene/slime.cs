@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.IO;
+using UnityEngine.SceneManagement;
 
 public class slime : MonoBehaviour
 {
@@ -34,6 +35,12 @@ public class slime : MonoBehaviour
     {
         FileStream file = new FileStream(slime_path, FileMode.OpenOrCreate);
         StreamReader reader = new StreamReader(file);
+        if (reader.EndOfStream)
+        {
+            reader.Close();
+            SceneManager.LoadScene("main", LoadSceneMode.Single);
+            return;
+        }
         nickname = reader.ReadLine();
         nickname = nickname.Substring(9);
         points = reader.ReadLine();
@@ -44,7 +51,7 @@ public class slime : MonoBehaviour
     }
     void set_images()
     {
-        gameObject.GetComponent<SpriteRenderer>().sprite = slimes[index_of_slime].GetComponent<SpriteRenderer>().sprite;
+        GetComponent<Image>().sprite = slimes[index_of_slime].GetComponent<Image>().sprite;
         passive_skill = my_camera.GetComponent<the_begin>().good_passive[index_of_slime].GetComponent<SpriteRenderer>().sprite;
         passive_index = my_camera.GetComponent<the_begin>().add_effect(passive_skill, side);
         boll.GetComponent<SpriteRenderer>().sprite = my_camera.GetComponent<the_begin>().bolls[index_of_slime].GetComponent<SpriteRenderer>().sprite;
@@ -92,6 +99,7 @@ public class slime : MonoBehaviour
     }   
     public void getting_damage(int damage)
     {
+        GetComponent<AudioSource>().Play();
         if ((index_of_slime == 5)||(index_of_slime == 6))
         {
             if (my_camera.GetComponent<the_begin>().edit_girl(side, damage)) return;
@@ -100,33 +108,27 @@ public class slime : MonoBehaviour
         if (hp < -10) hp = -10;
         hp_text.text = hp.ToString();
         hp_slider.value = hp;
-        if(side)
-        {
-            transform.localScale -= new Vector3(60, 60, 60);
-        }
-        else
-        {
-            transform.localScale -= new Vector3(60, 60, 60);
-        }
+        transform.localScale -= new Vector3(1, 1, 1);     
     }
     void rise_again()
     {
-        GetComponent<Animation>().Stop(name_of_fly);
+        name_of_player.GetComponent<AudioSource>().Play();
+        GetComponent<Animation>().Stop(name_of_fly);        
         gameObject.SetActive(false);
         if (again_life)
         {
             hp = 1;
-            hp_text.text = hp.ToString();
-            GetComponent<Animation>().Play(name_of_show);
+            hp_text.text = hp.ToString();          
             my_camera.GetComponent<the_begin>().remove_effect(passive_index, side);
             passive_skill = my_camera.GetComponent<the_begin>().bad_passive[index_of_slime].GetComponent<SpriteRenderer>().sprite;
             passive_index = my_camera.GetComponent<the_begin>().add_effect(passive_skill, side);
             gameObject.SetActive(true);
+            GetComponent<Animation>().Play(name_of_show);
         }
     }
     public void set_die(bool life = false)
     {
         again_life = life;
-        GetComponent<Animation>().Play(name_of_die);
+        GetComponent<Animation>().Play(name_of_die);       
     }
 }

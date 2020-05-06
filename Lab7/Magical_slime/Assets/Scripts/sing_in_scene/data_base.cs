@@ -71,6 +71,7 @@ public class data_base : MonoBehaviour
     }
     void OnMouseDown()
     {
+        GetComponent<AudioSource>().Play();
         string nickname = "Nickname=";
         string password = "Password=";
         nickname += input_nickname.text;

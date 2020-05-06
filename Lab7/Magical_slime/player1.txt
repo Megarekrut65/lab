@@ -1,5 +1,0 @@
-Nickname=Mega
-Points=77
-Element=white
-te
-

@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using System.IO;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class my_account_date : MonoBehaviour
 {
@@ -17,6 +18,12 @@ public class my_account_date : MonoBehaviour
     {
         FileStream file = new FileStream(path_account, FileMode.Open);
         StreamReader reader = new StreamReader(file);
+        if (reader.EndOfStream)
+        {
+            reader.Close();
+            SceneManager.LoadScene("main", LoadSceneMode.Single);
+            return;
+        }
         nickname.text += " " + reader.ReadLine().Substring(9);
         string temp = reader.ReadLine();
         mail.text += " " + reader.ReadLine().Substring(5);

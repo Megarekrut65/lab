@@ -68,6 +68,7 @@ public class create_account : MonoBehaviour
     }
     void OnMouseDown()
     {
+        GetComponent<AudioSource>().Play();
         incorrect_text.SetActive(false);        
         if(empty_input(input_nickname)|| empty_input(input_mail)|| empty_input(input_password)|| empty_input(input_password_again)) return;
         string nickname = "Nickname=" + input_nickname.text;

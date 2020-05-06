@@ -1,4 +1,0 @@
-Nickname=Player2
-Points=77
-Element=white
-

@@ -9,6 +9,7 @@ public class set_slime : MonoBehaviour
 
     void OnMouseDown()
     {
+        GetComponent<AudioSource>().Play();
         off_mode.GetComponent<offline_game>().set_element(index);
     }
 }

@@ -72,4 +72,8 @@ public class index : MonoBehaviour
             all_items[i].SetActive(true);
         }
     }
+    public void buying()
+    {
+        GetComponent<AudioSource>().Play();
+    }
 }

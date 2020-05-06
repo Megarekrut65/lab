@@ -36,6 +36,7 @@ public class start_button : MonoBehaviour
     }
     void OnMouseDown()
     {
+        GetComponent<AudioSource>().Play();
         choose_element(place.GetComponent<index>().i);
         FileStream file = new FileStream(slime_path, FileMode.OpenOrCreate);
         StreamWriter writer = new StreamWriter(file);

@@ -6,6 +6,7 @@ public class buttons : MonoBehaviour
 {
     void OnMouseDown()
     {
+        GetComponent<AudioSource>().Play();
         transform.localScale = new Vector3 (1.1f, 1.1f, 1.1f);
     }
     void OnMouseUp()

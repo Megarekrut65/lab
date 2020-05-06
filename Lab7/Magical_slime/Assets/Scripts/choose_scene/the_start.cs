@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.IO;
+using UnityEngine.SceneManagement;
 
 public class the_start : MonoBehaviour
 {
@@ -25,6 +26,12 @@ public class the_start : MonoBehaviour
     {
         FileStream file = new FileStream(path_account, FileMode.OpenOrCreate);
         StreamReader reader = new StreamReader(file);
+        if(reader.EndOfStream)
+        {
+            reader.Close();
+            SceneManager.LoadScene("main", LoadSceneMode.Single);
+            return;
+        }
         string coins_string = "0";
         string points_string = "0";
         nickname = reader.ReadLine();

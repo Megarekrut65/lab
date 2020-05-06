@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 public class offline_game : MonoBehaviour
 {
     public GameObject my_camera;
+    public GameObject backgraund;
     public GameObject back;
     public string path_of_player1;
     public string path_of_player2;
@@ -106,6 +107,7 @@ public class offline_game : MonoBehaviour
     }
     void OnMouseDown()
     {
+        backgraund.GetComponent<AudioSource>().Play();
         back.SetActive(true);
         read_account();
         my_camera.GetComponent<start_mode>().show_slimes(array_slimes);

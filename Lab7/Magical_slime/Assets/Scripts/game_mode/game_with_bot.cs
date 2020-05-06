@@ -12,6 +12,8 @@ public class game_with_bot : MonoBehaviour
     public string path_of_mode;
     private string element;
     public string name_of_scene;
+    public GameObject backgraund;
+
     void choose_element(int index)
     {
         switch (index)
@@ -63,7 +65,8 @@ public class game_with_bot : MonoBehaviour
         writer.Close();
     }
     void OnMouseDown()
-    {      
+    {
+        backgraund.GetComponent<AudioSource>().Play();
         int index = UnityEngine.Random.Range(0, 6);
         choose_element(index);
         FileStream file = new FileStream(path_of_player2, FileMode.OpenOrCreate);
