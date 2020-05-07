@@ -1,6 +1,7 @@
 #include "my_linked_list.h"
 #include <iostream>
 #include <vector>
+#include <ctime>
 #include "my_point.h"
 
 using namespace tdp;
@@ -134,5 +135,39 @@ namespace list
 		}
 		return items;
 	}
-
+	void Linked_list::random_generator(std::size_t number_of_items, std::size_t max_point)
+	{
+		srand(unsigned(time(0)));
+		for (std::size_t i = 0; i < number_of_items; i++)
+		{
+			add_item(Point(rand()% max_point, rand() % max_point, rand() % max_point));
+		}
+	}
+	double Linked_list::find_distance_between_two_points(std::size_t first_index, std::size_t second_index)
+	{
+		std::size_t i = 0;
+		Point first_point, second_point;
+		for (List_node* current = head; current; current = current->next, i++)
+		{
+			if (i == first_index)
+			{
+				first_point = current->point;
+			}
+			if (i == second_index)
+			{
+				second_point = current->point;
+				break;
+			}
+		}
+		return find_distance(first_point, second_point);		
+	}
+	void Linked_list::find_distance_between_adjacent_points()
+	{
+		std::cout << "\nDistance between adjacent points:" << std::endl;
+		std::size_t i = 0;
+		for (List_node* current = head; current->next; current = current->next, i++)
+		{
+			std::cout << i << " -> " << i + 1 << " = " << find_distance(current->point, current->next->point) << std::endl;
+		}
+	}
 }

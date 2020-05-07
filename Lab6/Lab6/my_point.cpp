@@ -1,6 +1,9 @@
 #include "my_point.h"
 #include <iostream>
 #include <vector>
+#include <string>
+#include <fstream>
+#include <cmath>
 
 namespace tdp//three-dimensional points
 {
@@ -38,6 +41,32 @@ namespace tdp//three-dimensional points
 	void Point::write()
 	{
 		std::cout << "( " << this->x << ", " << this->y << ", " << this->z << ")." << std::endl;
+	}
+	void Point::append_to_file(const std::string& path)
+	{
+		std::ofstream fout(path, std::ios_base::app);
+		fout << *this;
+		fout.close();
+	}
+	void Point::read_from_file(const std::string& path)
+	{
+		std::ifstream fin(path);
+		fin >> *this;
+		fin.close();
+	}
+	double find_distance(Point A, Point B)
+	{
+		return (sqrt(pow(A.x - B.x, 2) + pow(A.y - B.y, 2) + pow(A.z - B.z, 2)));
+	}
+	double find_length_of_circle(Point centre, Point anypoint)
+	{
+		double radius = find_distance(centre, anypoint);
+		return atan(1) * 8 * radius;
+	}
+	double find_area_of_circle(Point centre, Point anypoint)
+	{
+		double radius = find_distance(centre, anypoint);
+		return atan(1) * 4 * radius * radius;
 	}
 	bool operator < (Point A, Point B)
 	{
@@ -102,5 +131,16 @@ namespace tdp//three-dimensional points
 	Point operator / (Point A, Point B)
 	{
 		return Point(A.x / B.x, A.y / B.y, A.z / B.z);
+	}
+	std::ostream& operator << (std::ostream& out, const Point& point)
+	{
+		return out << "(" << point.x << ", " << point.y << ", " << point.z << ")" << std::endl;
+	}
+	std::istream& operator >> (std::istream& in, Point& point)
+	{
+		char waste[4];
+		in >> waste[0] >> point.x >> waste[1] >> point.y >> waste[2] >> point.z >> waste[3];
+		if (!in) point = Point();
+		return in;
 	}
 }
