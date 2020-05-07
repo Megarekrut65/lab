@@ -148,6 +148,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Lab6.cpp" />
+    <ClCompile Include="my_array_list.cpp" />
+    <ClCompile Include="my_avl_tree.cpp" />
+    <ClCompile Include="my_binary_tree.cpp" />
+    <ClCompile Include="my_linked_list.cpp" />
+    <ClCompile Include="my_point.cpp" />
+    <ClCompile Include="my_two_three_tree.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="my_array_list.h" />
+    <ClInclude Include="my_avl_tree.h" />
+    <ClInclude Include="my_binary_tree.h" />
+    <ClInclude Include="my_linked_list.h" />
+    <ClInclude Include="my_point.h" />
+    <ClInclude Include="my_two_three_tree.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
