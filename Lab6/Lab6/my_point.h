@@ -15,7 +15,7 @@ namespace tdp
 		Point(double, double, double);	
 		void write();
 		void append_to_file(const std::string&);
-		void read_from_file(const std::string&);
+		void read_from_file(const std::string&, std::size_t);
 	};
 	struct Item
 	{

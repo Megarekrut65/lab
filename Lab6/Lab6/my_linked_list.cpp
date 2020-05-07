@@ -52,6 +52,10 @@ namespace list
 	}
 	void Linked_list::write()
 	{
+		if (!head)
+		{
+			std::cout << "\nList is empty!" << std::endl;
+		}
 		std::cout << "\nList:\n";
 		for (List_node* current = head; current; current = current->next)
 		{
@@ -145,6 +149,7 @@ namespace list
 	}
 	double Linked_list::find_distance_between_two_points(std::size_t first_index, std::size_t second_index)
 	{
+		if ((first_index >= size)||(second_index >= size)) return -1;
 		std::size_t i = 0;
 		Point first_point, second_point;
 		for (List_node* current = head; current; current = current->next, i++)
@@ -169,5 +174,40 @@ namespace list
 		{
 			std::cout << i << " -> " << i + 1 << " = " << find_distance(current->point, current->next->point) << std::endl;
 		}
+	}
+	void Linked_list::read_file(std::size_t index)
+	{
+		std::string path = "date.txt";
+		Point point;
+		point.read_from_file(path, index);			
+		std::cout << point;
+	}
+	bool Linked_list::append_file(std::size_t index)
+	{
+		if (index >= size) return false;
+		std::string path = "date.txt";
+		std::size_t i = 0;
+		for (List_node* current = head; current; current = current->next, i++)
+		{
+			if (i == index)
+			{
+				current->point.append_to_file(path);
+				return true;
+			}
+		}
+		return false;
+	}
+	void Linked_list::clear()
+	{
+		List_node* current = head;
+		head = nullptr;
+		while (current)
+		{
+			List_node* temp = current;
+			current = current->next;
+			delete temp;
+			temp = nullptr;
+		}
+		size = 0;
 	}
 }

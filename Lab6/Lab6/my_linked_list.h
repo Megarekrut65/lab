@@ -30,5 +30,8 @@ namespace list
 		void random_generator(std::size_t, std::size_t); 
 		double find_distance_between_two_points(std::size_t, std::size_t);
 		void find_distance_between_adjacent_points();
+		void read_file(std::size_t);
+		bool append_file(std::size_t);
+		void clear();
 	};
 }

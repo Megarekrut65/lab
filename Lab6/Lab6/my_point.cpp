@@ -48,10 +48,13 @@ namespace tdp//three-dimensional points
 		fout << *this;
 		fout.close();
 	}
-	void Point::read_from_file(const std::string& path)
+	void Point::read_from_file(const std::string& path, std::size_t index)
 	{
 		std::ifstream fin(path);
-		fin >> *this;
+		for (std::size_t i = 0; i <= index; i++)
+		{
+			fin >> *this;
+		}
 		fin.close();
 	}
 	double find_distance(Point A, Point B)

@@ -11,6 +11,6 @@ int main()
 	Linked_list list;
 	list.random_generator(10, 100);
 	list.write();
-	list.find_distance_between_adjacent_points();
+	list.read_file(333);
 	return 0;
 }
