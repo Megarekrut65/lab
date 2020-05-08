@@ -113,7 +113,7 @@ namespace list
 		size++;
 		return false;
 	}
-	std::vector<Item> Linked_list::find_item(Point point)
+	std::vector<Item> Linked_list::find_items(Point point)
 	{
 		std::vector<Item> items;
 		std::size_t i = 0;
@@ -127,7 +127,7 @@ namespace list
 		}
 		return items;
 	}
-	std::vector<Item> Linked_list::find_item(Point begin_point, Point end_point)
+	std::vector<Item> Linked_list::find_items(Point begin_point, Point end_point)
 	{
 		std::vector<Item> items;
 		std::size_t i = 0;
@@ -229,6 +229,7 @@ namespace list
 		std::cout << "Radius: " << radius << std::endl;
 		std::cout << "Length: " << length << std::endl;
 		std::cout << "Area: " << area << std::endl;
+		return true;
 	}
 	void Linked_list::clear()
 	{

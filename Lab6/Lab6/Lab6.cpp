@@ -1,16 +1,18 @@
 ﻿#include <iostream>
 #include "my_linked_list.h"
+#include "my_array_list.h"
 #include <vector>
 #include <fstream>
 
 using namespace tdp;
 using namespace list;
+using namespace array;
 
 int main()
 {
-	Linked_list list;
-	list.random_generator(10, 100);
+	Array_list list;
+	list.random_generator(14, 20);
 	list.write();
-	list.find_length_and_area_of_circle(0, 4);
+	list.find_distance_between_adjacent_points();
 	return 0;
 }
