@@ -32,6 +32,7 @@ namespace list
 		void find_distance_between_adjacent_points();
 		void read_file(std::size_t);
 		bool append_file(std::size_t);
+		bool find_length_and_area_of_circle(std::size_t, std::size_t);
 		void clear();
 	};
 }

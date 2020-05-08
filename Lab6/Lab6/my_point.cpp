@@ -40,7 +40,7 @@ namespace tdp//three-dimensional points
 	}
 	void Point::write()
 	{
-		std::cout << "( " << this->x << ", " << this->y << ", " << this->z << ")." << std::endl;
+		std::cout << "(" << this->x << ", " << this->y << ", " << this->z << ")." << std::endl;
 	}
 	void Point::append_to_file(const std::string& path)
 	{

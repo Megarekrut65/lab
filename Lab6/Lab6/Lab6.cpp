@@ -11,6 +11,6 @@ int main()
 	Linked_list list;
 	list.random_generator(10, 100);
 	list.write();
-	list.read_file(333);
+	list.find_length_and_area_of_circle(0, 4);
 	return 0;
 }

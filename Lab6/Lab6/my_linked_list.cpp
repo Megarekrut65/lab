@@ -56,9 +56,11 @@ namespace list
 		{
 			std::cout << "\nList is empty!" << std::endl;
 		}
+		std::size_t i = 0;
 		std::cout << "\nList:\n";
-		for (List_node* current = head; current; current = current->next)
+		for (List_node* current = head; current; current = current->next, i++)
 		{
+			std::cout << i << ".";
 			current->point.write();
 		}
 	}
@@ -196,6 +198,37 @@ namespace list
 			}
 		}
 		return false;
+	}
+	bool Linked_list::find_length_and_area_of_circle(std::size_t index_of_centre, std::size_t index_of_anypoint)
+	{
+		if ((index_of_centre >= size) || (index_of_anypoint >= size)) return false;
+		std::size_t i = 0;
+		Point centre, anypoint;
+		bool is_find = false;
+		for (List_node* current = head; current; current = current->next, i++)
+		{
+			if (i == index_of_centre)
+			{
+				centre = current->point;
+				if (is_find) break;
+				else is_find = true;
+			}
+			if (i == index_of_anypoint)
+			{
+				anypoint = current->point;
+				if (is_find) break;
+				else is_find = true;
+			}
+		}
+		double length = find_length_of_circle(centre, anypoint);
+		double area = find_area_of_circle(centre, anypoint);
+		double radius = find_distance(centre, anypoint);
+		std::cout << "\nCircle.\n";
+		std::cout << "Centre: ";
+		centre.write();
+		std::cout << "Radius: " << radius << std::endl;
+		std::cout << "Length: " << length << std::endl;
+		std::cout << "Area: " << area << std::endl;
 	}
 	void Linked_list::clear()
 	{
