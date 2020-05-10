@@ -55,6 +55,7 @@ namespace list
 		if (!head)
 		{
 			std::cout << "\nList is empty!" << std::endl;
+			return;
 		}
 		std::size_t i = 0;
 		std::cout << "\nList:\n";
@@ -143,6 +144,7 @@ namespace list
 	}
 	void Linked_list::random_generator(std::size_t number_of_items, std::size_t max_point)
 	{
+		clear();
 		srand(unsigned(time(0)));
 		for (std::size_t i = 0; i < number_of_items; i++)
 		{
@@ -154,16 +156,20 @@ namespace list
 		if ((first_index >= size)||(second_index >= size)) return -1;
 		std::size_t i = 0;
 		Point first_point, second_point;
+		bool is_find = false;
 		for (List_node* current = head; current; current = current->next, i++)
 		{
 			if (i == first_index)
 			{
 				first_point = current->point;
+				if (is_find) break;
+				is_find = true;
 			}
 			if (i == second_index)
 			{
 				second_point = current->point;
-				break;
+				if(is_find) break;
+				is_find = true;
 			}
 		}
 		return find_distance(first_point, second_point);		
@@ -183,6 +189,7 @@ namespace list
 		Point point;
 		point.read_from_file(path, index);			
 		std::cout << point;
+		add_item(point);
 	}
 	bool Linked_list::append_file(std::size_t index)
 	{

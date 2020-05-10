@@ -38,6 +38,7 @@ namespace array
 		if (points.size() == 0)
 		{
 			std::cout << "\nList is empty!" << std::endl;
+			return;
 		}
 		std::cout << "\nList:\n";
 		for (std::size_t i = 0; i < points.size(); i++)
@@ -93,6 +94,7 @@ namespace array
 	}
 	void Array_list::random_generator(std::size_t number_of_items, std::size_t max_point)
 	{
+		clear();
 		srand(unsigned(time(0)));
 		for (std::size_t i = 0; i < number_of_items; i++)
 		{
@@ -119,6 +121,7 @@ namespace array
 		Point point;
 		point.read_from_file(path, index);
 		std::cout << point;
+		add_item(point);
 	}
 	bool Array_list::append_file(std::size_t index)
 	{
