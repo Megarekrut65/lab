@@ -17,7 +17,7 @@ namespace binary
 		Tree_node* right;
 		Point point;
 		Tree_node();
-		Tree_node(Tree_node*, Tree_node*, Tree_node*, Point);
+		Tree_node(Tree_node*, Point);
 	};
 	struct Binary_tree
 	{
@@ -31,6 +31,7 @@ namespace binary
 		void find_items_current(Tree_node*, Point, Point, std::vector<Item>&, std::size_t&);
 		bool find_point(Tree_node*, std::size_t, Point&, std::size_t&);
 		bool append_file_current(Tree_node*, std::size_t, std::size_t&, const std::string&);
+		Tree_node* find_parent(Tree_node*);
 		void edit_tree(Tree_node* node, Side side);
 	public:
 		Tree_node* root;

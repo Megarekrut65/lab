@@ -19,10 +19,15 @@ namespace tdp//three-dimensional points
 	}
 	void write_items(std::vector<Item>& items)
 	{
-		std::cout << "\nItem:\nIndex -> Point" << std::endl;
+		if (items.size() == 0)
+		{
+			std::cout << "\nArray is empty!" << std::endl;
+			return;
+		}
+		std::cout << "\nItem:" << std::endl;
 		for (std::size_t i = 0; i < items.size(); i++)
 		{
-			std::cout << items[i].index << " -> ";
+			std::cout << items[i].index << ".";
 			items[i].point.write();
 		}
 	}

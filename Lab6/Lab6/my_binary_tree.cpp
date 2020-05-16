@@ -13,11 +13,11 @@ namespace binary
 		right = nullptr;
 		point = Point();
 	}
-	Tree_node::Tree_node(Tree_node* parent, Tree_node* left, Tree_node* right, Point point)
+	Tree_node::Tree_node(Tree_node* parent, Point point)
 	{
 		this->parent = parent;
-		this->left = left;
-		this->right = right;
+		this->left = nullptr;
+		this->right = nullptr;
 		this->point = point;
 	}
 	Binary_tree::Binary_tree()
@@ -28,11 +28,11 @@ namespace binary
 	void Binary_tree::add_item_current(Tree_node* node, Point point)
 	{
 		if (!node) return;
-		if (node->point >= point)
+		if (point < node->point)
 		{
 			if (!node->left)
 			{
-				node->left = new Tree_node(node, nullptr, nullptr, point);
+				node->left = new Tree_node(node, point);
 				return;
 			}
 			add_item_current(node->left, point);
@@ -41,7 +41,7 @@ namespace binary
 		{
 			if (!node->right)
 			{
-				node->right = new Tree_node(node, nullptr, nullptr, point);
+				node->right = new Tree_node(node, point);
 				return;
 			}
 			add_item_current(node->right, point);
@@ -52,7 +52,7 @@ namespace binary
 		size++;
 		if (!root)
 		{
-			root = new Tree_node(nullptr, nullptr, nullptr, point);
+			root = new Tree_node(nullptr, point);
 			return;
 		}
 		add_item_current(root, point);
@@ -100,7 +100,7 @@ namespace binary
 		delete node;
 		node = nullptr;
 	}
-	Tree_node* find_parent(Tree_node* node)
+	Tree_node* Binary_tree::find_parent(Tree_node* node)
 	{
 		if (node->left)
 		{
