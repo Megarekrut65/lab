@@ -142,19 +142,13 @@ namespace list
 		}
 		return items;
 	}
-	void Linked_list::random_generator(std::size_t number_of_items, double max_point)
+	void Linked_list::random_generator(std::size_t number_of_items, double max_value)
 	{
 		clear();
 		srand(unsigned(time(0)));
 		for (std::size_t i = 0; i < number_of_items; i++)
 		{
-			double fractional_part_x = rand() % long(trunc(max_point));
-			double fractional_part_y = rand() % long(trunc(max_point));
-			double fractional_part_z = rand() % long(trunc(max_point));
-			double x = max_point - rand() % long(trunc(max_point)) + 0.01 * fractional_part_x;
-			double y = max_point - rand() % long(trunc(max_point)) + 0.01 * fractional_part_y;
-			double z = max_point - rand() % long(trunc(max_point)) + 0.01 * fractional_part_z;
-			add_item(Point(x, y, z));
+			add_item(Point(max_value));
 		}
 	}
 	double Linked_list::find_distance_between_two_points(std::size_t first_index, std::size_t second_index)
@@ -182,6 +176,7 @@ namespace list
 	}
 	void Linked_list::find_distance_between_adjacent_points()
 	{
+		if (!head) return;
 		std::cout << "\nDistance between adjacent points:" << std::endl;
 		std::size_t i = 0;
 		for (List_node* current = head; current->next; current = current->next, i++)

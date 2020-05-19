@@ -44,6 +44,28 @@ namespace tdp//three-dimensional points
 		this->y = y;
 		this->z = z;
 	}
+	double Point::fractional_part(double max_value)
+	{
+		double value = rand() % long(trunc(max_value));
+		return value;
+	}
+	double Point::whole_part(double max_value)
+	{
+		double value = rand() % 1000;
+		return value / 1000;
+	}	
+	int Point::sign()
+	{
+		int value = rand() % 2;
+		if (value == 0) return 1;
+		return -1;
+	}
+	Point::Point(double max_value)
+	{
+		x = sign() * (whole_part(max_value) - fractional_part(max_value));
+		y = sign() * (whole_part(max_value) - fractional_part(max_value));
+		z = sign() * (whole_part(max_value) - fractional_part(max_value));
+	}
 	void Point::write()
 	{
 		std::cout << "(" << this->x << ", " << this->y << ", " << this->z << ")." << std::endl;

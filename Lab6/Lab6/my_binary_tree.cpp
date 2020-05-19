@@ -225,16 +225,13 @@ namespace binary
 		find_items_current(root, begin_point, end_point, items, index);
 		return items;
 	}
-	void Binary_tree::random_generator(std::size_t number_of_items, double max_point)
+	void Binary_tree::random_generator(std::size_t number_of_items, double max_value)
 	{
 		clear();
 		srand(unsigned(time(0)));
 		for (std::size_t i = 0; i < number_of_items; i++)
 		{
-			double x = max_point - rand() % long(trunc(max_point));
-			double y = max_point - rand() % long(trunc(max_point));
-			double z = max_point - rand() % long(trunc(max_point));
-			add_item(Point(x, y, z));
+			add_item(Point(max_value));
 		}
 	}
 	bool Binary_tree::find_point(Binary_node* node, std::size_t index, Point& point, std::size_t& current)

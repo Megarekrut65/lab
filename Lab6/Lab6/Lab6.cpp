@@ -59,7 +59,7 @@ void remove_item_menu(T& list)
 		case '2': remove_by_value(list);
 			break;
 		case'0': return;
-		default: std::cout << "\nPress the correct key!\n" << std::endl;
+		default: std::cout << "\nPress the correct key!" << std::endl;
 		}
 	}
 }
@@ -99,7 +99,7 @@ void find_menu(T& list)
 		case '2': find_by_begin_and_end(list);
 			break;
 		case'0': return;
-		default: std::cout << "\nPress the correct key!\n" << std::endl;
+		default: std::cout << "\nPress the correct key!" << std::endl;
 		}
 	}
 }
@@ -110,6 +110,48 @@ void generate_random_items(T& list)
 	double max = correct::read_double("maximum coordinate value");
 	list.random_generator(size, max);
 	std::cout << "\nThe list was created!" << std::endl;
+}
+template<class T>
+void find_distance(T& list)
+{
+	std::size_t first_index, second_index;
+	first_index = correct::read_size_t("index of first point");
+	second_index = correct::read_size_t("index of second point");
+	double distance = list.find_distance_between_two_points(first_index, second_index);
+	if (distance == -1)
+	{
+		std::cout << "\nThere aren't points entered!" << std::endl;
+		return;
+	}
+	std::cout << "\nDistance: "<< distance << std::endl;
+}
+template<class T>
+void perform_actions(T& list)
+{
+	while (true)
+	{
+		std::cout << "\nChoose:\n1)Find distance between two points in list.\n"
+			<< "2)Find distance between adjacent points in list.\n"
+			<< "3)Read point from file and add to list.\n"
+			<< "4)Add point to file from list.\n"
+			<< "5)Find length and area of circle by points in list.\n"
+			<< "0)Back." << std::endl;
+		switch (_getch())
+		{
+		case '1': find_distance(list);
+			break;
+		case '2': list.find_distance_between_adjacent_points();
+			break;
+		case '3': //(list);
+			break;
+		case '4': //(list);
+			break;
+		case '5': //(list);
+			break;
+		case'0': return;
+		default: std::cout << "\nPress the correct key!" << std::endl;
+		}
+	}
 }
 template<class T>
 void menu(T& list)
@@ -128,7 +170,7 @@ void menu(T& list)
 			break;
 		case '4': list.write();
 			break;
-		case '5':;
+		case '5': perform_actions(list);
 			break;
 		case '6': generate_random_items(list);
 			break;
@@ -138,7 +180,7 @@ void menu(T& list)
 			return;
 		}
 		break;
-		default: std::cout << "\nPress the correct key!\n" << std::endl;
+		default: std::cout << "\nPress the correct key!" << std::endl;
 		}
 	}
 }
@@ -170,7 +212,7 @@ void interactive_dialog_mode()
 			return;
 		}
 		break;
-		default: std::cout << "\nPress the correct key!\n" << std::endl;
+		default: std::cout << "\nPress the correct key!" << std::endl;
 		}
 	}
 }
