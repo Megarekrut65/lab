@@ -67,6 +67,7 @@ namespace avl
 	}
 	Avl_node* Avl_tree::balance(Avl_node* node)
 	{
+		int temp = set_height(node);
 		int factor = balance_factor(node);
 
 		if (factor >= 2)
@@ -99,7 +100,6 @@ namespace avl
 	Avl_node* Avl_tree::add_item_current(Avl_node* node, Point point)
 	{
 		if (!node) return new Avl_node(point);
-		node->height++;
 		if (point < node->point)
 		{
 			node->left = add_item_current(node->left, point);
@@ -274,13 +274,16 @@ namespace avl
 		find_items_current(root, begin_point, end_point, items, index);
 		return items;
 	}
-	void Avl_tree::random_generator(std::size_t number_of_items, std::size_t max_point)
+	void Avl_tree::random_generator(std::size_t number_of_items, double max_point)
 	{
 		clear();
 		srand(unsigned(time(0)));
 		for (std::size_t i = 0; i < number_of_items; i++)
 		{
-			add_item(Point(rand() % max_point, rand() % max_point, rand() % max_point));
+			double x = max_point - rand() % long(trunc(max_point));
+			double y = max_point - rand() % long(trunc(max_point));
+			double z = max_point - rand() % long(trunc(max_point));
+			add_item(Point(x, y, z));
 		}
 	}
 	bool Avl_tree::find_point(Avl_node* node, std::size_t index, Point& point, std::size_t& current)

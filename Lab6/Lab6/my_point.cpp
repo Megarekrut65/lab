@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include <cmath>
+#include "my_correct_read.h"
 
 namespace tdp//three-dimensional points
 {
@@ -46,6 +47,13 @@ namespace tdp//three-dimensional points
 	void Point::write()
 	{
 		std::cout << "(" << this->x << ", " << this->y << ", " << this->z << ")." << std::endl;
+	}
+	void Point::read(const std::string& name)
+	{
+		std::cout << "\n" + name << std::endl;
+		x = correct::read_double("the first coordinate");
+		y = correct::read_double("the second coordinate");
+		z = correct::read_double("the third coordinate");
 	}
 	void Point::append_to_file(const std::string& path)
 	{

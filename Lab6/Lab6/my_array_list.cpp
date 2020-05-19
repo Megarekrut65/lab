@@ -92,13 +92,16 @@ namespace array
 		}
 		return items;
 	}
-	void Array_list::random_generator(std::size_t number_of_items, std::size_t max_point)
+	void Array_list::random_generator(std::size_t number_of_items, double max_point)
 	{
 		clear();
 		srand(unsigned(time(0)));
 		for (std::size_t i = 0; i < number_of_items; i++)
 		{
-			add_item(Point(rand() % max_point, rand() % max_point, rand() % max_point));
+			double x = max_point - rand() % long(trunc(max_point));
+			double y = max_point - rand() % long(trunc(max_point));
+			double z = max_point - rand() % long(trunc(max_point));
+			add_item(Point(x, y, z));
 		}
 	}
 	double Array_list::find_distance_between_two_points(std::size_t first_index, std::size_t second_index)

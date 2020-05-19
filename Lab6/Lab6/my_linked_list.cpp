@@ -142,13 +142,19 @@ namespace list
 		}
 		return items;
 	}
-	void Linked_list::random_generator(std::size_t number_of_items, std::size_t max_point)
+	void Linked_list::random_generator(std::size_t number_of_items, double max_point)
 	{
 		clear();
 		srand(unsigned(time(0)));
 		for (std::size_t i = 0; i < number_of_items; i++)
 		{
-			add_item(Point(rand()% max_point, rand() % max_point, rand() % max_point));
+			double fractional_part_x = rand() % long(trunc(max_point));
+			double fractional_part_y = rand() % long(trunc(max_point));
+			double fractional_part_z = rand() % long(trunc(max_point));
+			double x = max_point - rand() % long(trunc(max_point)) + 0.01 * fractional_part_x;
+			double y = max_point - rand() % long(trunc(max_point)) + 0.01 * fractional_part_y;
+			double z = max_point - rand() % long(trunc(max_point)) + 0.01 * fractional_part_z;
+			add_item(Point(x, y, z));
 		}
 	}
 	double Linked_list::find_distance_between_two_points(std::size_t first_index, std::size_t second_index)

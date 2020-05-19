@@ -10,31 +10,31 @@ using namespace tdp;
 namespace binary
 {
 	enum class Side { CENTRE, LEFT, RIGHT };
-	struct Tree_node
+	struct Binary_node
 	{
-		Tree_node* parent;
-		Tree_node* left;
-		Tree_node* right;
+		Binary_node* parent;
+		Binary_node* left;
+		Binary_node* right;
 		Point point;
-		Tree_node();
-		Tree_node(Tree_node*, Point);
+		Binary_node();
+		Binary_node(Binary_node*, Point);
 	};
 	struct Binary_tree
 	{
 	private:
-		void add_item_current(Tree_node*, Point);
-		void write_current(Tree_node*, std::size_t&);
-		void remove_children(Tree_node*, Side);
-		bool remove_item_current(Tree_node*, Point, Side);
-		bool remove_item_current(Tree_node*, std::size_t&, std::size_t, Side);
-		void find_items_current(Tree_node*, Point, std::vector<Item>&, std::size_t&);
-		void find_items_current(Tree_node*, Point, Point, std::vector<Item>&, std::size_t&);
-		bool find_point(Tree_node*, std::size_t, Point&, std::size_t&);
-		bool append_file_current(Tree_node*, std::size_t, std::size_t&, const std::string&);
-		Tree_node* find_parent(Tree_node*);
-		void edit_tree(Tree_node* node, Side side);
+		void add_item_current(Binary_node*, Point);
+		void write_current(Binary_node*, std::size_t&);
+		void remove_children(Binary_node*, Side);
+		bool remove_item_current(Binary_node*, Point, Side);
+		bool remove_item_current(Binary_node*, std::size_t&, std::size_t, Side);
+		void find_items_current(Binary_node*, Point, std::vector<Item>&, std::size_t&);
+		void find_items_current(Binary_node*, Point, Point, std::vector<Item>&, std::size_t&);
+		bool find_point(Binary_node*, std::size_t, Point&, std::size_t&);
+		bool append_file_current(Binary_node*, std::size_t, std::size_t&, const std::string&);
+		Binary_node* find_parent(Binary_node*);
+		void edit_tree(Binary_node* node, Side side);
 	public:
-		Tree_node* root;
+		Binary_node* root;
 		std::size_t size;
 		Binary_tree();
 		void add_item(Point);
@@ -43,7 +43,7 @@ namespace binary
 		bool remove_item(std::size_t);
 		std::vector<Item> find_items(Point);
 		std::vector<Item> find_items(Point, Point);
-		void random_generator(std::size_t, std::size_t);
+		void random_generator(std::size_t, double);
 		double find_distance_between_two_points(std::size_t, std::size_t);
 		void find_distance_between_adjacent_points();
 		void read_file(std::size_t);

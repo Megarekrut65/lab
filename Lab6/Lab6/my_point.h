@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include "my_correct_read.h"
 
 namespace tdp
 {
@@ -14,6 +15,7 @@ namespace tdp
 		Point();
 		Point(double, double, double);	
 		void write();
+		void read(const std::string&);
 		void append_to_file(const std::string&);
 		void read_from_file(const std::string&, std::size_t);
 	};

@@ -6,14 +6,14 @@
 
 namespace binary
 {	
-	Tree_node::Tree_node()
+	Binary_node::Binary_node()
 	{
 		parent = nullptr;
 		left = nullptr;
 		right = nullptr;
 		point = Point();
 	}
-	Tree_node::Tree_node(Tree_node* parent, Point point)
+	Binary_node::Binary_node(Binary_node* parent, Point point)
 	{
 		this->parent = parent;
 		this->left = nullptr;
@@ -25,14 +25,14 @@ namespace binary
 		root = nullptr;
 		size = 0;
 	}
-	void Binary_tree::add_item_current(Tree_node* node, Point point)
+	void Binary_tree::add_item_current(Binary_node* node, Point point)
 	{
 		if (!node) return;
 		if (point < node->point)
 		{
 			if (!node->left)
 			{
-				node->left = new Tree_node(node, point);
+				node->left = new Binary_node(node, point);
 				return;
 			}
 			add_item_current(node->left, point);
@@ -41,7 +41,7 @@ namespace binary
 		{
 			if (!node->right)
 			{
-				node->right = new Tree_node(node, point);
+				node->right = new Binary_node(node, point);
 				return;
 			}
 			add_item_current(node->right, point);
@@ -52,12 +52,12 @@ namespace binary
 		size++;
 		if (!root)
 		{
-			root = new Tree_node(nullptr, point);
+			root = new Binary_node(nullptr, point);
 			return;
 		}
 		add_item_current(root, point);
 	}
-	void Binary_tree::write_current(Tree_node* node, std::size_t& index)
+	void Binary_tree::write_current(Binary_node* node, std::size_t& index)
 	{
 		if (!node) return;
 		write_current(node->left, index);
@@ -77,7 +77,7 @@ namespace binary
 		std::cout << "\nTree:\n";
 		write_current(root, index);
 	}
-	void Binary_tree::remove_children(Tree_node* node, Side side)
+	void Binary_tree::remove_children(Binary_node* node, Side side)
 	{
 		if (!node) return;
 		if (node->left)
@@ -100,7 +100,7 @@ namespace binary
 		delete node;
 		node = nullptr;
 	}
-	Tree_node* Binary_tree::find_parent(Tree_node* node)
+	Binary_node* Binary_tree::find_parent(Binary_node* node)
 	{
 		if (node->left)
 		{
@@ -108,11 +108,11 @@ namespace binary
 		}
 		return node;
 	}
-	void Binary_tree::edit_tree(Tree_node* node, Side side)
+	void Binary_tree::edit_tree(Binary_node* node, Side side)
 	{
 		size--;
-		Tree_node* new_parent = node->parent;
-		Tree_node* new_node = node->left;
+		Binary_node* new_parent = node->parent;
+		Binary_node* new_node = node->left;
 		if (node->left)
 		{
 			if (node->right)
@@ -148,7 +148,7 @@ namespace binary
 		delete node;
 		node = nullptr;
 	}
-	bool Binary_tree::remove_item_current(Tree_node* node, Point point, Side side)
+	bool Binary_tree::remove_item_current(Binary_node* node, Point point, Side side)
 	{
 		if (!node) return false;
 		if (remove_item_current(node->left, point, Side::LEFT)) return true;
@@ -165,7 +165,7 @@ namespace binary
 	{			
 		return remove_item_current(root, point, Side::CENTRE);
 	}
-	bool Binary_tree::remove_item_current(Tree_node* node, std::size_t& current, std::size_t index, Side side)
+	bool Binary_tree::remove_item_current(Binary_node* node, std::size_t& current, std::size_t index, Side side)
 	{
 		if (!node) return false;
 		if (remove_item_current(node->left, current, index, Side::LEFT)) return true;		
@@ -187,7 +187,7 @@ namespace binary
 
 		return remove_item_current(root, current, index, Side::CENTRE);
 	}
-	void Binary_tree::find_items_current(Tree_node* node, Point point, std::vector<Item>& items, std::size_t& index)
+	void Binary_tree::find_items_current(Binary_node* node, Point point, std::vector<Item>& items, std::size_t& index)
 	{
 		if (!node) return;
 		find_items_current(node->left, point, items, index);
@@ -206,7 +206,7 @@ namespace binary
 		find_items_current(root, point, items, index);
 		return items;
 	}
-	void Binary_tree::find_items_current(Tree_node* node, Point begin_point, Point end_point, std::vector<Item>& items, std::size_t& index)
+	void Binary_tree::find_items_current(Binary_node* node, Point begin_point, Point end_point, std::vector<Item>& items, std::size_t& index)
 	{
 		if (!node) return;
 		find_items_current(node->left, begin_point, end_point, items, index);
@@ -225,16 +225,19 @@ namespace binary
 		find_items_current(root, begin_point, end_point, items, index);
 		return items;
 	}
-	void Binary_tree::random_generator(std::size_t number_of_items, std::size_t max_point)
+	void Binary_tree::random_generator(std::size_t number_of_items, double max_point)
 	{
 		clear();
 		srand(unsigned(time(0)));
 		for (std::size_t i = 0; i < number_of_items; i++)
 		{
-			add_item(Point(rand() % max_point, rand() % max_point, rand() % max_point));
+			double x = max_point - rand() % long(trunc(max_point));
+			double y = max_point - rand() % long(trunc(max_point));
+			double z = max_point - rand() % long(trunc(max_point));
+			add_item(Point(x, y, z));
 		}
 	}
-	bool Binary_tree::find_point(Tree_node* node, std::size_t index, Point& point, std::size_t& current)
+	bool Binary_tree::find_point(Binary_node* node, std::size_t index, Point& point, std::size_t& current)
 	{
 		if (!node) return false;
 		if (find_point(node->left, index, point, current)) return true;
@@ -272,7 +275,7 @@ namespace binary
 		std::cout << point;
 		add_item(point);
 	}
-	bool Binary_tree::append_file_current(Tree_node* node, std::size_t index, std::size_t& current, const std::string& path)
+	bool Binary_tree::append_file_current(Binary_node* node, std::size_t index, std::size_t& current, const std::string& path)
 	{
 		if (!node) return false;
 		if (append_file_current(node->left, index, current, path)) return true;
