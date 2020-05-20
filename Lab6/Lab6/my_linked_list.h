@@ -30,8 +30,8 @@ namespace list
 		void random_generator(std::size_t, double); 
 		double find_distance_between_two_points(std::size_t, std::size_t);
 		void find_distance_between_adjacent_points();
-		void read_file(std::size_t);
-		bool append_file(std::size_t);
+		Point read_file(std::size_t, const std::string&);
+		bool append_file(std::size_t, const std::string&);
 		bool find_length_and_area_of_circle(std::size_t, std::size_t);
 		void clear();
 	};

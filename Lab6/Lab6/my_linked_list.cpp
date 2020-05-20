@@ -61,8 +61,7 @@ namespace list
 		std::cout << "\nList:\n";
 		for (List_node* current = head; current; current = current->next, i++)
 		{
-			std::cout << i << ".";
-			current->point.write();
+			std::cout << i << "." << current->point << std::endl;
 		}
 	}
 	bool Linked_list::remove_item(Point point)
@@ -184,18 +183,17 @@ namespace list
 			std::cout << i << " -> " << i + 1 << " = " << find_distance(current->point, current->next->point) << std::endl;
 		}
 	}
-	void Linked_list::read_file(std::size_t index)
+	Point Linked_list::read_file(std::size_t index, const std::string& path)
 	{
-		std::string path = "date.txt";
 		Point point;
 		point.read_from_file(path, index);			
-		std::cout << point;
 		add_item(point);
+
+		return point;
 	}
-	bool Linked_list::append_file(std::size_t index)
+	bool Linked_list::append_file(std::size_t index, const std::string& path)
 	{
 		if (index >= size) return false;
-		std::string path = "date.txt";
 		std::size_t i = 0;
 		for (List_node* current = head; current; current = current->next, i++)
 		{
@@ -232,8 +230,7 @@ namespace list
 		double area = find_area_of_circle(centre, anypoint);
 		double radius = find_distance(centre, anypoint);
 		std::cout << "\nCircle.\n";
-		std::cout << "Centre: ";
-		centre.write();
+		std::cout << "Centre: " << centre << std::endl;
 		std::cout << "Radius: " << radius << std::endl;
 		std::cout << "Length: " << length << std::endl;
 		std::cout << "Area: " << area << std::endl;

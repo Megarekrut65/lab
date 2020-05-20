@@ -126,6 +126,41 @@ void find_distance(T& list)
 	std::cout << "\nDistance: "<< distance << std::endl;
 }
 template<class T>
+void read_point_from_file(T& list)
+{
+	std::cout << "\nEnter the path to file: ";
+	std::string path = "text.txt";
+	getline(std::cin, path);
+	std::size_t index = correct::read_size_t("the index of point in file");
+	std::cout << "\nThe point: " << list.read_file(index, path) << " was added to list" << std::endl;
+}
+template<class T>
+void add_point_to_file(T& list)
+{
+	std::cout << "\nEnter the path to file: ";
+	std::string path = "text.txt";
+	getline(std::cin, path);
+	std::size_t index = correct::read_size_t("the index of point");
+	if (list.append_file(index, path))
+	{
+		std::cout << "\nThe point was added to file!" << std::endl;
+	}
+	else
+	{
+		std::cout << "\nThere isn't point with index: " << index << "." << std::endl;
+	}
+}
+template<class T>
+void find_circle(T& list)
+{
+	std::size_t index_of_centre = correct::read_size_t("the index of point of centre of circle");
+	std::size_t index = correct::read_size_t("the index of point of circle");
+	if (!list.find_length_and_area_of_circle(index_of_centre, index))
+	{
+		std::cout << "\nThere isn't point with indexes entered!"<< std::endl;
+	}
+}
+template<class T>
 void perform_actions(T& list)
 {
 	while (true)
@@ -142,11 +177,11 @@ void perform_actions(T& list)
 			break;
 		case '2': list.find_distance_between_adjacent_points();
 			break;
-		case '3': //(list);
+		case '3': read_point_from_file(list);
 			break;
-		case '4': //(list);
+		case '4': add_point_to_file(list);
 			break;
-		case '5': //(list);
+		case '5': find_circle(list);
 			break;
 		case'0': return;
 		default: std::cout << "\nPress the correct key!" << std::endl;

@@ -28,8 +28,7 @@ namespace tdp//three-dimensional points
 		std::cout << "\nItem:" << std::endl;
 		for (std::size_t i = 0; i < items.size(); i++)
 		{
-			std::cout << items[i].index << ".";
-			items[i].point.write();
+			std::cout << items[i].index << "." << items[i].point << std::endl;
 		}
 	}
 	Point::Point()
@@ -65,10 +64,6 @@ namespace tdp//three-dimensional points
 		x = sign() * (whole_part(max_value) - fractional_part(max_value));
 		y = sign() * (whole_part(max_value) - fractional_part(max_value));
 		z = sign() * (whole_part(max_value) - fractional_part(max_value));
-	}
-	void Point::write()
-	{
-		std::cout << "(" << this->x << ", " << this->y << ", " << this->z << ")." << std::endl;
 	}
 	void Point::read(const std::string& name)
 	{
@@ -172,7 +167,7 @@ namespace tdp//three-dimensional points
 	}
 	std::ostream& operator << (std::ostream& out, const Point& point)
 	{
-		return out << "(" << point.x << ", " << point.y << ", " << point.z << ")" << std::endl;
+		return out << "(" << point.x << ", " << point.y << ", " << point.z << ")";
 	}
 	std::istream& operator >> (std::istream& in, Point& point)
 	{

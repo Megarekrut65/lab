@@ -61,8 +61,7 @@ namespace binary
 	{
 		if (!node) return;
 		write_current(node->left, index);
-		std::cout << index << ".";
-		node->point.write();
+		std::cout << index << "." << node->point << std::endl;
 		index++;
 		write_current(node->right, index);
 	}
@@ -264,13 +263,13 @@ namespace binary
 			std::cout << i << " -> " << i + 1 << " = " << find_distance_between_two_points(i, i + 1) << std::endl;
 		}
 	}
-	void Binary_tree::read_file(std::size_t index)
+	Point Binary_tree::read_file(std::size_t index, const std::string& path)
 	{
-		std::string path = "date.txt";
 		Point point;
 		point.read_from_file(path, index);
-		std::cout << point;
 		add_item(point);
+
+		return point;
 	}
 	bool Binary_tree::append_file_current(Binary_node* node, std::size_t index, std::size_t& current, const std::string& path)
 	{
@@ -286,10 +285,9 @@ namespace binary
 		if (append_file_current(node->right, index, current, path)) return true;
 		return false;
 	}
-	bool Binary_tree::append_file(std::size_t index)
+	bool Binary_tree::append_file(std::size_t index, const std::string& path)
 	{
 		if (index >= size) return false;
-		std::string path = "date.txt";
 		std::size_t current = 0;
 		return append_file_current(root, index, current, path);
 	}
@@ -305,8 +303,7 @@ namespace binary
 		double area = find_area_of_circle(centre, anypoint);
 		double radius = find_distance(centre, anypoint);
 		std::cout << "\nCircle.\n";
-		std::cout << "Centre: ";
-		centre.write();
+		std::cout << "Centre: " << centre << std::endl;
 		std::cout << "Radius: " << radius << std::endl;
 		std::cout << "Length: " << length << std::endl;
 		std::cout << "Area: " << area << std::endl;

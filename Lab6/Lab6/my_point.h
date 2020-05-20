@@ -18,7 +18,6 @@ namespace tdp
 		double fractional_part(double);
 		double whole_part(double);
 		int sign();
-		void write();
 		void read(const std::string&);
 		void append_to_file(const std::string&);
 		void read_from_file(const std::string&, std::size_t);

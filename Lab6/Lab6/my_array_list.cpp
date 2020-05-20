@@ -43,8 +43,7 @@ namespace array
 		std::cout << "\nList:\n";
 		for (std::size_t i = 0; i < points.size(); i++)
 		{
-			std::cout << i << ".";
-			points[i].write();
+			std::cout << i << "." << points[i] << std::endl;
 		}
 	}
 	bool Array_list::remove_item(std::size_t index)
@@ -115,18 +114,17 @@ namespace array
 			std::cout << i << " -> " << i + 1 << " = " << find_distance(points[i], points[i + 1]) << std::endl;
 		}
 	}
-	void Array_list::read_file(std::size_t index)
+	Point Array_list::read_file(std::size_t index, const std::string& path)
 	{
-		std::string path = "date.txt";
 		Point point;
 		point.read_from_file(path, index);
-		std::cout << point;
 		add_item(point);
+
+		return point;
 	}
-	bool Array_list::append_file(std::size_t index)
+	bool Array_list::append_file(std::size_t index, const std::string& path)
 	{
 		if (index >= points.size()) return false;
-		std::string path = "date.txt";
 		points[index].append_to_file(path);
 		return true;
 	}
@@ -140,8 +138,7 @@ namespace array
 		double area = find_area_of_circle(centre, anypoint);
 		double radius = find_distance(centre, anypoint);
 		std::cout << "\nCircle.\n";
-		std::cout << "Centre: ";
-		centre.write();
+		std::cout << "Centre: " << centre << std::endl;
 		std::cout << "Radius: " << radius << std::endl;
 		std::cout << "Length: " << length << std::endl;
 		std::cout << "Area: " << area << std::endl;

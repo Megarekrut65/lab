@@ -30,7 +30,7 @@ namespace ttt//two-three tree
 	void Tree_node::add_child(Tree_node* child)
 	{
 		std::cout << "\nL: " << length << std::endl;
-		child->points[0].write();
+		//child->points[0].write();
 		if (length > 3) return;
 		std::size_t i = length;
 		while(i != 0)
@@ -190,8 +190,7 @@ namespace ttt//two-three tree
 	{
 		if (!node) return;
 		write_current(node->children[0], index);
-		std::cout << index << ".";
-		node->points[0].write();
+		std::cout << index << "." << node->points[0] << std::endl;
 		index++;
 		write_current(node->children[1], index);
 		write_current(node->children[2], index);
