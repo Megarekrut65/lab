@@ -101,6 +101,7 @@ namespace binary
 	}
 	Binary_node* Binary_tree::find_parent(Binary_node* node)
 	{
+		if (!node) return nullptr;
 		if (node->left)
 		{
 			return find_parent(node->left);

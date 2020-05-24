@@ -142,53 +142,163 @@ namespace ttt//two-three tree
 			node->right = nullptr;
 		}
 	}
-	/*Tree_node* Two_three_tree::remove_item_current(Tree_node* node, Point point, bool& removed)
+	Tree_node* Two_three_tree::find_left(Tree_node* node)
 	{
 		if (!node) return nullptr;
-		node->left = remove_item_current(node->left, point, removed);
-		if (removed) return node;
-		if (node->point == point)
+		if (node->left)
 		{
-			removed = true;
-			return edit_tree(node);
+			return find_left(node->left);
 		}
-		if (node->point > point) return node;
-		node->right = remove_item_current(node->right, point, removed);
 
 		return node;
-	}*/
-	/*bool Two_three_tree::remove_item(Point point)
-	{
-		bool removed = false;
-		root = remove_item_current(root, point, removed);
-		balance();
-
-		return removed;
-	}*/
-	/*Tree_node* Two_three_tree::remove_item_current(Tree_node* node, std::size_t& current, std::size_t index)
+	}
+	Tree_node* Two_three_tree::find_right(Tree_node* node)
 	{
 		if (!node) return nullptr;
-		node->left = remove_item_current(node->left, current, index);
+		if (node->right)
+		{
+			return find_right(node->right);
+		}
+
+		return node;
+	}
+	Point Two_three_tree::max_point(Tree_node* node)
+	{
+		if (!node) return Point();
+		if (node->right) return max_point(node->right);
+		if (node->centre) return node->points[1];
+		
+		return node->points[0];
+	}
+	void Two_three_tree::update_centre_node(Tree_node* node)
+	{
+		if (!node || node->length == 0) return;
+		std::cout << "\n1\n";
+		update_centre_node(node->left);
+		std::cout << "\n-1\n";
+		if (node->centre)
+		{
+			update_centre_node(node->centre);
+			node->points[1] = max_point(node->centre);			
+		}
+		std::cout << "\n1-\n";
+		update_centre_node(node->right);
+		std::cout << "\n-1-\n";
+	}
+	Tree_node* Two_three_tree::delete_item(Tree_node* node)
+	{
+		if (!node) return nullptr;
+		size--;
+		Tree_node* new_node = nullptr;
+		switch (node->length)
+		{
+		case 0:;
+		break;
+		case 1:
+		{
+			if (node->left) new_node = node->left;
+			else if (node->right) new_node = node->right;
+		}
+		break;
+		case 2:
+		{
+			Tree_node* new_parent = find_left(node->right);
+			new_node = node->right;
+			new_parent->left = node->left;
+			new_parent->length++;
+			node->left->parent = new_parent;
+		}
+		break;
+		case 3:
+		{
+			Tree_node* left_node = find_left(node->centre);
+			Tree_node* right_node = find_right(node->centre);
+			new_node = node->centre;
+			left_node->left = node->left;
+			left_node->left->parent = left_node;
+			left_node->length++;
+			right_node->right = node->right;
+			right_node->right->parent = right_node;
+			right_node->length++;
+		}
+		break;
+		default:
+		{
+			return node;
+		}
+		break;
+		}
+		node->left = nullptr;
+		node->right = nullptr;
+		if (new_node) new_node->parent = node->parent;
+		else node->parent->length--;
+		delete[] node->points;
+		delete node;
+
+		return new_node;
+	}
+	bool Two_three_tree::remove_item_current(Tree_node* node, Point point)
+	{
+		if (!node) return false;
+		if (remove_item_current(node->left, point)) return true;
+		if (node->points[0] == point)
+		{
+			delete_item(node);
+			return true;
+		}
+		if (remove_item_current(node->centre, point)) return true;
+		if(remove_item_current(node->right, point)) return true;
+
+		return false;
+	}
+	bool Two_three_tree::remove_item(Point point)
+	{
+		if (point == root->points[0])
+		{
+			root = delete_item(root);
+
+			return true;
+		}
+		bool is_point = remove_item_current(root, point);
+		if(is_point) update_centre_node(root);
+
+		return is_point;
+	}
+	bool Two_three_tree::remove_item_current(Tree_node* node, std::size_t& current, std::size_t index)
+	{
+		if (!node) return false;
+		std::cout << "\n3\n";
+		if (remove_item_current(node->left, current, index)) return true;
+		std::cout << "\n-3\n";
 		if (current == index)
 		{
-			current++;
-			return edit_tree(node);
+			std::cout << "\ndel\n";
+			if (node == root) root = delete_item(node);
+			else node = delete_item(node);
+			std::cout << "\ndel-\n";
+			return true;
 		}
-		if (current > index) return node;
+		std::cout << "\n3-\n";
 		current++;
-		node->right = remove_item_current(node->right, current, index);
+		if (current > index) return false;
+		if (remove_item_current(node->centre, current, index)) return true;
+		std::cout << "\n4\n";
+		if (remove_item_current(node->right, current, index)) return true;
+		std::cout << "\n-4\n";
 
-		return node;
-	}*/
-	/*bool Two_three_tree::remove_item(std::size_t index)
+		return false;
+	}
+	bool Two_three_tree::remove_item(std::size_t index)
 	{
 		if (index >= size) return false;
 		std::size_t current = 0;
-		root = remove_item_current(root, current, index);
-		balance();
+		std::cout << "\n--w--\n";
+		bool is_point = remove_item_current(root, current, index);
+		std::cout << "\n-----\n";
+		//if(is_point) update_centre_node(root);
 
-		return (current < size);
-	}*/
+		return is_point;
+	}
 	/*void Two_three_tree::find_items_current(Tree_node* node, Point point, std::vector<Item>& items, std::size_t& index)
 	{
 		if (!node) return;

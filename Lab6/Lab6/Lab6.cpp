@@ -466,22 +466,23 @@ int main()
 	//list.append_file(3);
 	//std::cout << list.find_distance_between_two_points(1, 6);
 	//list.find_distance_between_adjacent_points();
-	for (std::size_t j = 0; j < 3; j++)
+	/*for (std::size_t j = 0; j < 3; j++)
 	{
-		list.clear();
-		std::cout << "\neeeee\n";
-		list.random_generator(10, 100);
+		list.random_generator(40, 100);
 		list.write();
-	}
-	/*list.remove_item(2);
+	}*/
+	list.remove_item(2);
+	list.write();
+	std::cout << "\n------1\n";
 	list.remove_item(3);
+	std::cout << "\n-1---------------\n";
 	list.remove_item(0);
 	list.write();
 	list.add_item(Point(1, 2, 3));
 	list.add_item(Point(7, 2, 3));
 	list.add_item(Point(0, 2, 3));
 	list.add_item(Point(1, 2, 3));
-	list.write();*/
+	list.write();
 	/*std::vector<Item> items = list.find_items(Point(3, 2, 3), Point(10,2,1));
 	write_items(items);*/
 	std::cout << "\nThe end\n";
