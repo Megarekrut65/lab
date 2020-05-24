@@ -148,4 +148,22 @@ namespace array
 	{
 		points.clear();
 	}
+	Array_list::Array_list(Array_list& copy_list)
+	{
+		for (std::size_t i = 0; i < copy_list.points.size(); i++)
+		{
+			add_item(copy_list.points[i]);
+		}
+	}
+	std::size_t Array_list::count_size_of_memory()
+	{
+		std::size_t memory_size = 0;
+		memory_size += points.size() * sizeof(Point);
+
+		return memory_size;
+	}
+	std::size_t Array_list::get_size()
+	{
+		return points.size();
+	}
 }

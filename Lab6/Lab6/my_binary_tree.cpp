@@ -311,7 +311,32 @@ namespace binary
 	}
 	void Binary_tree::clear()
 	{
+		if (!root) return;
 		remove_children(root, Side::CENTRE);
 		size = 0;
+	}
+	void Binary_tree::copy_tree_current(Binary_node* node)
+	{
+		if (!node) return;
+		add_item(node->point);
+		copy_tree_current(node->left);
+		copy_tree_current(node->right);
+	}
+	Binary_tree::Binary_tree(Binary_tree& copy_tree)
+	{
+		root = nullptr;
+		size = 0;
+		copy_tree_current(copy_tree.root);
+	}
+	std::size_t Binary_tree::count_size_of_memory()
+	{
+		std::size_t memory_size = 0;
+		memory_size += size * sizeof(Binary_node*);
+
+		return memory_size;
+	}
+	std::size_t Binary_tree::get_size()
+	{
+		return size;
 	}
 }

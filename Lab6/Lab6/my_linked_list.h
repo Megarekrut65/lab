@@ -21,6 +21,7 @@ namespace list
 		List_node* head;
 		std::size_t size;
 		Linked_list();
+		Linked_list(Linked_list&);
 		void add_item(Point);
 		void write();
 		bool remove_item(Point);
@@ -34,5 +35,8 @@ namespace list
 		bool append_file(std::size_t, const std::string&);
 		bool find_length_and_area_of_circle(std::size_t, std::size_t);
 		void clear();
+		std::size_t count_size_of_memory();
+		std::size_t get_size();
+
 	};
 }

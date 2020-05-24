@@ -360,9 +360,34 @@ namespace avl
 	}
 	void Avl_tree::clear()
 	{
+		if (!root) return;
 		remove_children(root);
 		delete root;
 		root = nullptr;
 		size = 0;
+	}
+	void Avl_tree::copy_tree_current(Avl_node* node)
+	{
+		if (!node) return;
+		add_item(node->point);
+		copy_tree_current(node->left);
+		copy_tree_current(node->right);
+	}
+	Avl_tree::Avl_tree(Avl_tree& copy_tree)
+	{
+		root = nullptr;
+		size = 0;
+		copy_tree_current(copy_tree.root);
+	}
+	std::size_t Avl_tree::count_size_of_memory()
+	{
+		std::size_t memory_size = 0;
+		memory_size += size * sizeof(Avl_node*);
+
+		return memory_size;
+	}
+	std::size_t Avl_tree::get_size()
+	{
+		return size;
 	}
 }

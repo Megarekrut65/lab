@@ -11,8 +11,9 @@ namespace ttt//two-three tree
 	Tree_node::Tree_node()
 	{
 		parent = nullptr;
-		children = new Tree_node* [max_size];
-		for (std::size_t i = 0; i < max_size; i++) children[i] = nullptr;
+		left = nullptr;
+		centre = nullptr;
+		right = nullptr;		
 		length = 0;
 		points = new Point[2];
 		for (std::size_t i = 0; i < 2; i++) points[i] = Point();
@@ -20,162 +21,72 @@ namespace ttt//two-three tree
 	Tree_node::Tree_node(Tree_node* parent, Point point)
 	{		
 		this->parent = parent;
-		children = new Tree_node * [max_size];
-		for (std::size_t i = 0; i < max_size; i++) children[i] = nullptr;
+		if(parent) parent->length++;
+		left = nullptr;
+		centre = nullptr;
+		right = nullptr;
 		length = 0;
 		points = new Point[2];
 		points[0] = point;
 		points[1] = Point();
-	}
-	void Tree_node::add_child(Tree_node* child)
-	{
-		std::cout << "\nL: " << length << std::endl;
-		//child->points[0].write();
-		if (length > 3) return;
-		std::size_t i = length;
-		while(i != 0)
-		{
-			if (child < children[i - 1])
-			{
-				children[i] = children[i - 1];
-			}
-			else
-			{
-				break;
-			}
-			i--;
-		}
-		children[i] = child;
-		length++;
-		if (length > 2) points[1] = children[1]->points[0];
-	}
+	}	
 	Two_three_tree::Two_three_tree()
 	{
 		root = nullptr;
 		size = 0;
-	}
-	/*int Two_three_tree::set_height(Tree_node* node)
-	{
-		if (!node) return 0;
-		int left_height = set_height(node->left);
-		int right_height = set_height(node->right);
-		node->height = (left_height > right_height) ? left_height : right_height;
-		node->height++;
-
-		return node->height;
-	}*/
-	/*int Two_three_tree::get_height(Tree_node* node)
-	{
-		if (!node) return 0;
-
-		return node->height;
-	}*/
-	/*Tree_node* Two_three_tree::rotate_right(Tree_node* node)
-	{
-		Avl_node* new_node = node->left;
-		node->left = new_node->right;
-		new_node->right = node;
-
-		return new_node;
-	}*/
-	/*Tree_node* Two_three_tree::rotate_left(Tree_node* node)
-	{
-		Avl_node* new_node = node->right;
-		node->right = new_node->left;
-		new_node->left = node;
-
-		return new_node;
-	}*/
-	/*int Two_three_tree::balance_factor(Tree_node* node)
-	{
-		if (!node) return 0;
-
-		return get_height(node->right) - get_height(node->left);
-	}*/
-	/*Tree_node* Two_three_tree::balance(Tree_node* node)
-	{
-		int temp = set_height(node);
-		int factor = balance_factor(node);
-
-		if (factor >= 2)
-		{
-			if (balance_factor(node->right) < 0)
-			{
-				node->right = rotate_right(node->right);
-			}
-
-			return rotate_left(node);
-		}
-		if (factor <= -2)
-		{
-			if (balance_factor(node->left) > 0)
-			{
-				node->left = rotate_left(node->left);
-			}
-
-			return rotate_right(node);
-		}
-
-		return node;
-	}*/
-	/*void Two_three_tree::balance()
-	{
-		int temp = set_height(root);
-		root = balance(root);
-		temp = set_height(root);
-	}*/
+	}			
 	void Two_three_tree::add_item_current(Tree_node* node, Point point)
 	{
 		if (!node) return;
-		if (node->length < 3)
+		switch (node->length)
 		{
-			node->add_child(new Tree_node(node, point));
-			return;
+		case 0:
+		{
+			if (node->points[0] > point) node->left = new Tree_node(node, point);
+			else node->right = new Tree_node(node, point);
 		}
-		if (node->points[1] < point) add_item_current(node->children[2], point);
-		else if (node->points[0] < point) add_item_current(node->children[1], point);
-		else add_item_current(node->children[0], point);
+			break;
+		case 1:
+		{
+			if (node->points[0] > point)
+			{
+				if (!node->left) node->left = new Tree_node(node, point);
+				else add_item_current(node->left, point);
+				return;				
+			}
+			if (!node->right) node->right = new Tree_node(node, point);
+			else add_item_current(node->right, point);
+		}
+			break;
+		case 2:
+		{
+			if (node->points[0] > point)
+			{
+				add_item_current(node->left, point);
+				return;
+			}
+			if (node->right->points[0] > point)
+			{
+				node->centre = new Tree_node(node, point);
+				node->points[1] = point;
+			}
+			else
+			{
+				node->centre = node->right;
+				node->points[1] = node->right->points[0];
+				node->right = new Tree_node(node, point);
+			}
+		}
+			break;
+		default:
+		{
+			if (node->points[1] < point) add_item_current(node->right, point);
+			else if (node->points[0] < point) add_item_current(node->centre, point);
+			else add_item_current(node->left, point);
+		}
+			break;
+		}			
 	}
-	/*void Two_three_tree::split_parent(Tree_node* parent)
-	{
-		if (parent->length <= 3) return;
-		Tree_node* new_node = parent->children[3];
-		new_node->add_child(parent->children[2]);
-		parent->children[2]->parent = new_node;
-		parent->children[2] = nullptr;
-		parent->children[3] = nullptr;
-		parent->length = 2;
-		parent->points[1] = Point();		
-		if (parent->parent)
-		{
-			new_node->parent = parent->parent;
-			parent->parent->add_child(new_node);
-			split_parent(parent->parent);
-			return;
-		}
-		new_node->parent = parent;
-		parent->add_child(new_node);
-		Tree_node* new_node = new Tree_node(parent->parent, parent->children[2]->points[0]);
-		new_node->add_child(parent->children[2]);
-		new_node->add_child(parent->children[3]);
-		parent->children[2]->parent = new_node;
-		parent->children[3]->parent = new_node;
-		parent->length = 2;
-		parent->children[2] = nullptr;
-		parent->children[3] = nullptr;
-		if (parent->parent)
-		{
-			parent->parent->add_child(new_node);
-			split_parent(parent->parent);
-			return;
-		}
-		Tree_node* node = root;
-		root.sons[0] = t;
-		root.sons[1] = a;
-		t.parent = root;
-		a.parent = root;
-		root.length = 2;
-	}*/
 	void Two_three_tree::add_item(Point point)
 	{
 		size++;
@@ -189,11 +100,11 @@ namespace ttt//two-three tree
 	void Two_three_tree::write_current(Tree_node* node, std::size_t& index)
 	{
 		if (!node) return;
-		write_current(node->children[0], index);
+		write_current(node->left, index);
 		std::cout << index << "." << node->points[0] << std::endl;
 		index++;
-		write_current(node->children[1], index);
-		write_current(node->children[2], index);
+		write_current(node->centre, index);
+		write_current(node->right, index);
 	}
 	void Two_three_tree::write()
 	{
@@ -206,53 +117,31 @@ namespace ttt//two-three tree
 		std::cout << "\nTree:\n";
 		write_current(root, index);
 	}
-	/*void Two_three_tree::remove_children(Tree_node* node)
+	void Two_three_tree::remove_children(Tree_node* node)
 	{
 		if (!node) return;
 		if (node->left)
 		{
 			remove_children(node->left);
+			delete[] node->left->points;
 			delete node->left;
 			node->left = nullptr;
+		}
+		if (node->centre)
+		{
+			remove_children(node->centre);
+			delete[] node->centre->points;
+			delete node->centre;
+			node->centre = nullptr;
 		}
 		if (node->right)
 		{
 			remove_children(node->right);
+			delete[] node->right->points;
 			delete node->right;
 			node->right = nullptr;
 		}
-	}*/
-	/*Tree_node* Two_three_tree::find_min_node(Tree_node* node)
-	{
-		if (node->left)
-		{
-			return find_min_node(node->left);
-		}
-		return node;
-	}*/
-	/*Tree_node* Two_three_tree::remove_min_node(Tree_node* node)
-	{
-		if (!node->left)
-		{
-			return node->right;
-		}
-		node->left = remove_min_node(node->left);
-
-		return balance(node);
-	}*/
-	/*Tree_node* Two_three_tree::edit_tree(Tree_node* node)
-	{
-		size--;
-		Avl_node* left_node = node->left;
-		Avl_node* right_node = node->right;
-		delete node;
-		if (!right_node) return left_node;
-		Avl_node* min_node = find_min_node(right_node);
-		min_node->right = remove_min_node(right_node);
-		min_node->left = left_node;
-
-		return balance(min_node);
-	}*/
+	}
 	/*Tree_node* Two_three_tree::remove_item_current(Tree_node* node, Point point, bool& removed)
 	{
 		if (!node) return nullptr;
@@ -300,7 +189,7 @@ namespace ttt//two-three tree
 
 		return (current < size);
 	}*/
-	void Two_three_tree::find_items_current(Tree_node* node, Point point, std::vector<Item>& items, std::size_t& index)
+	/*void Two_three_tree::find_items_current(Tree_node* node, Point point, std::vector<Item>& items, std::size_t& index)
 	{
 		if (!node) return;
 		if (point < node->points[0]) return;
@@ -355,19 +244,16 @@ namespace ttt//two-three tree
 		std::size_t index = 0;
 		find_items_current(root, begin_point, end_point, items, index);
 		return items;
-	}
-	/*void Two_three_tree::random_generator(std::size_t number_of_items, double max_point)
+	}*/
+	void Two_three_tree::random_generator(std::size_t number_of_items, double max_value)
 	{
 		clear();
 		srand(unsigned(time(0)));
 		for (std::size_t i = 0; i < number_of_items; i++)
 		{
-			double x = max_point - rand() % long(trunc(max_point));
-			double y = max_point - rand() % long(trunc(max_point));
-			double z = max_point - rand() % long(trunc(max_point));
-			add_item(Point(x, y, z));
+			add_item(Point(max_value));
 		}
-	}*/
+	}
 	/*bool Two_three_tree::find_point(Tree_node* node, std::size_t index, Point& point, std::size_t& current)
 	{
 		if (!node) return false;
@@ -446,11 +332,13 @@ namespace ttt//two-three tree
 		std::cout << "Area: " << area << std::endl;
 		return true;
 	}*/
-	/*void Two_three_tree::clear()
+	void Two_three_tree::clear()
 	{
+		if (!root) return;
 		remove_children(root);
+		delete[] root->points;
 		delete root;
 		root = nullptr;
 		size = 0;
-	}*/
+	}
 }

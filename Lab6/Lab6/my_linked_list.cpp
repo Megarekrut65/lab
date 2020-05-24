@@ -249,4 +249,25 @@ namespace list
 		}
 		size = 0;
 	}
+	Linked_list::Linked_list(Linked_list& copy_list)
+	{
+		head = nullptr;
+		size = 0;
+		for (List_node* current = copy_list.head; current; current = current->next)
+		{
+			add_item(current->point);
+		}
+	}
+	std::size_t Linked_list::count_size_of_memory()
+	{
+		std::size_t memory_size = 0;
+		memory_size += size * sizeof(List_node*)
+			+ sizeof(size);
+
+		return memory_size;
+	}
+	std::size_t Linked_list::get_size()
+	{
+		return size;
+	}
 }

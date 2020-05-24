@@ -32,11 +32,13 @@ namespace binary
 		bool find_point(Binary_node*, std::size_t, Point&, std::size_t&);
 		bool append_file_current(Binary_node*, std::size_t, std::size_t&, const std::string&);
 		Binary_node* find_parent(Binary_node*);
-		void edit_tree(Binary_node* node, Side side);
+		void edit_tree(Binary_node*, Side);
+		void copy_tree_current(Binary_node*);
 	public:
 		Binary_node* root;
 		std::size_t size;
 		Binary_tree();
+		Binary_tree(Binary_tree&);
 		void add_item(Point);
 		void write();
 		bool remove_item(Point);
@@ -50,5 +52,7 @@ namespace binary
 		bool append_file(std::size_t, const std::string&);
 		bool find_length_and_area_of_circle(std::size_t, std::size_t);
 		void clear();
+		std::size_t count_size_of_memory();
+		std::size_t get_size();
 	};
 }

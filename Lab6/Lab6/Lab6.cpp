@@ -7,9 +7,31 @@
 #include "my_correct_read.h"
 #include <conio.h>
 #include <Windows.h>
+#include <chrono>
 #include <vector>
 #include <fstream>
 
+struct measurement_result
+{
+	std::size_t number_of_items;
+	std::size_t number_of_operations;
+	float time;
+	std::size_t size;
+	measurement_result()
+	{
+		number_of_items = 0;
+		number_of_operations = 0;
+		time = 0;
+		size = 0;
+	}
+	measurement_result(std::size_t number_of_items, std::size_t number_of_operations, float time, std::size_t size)
+	{
+		this->number_of_items = number_of_items;
+		this->number_of_operations = number_of_operations;
+		this->time = time;
+		this->size = size;
+	}
+};
 template<class T>
 void add_item(T& list)
 {
@@ -255,14 +277,162 @@ void demo_mode()
 {
 
 }
+std::size_t set_number(bool is_one_second, std::size_t& copy_size, std::size_t& coefficient)//resizes depending on condition
+{
+	if (is_one_second)
+	{
+		return coefficient++ * copy_size;
+	}
+	else
+	{
+		return copy_size *= 2;
+	}
+}
+void clear_result_files(std::string paths[], int number_of_files, std::string name_of_struct)
+{
+	for (int i = 0; i < number_of_files; i++)
+	{
+		std::ofstream file(name_of_struct + paths[i] + ".txt");
+		file.close();
+	}
+}
+void add_result_to_file(measurement_result result, const std::string& name_of_files)
+{
+	std::ofstream file(name_of_files + ".txt", std::ios_base::app);
+	file << "Number of items = " << result.number_of_items << "." << std::endl;
+	file << "Number of operations = " << result.number_of_operations << "." << std::endl;
+	file << "Time = " << result.time << "." << std::endl;
+	file << "Size of memory = " << result.size << "." << std::endl;
+	file.close();
+}
+template<class T>
+void measurement_add_item(T& list, std::size_t number_of_items)
+{
+	list.add_item(Point(number_of_items));
+}
+template<class T>
+void measurement_remove_item_by_index(T& list, std::size_t number_of_items)
+{
+	list.remove_item(rand() % list.get_size());
+}
+template<class T>
+void measurement_remove_item_by_value(T& list, std::size_t number_of_items)
+{
+	list.remove_item(Point(number_of_items));
+}
+template<class T>
+void measurement_find_item_by_one_value(T& list, std::size_t number_of_items)
+{
+	std::vector<tdp::Item> items = list.find_items(Point(number_of_items));
+}
+template<class T>
+void measurement_find_item_by_two_values(T& list, std::size_t number_of_items)
+{
+	std::vector<tdp::Item> items = list.find_items(Point(number_of_items/2), Point(number_of_items));
+}
+template<class T>
+void measurement_random_generator(T& list, std::size_t number_of_items)
+{
+	list.random_generator(number_of_items, number_of_items);
+}
+template<class T>
+void measurement_clear(T& list, std::size_t number_of_items)
+{
+	list.clear();
+}
+template<class T>
+float measurement(T& list, std::size_t index, std::size_t number_of_items, std::size_t number_of_operations, const std::string& name_of_functions, const std::string& name_of_struct)//measures the sort time of an array
+{
+	srand(unsigned(time(0)));
+	const int number_of_functions = 12;
+	void(*all_functions[number_of_functions])(T&, std::size_t) = {
+		measurement_add_item, measurement_remove_item_by_index,
+		measurement_remove_item_by_value,
+		measurement_find_item_by_one_value, measurement_find_item_by_two_values,
+		measurement_random_generator, measurement_clear };
+	T new_list(list);
+	auto the_start = std::chrono::high_resolution_clock::now();
+	auto the_end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<float> duration;
+	the_start = std::chrono::high_resolution_clock::now();
+	all_functions[index](new_list, number_of_items);
+	if ((index != 5)&&(index != 6))
+	{
+		for (std::size_t i = 0; i < number_of_operations - 1; i++)
+		{
+			all_functions[index](new_list, number_of_items);
+		}	
+	}
+	the_end = std::chrono::high_resolution_clock::now();
+	duration = the_end - the_start;
+	measurement_result result = measurement_result(number_of_items, number_of_operations, duration.count(), list.count_size_of_memory());
+	add_result_to_file(result, name_of_struct + name_of_functions);
+	std::cout << "\nTime of " << name_of_functions << " = " << result.time << std::endl;
+	std::cout << "Size of memory = " << result.size << std::endl;
+
+	return result.time;
+}
+template<class T>
+void benchmark_mode_menu(T& list, const std::string& name_of_struct)
+{
+	const int number_of_functions = 7;
+	std::string name_of_functions[number_of_functions] = { "Add item", "Remove item by index",
+	"Remove item by value", "Find items by one value", "Find points by two values",
+	"Random generator", "Clear list" };
+	clear_result_files(name_of_functions, number_of_functions, name_of_struct);
+	bool is_one_second, are_ten_seconds = false;
+	std::size_t number_of_items, number_of_operations, number = 1000;
+	std::size_t copy_number_of_items = number, coefficient_of_items = 3;
+	std::size_t copy_number_of_operations, coefficient_of_operations;
+	std::size_t max_number = 60000;
+	for (number_of_items = number; number_of_items < max_number;)
+	{
+		list.random_generator(number_of_items, number_of_items);
+		copy_number_of_operations = number_of_items / 10;
+		coefficient_of_operations = 3;
+		is_one_second = false;
+		for (number_of_operations = copy_number_of_operations; number_of_operations < number_of_items;)
+		{
+			std::cout << "\nNumber of items = " << number_of_items << std::endl;
+			std::cout << "Number of operations = " << number_of_operations << std::endl;
+			float time;
+			for (std::size_t i = 0; i < number_of_functions; i++)
+			{
+				time = measurement(list, i, number_of_items, number_of_operations, name_of_functions[i], name_of_struct);
+				if (time > 1) is_one_second = true;
+				if (time > 10) are_ten_seconds = true;
+			}
+			if (are_ten_seconds) break;			
+			number_of_operations = set_number(is_one_second, copy_number_of_operations, coefficient_of_operations);			
+		}
+		list.clear();
+		if (are_ten_seconds) break;
+		number_of_items = set_number(is_one_second, copy_number_of_items, coefficient_of_items);
+	}
+	std::cout << "\nResults of measurements of program in the following files:\n"
+		<< name_of_struct + name_of_functions[0] + ".txt\n" << name_of_struct + name_of_functions[1] + ".txt\n"
+		<< name_of_struct + name_of_functions[2] + ".txt\n" << name_of_struct + name_of_functions[3] + ".txt\n"
+		<< name_of_struct + name_of_functions[4] + ".txt\n" << name_of_struct + name_of_functions[5] + ".txt\n"
+		<< name_of_struct + name_of_functions[6] + ".txt\n" << std::endl;
+}
 void benchmark_mode()
 {
-
-	
+	list::Linked_list linked_list;
+	std::cout << "\nLinked list:" << std::endl;
+	benchmark_mode_menu(linked_list, "Linked list ");
+	array::Array_list array_list;
+	std::cout << "\nArray list:" << std::endl;
+	benchmark_mode_menu(array_list, "Array list ");
+	binary::Binary_tree binary_tree;
+	std::cout << "\nBinary tree:" << std::endl;
+	benchmark_mode_menu(binary_tree, "Binary tree ");
+	avl::Avl_tree avl_tree;
+	std::cout << "\nAvl tree:" << std::endl;
+	benchmark_mode_menu(avl_tree, "Avl tree ");
 }
 int main()
 {
-	while (true)
+	/*while (true)
 	{
 		std::cout << "Select the application mode:\n1)Interactive dialog mode.\n"
 			<< "2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit." << std::endl;
@@ -282,31 +452,27 @@ int main()
 		break;
 		default: std::cout << "\nPress the correct key!\n" << std::endl;
 		}
-	}
-	/*Two_three_tree list;
+	}*/
+	ttt::Two_three_tree list;
 	list.add_item(Point(100, 1, 1));
-	std::cout << "====\n";
 	list.add_item(Point(2, 1, 1));
-	std::cout << "====\n";
 	list.add_item(Point(7, 2, 5));
 	list.add_item(Point(6, 2, 3));
 	list.add_item(Point(3, 2, 3));
 	list.add_item(Point(9, 1, 1));
 	list.add_item(Point(4, 1, 1));
-	std::cout << "====\n";
 	list.write();
 	//list.find_length_and_area_of_circle(0, 3);
 	//list.append_file(3);
 	//std::cout << list.find_distance_between_two_points(1, 6);
 	//list.find_distance_between_adjacent_points();
-	/*for (std::size_t j = 0; j < 15; j++)
+	for (std::size_t j = 0; j < 3; j++)
 	{
 		list.clear();
-		list.random_generator(30, 100);
+		std::cout << "\neeeee\n";
+		list.random_generator(10, 100);
 		list.write();
-		for (std::size_t i = 0; i < 15; i++) list.remove_item(0);
-		list.write();
-	}	*/
+	}
 	/*list.remove_item(2);
 	list.remove_item(3);
 	list.remove_item(0);
@@ -318,5 +484,6 @@ int main()
 	list.write();*/
 	/*std::vector<Item> items = list.find_items(Point(3, 2, 3), Point(10,2,1));
 	write_items(items);*/
+	std::cout << "\nThe end\n";
 	return 0;
 }
