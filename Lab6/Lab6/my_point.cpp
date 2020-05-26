@@ -25,7 +25,7 @@ namespace tdp//three-dimensional points
 			std::cout << "\nArray is empty!" << std::endl;
 			return;
 		}
-		std::cout << "\nItem:" << std::endl;
+		std::cout << "\nItems:" << std::endl;
 		for (std::size_t i = 0; i < items.size(); i++)
 		{
 			std::cout << items[i].index << "." << items[i].point << std::endl;

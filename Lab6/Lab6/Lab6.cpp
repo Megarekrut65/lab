@@ -217,7 +217,7 @@ namespace all_interactive
 	{
 		while (true)
 		{
-			std::cout << "\nMenu:\n1)Add item.\n2)Remove item.\n3)Find item.\n4)Write list.\n"
+			std::cout << "\nMenu:\n1)Add item.\n2)Remove item.\n3)Find items.\n4)Write list.\n"
 				<< "5)Perform actions on items.\n6)Generate random items.\n0)Back." << std::endl;
 			switch (_getch())
 			{
@@ -279,14 +279,324 @@ void interactive_dialog_mode()
 }
 namespace all_demo
 {
-	void demo_mode_menu()
+	void demo_interactive(unsigned delay)
 	{
-
+		std::cout << "\nSelect the application mode:\n1)Interactive dialog mode.\n"
+			<< "2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit." << std::endl;
+		Sleep(delay);
+		std::cout << "\nSelect the application mode:\n1)Interactive dialog mode. <-press\n"
+			<< "2)Demo mode.\n3)Automatic benchmark mode.\n0)Exit." << std::endl;
+		Sleep(delay);
+	}
+	void demo_interactive_menu(unsigned delay)
+	{
+		std::cout << "\nSelect the basis for the data structure:\n1)Linked list. <-press\n"
+			<< "2)Array list.\n3)Binary tree.\n4)Avl tree.\n5)Two-Three tree.\n0)Back." << std::endl;
+		Sleep(delay);
+	}
+	void demo_menu(unsigned delay)
+	{
+		std::cout << "\nMenu:\n1)Add item.\n2)Remove item.\n3)Find items.\n4)Write list.\n"
+			<< "5)Perform actions on items.\n6)Generate random items.\n0)Back." << std::endl;
+	}
+	template<class T>
+	void demo_read_number(unsigned delay, T number, std::string sentence)
+	{
+		std::cout << "\nEnter " + sentence + ": <-write and press <Enter>" << std::endl;
+		Sleep(delay);
+		std::cout << "Enter " + sentence + ": " << number << std::endl;
+		Sleep(delay);
+	}
+	void demo_read_point(unsigned delay, Point point, std::string sentence)
+	{
+		std::cout << "\n" + sentence << std::endl;
+		demo_read_number(delay, point.x, "the first coordinate");
+		demo_read_number(delay, point.y, "the second coordinate");
+		demo_read_number(delay, point.z, "the third coordinate");		
+	}
+	template<class T>
+	void demo_add_item(unsigned delay,T& list,  Point point)
+	{
+		std::cout << "\nMenu:\n1)Add item. <-press\n2)Remove item.\n3)Find item.\n4)Write list.\n"
+			<< "5)Perform actions on items.\n6)Generate random items.\n0)Back." << std::endl;
+		Sleep(delay);
+		demo_read_point(delay, point, "The point:");
+		list.add_item(point);
+		std::cout << "\nThe point was added!" << std::endl;
+		Sleep(delay);
+	}
+	void demo_remove_menu(unsigned delay)
+	{
+		std::cout << "\nMenu:\n1)Add item.\n2)Remove item. <-press\n3)Find items.\n4)Write list.\n"
+			<< "5)Perform actions on items.\n6)Generate random items.\n0)Back." << std::endl;
+		Sleep(delay);
+	}
+	template<class T>
+	void demo_remove_by_index(unsigned delay, T& list, std::size_t index)
+	{
+		std::cout << "\nChoose:\n1)Remove by index. <-press\n2)Remove by value."
+			<< "\n0)Back." << std::endl;
+		Sleep(delay);
+		demo_read_number(delay, index, "the index of point");
+		if (list.remove_item(index))
+		{
+			std::cout << "\nThe point was removed!" << std::endl;
+		}
+		else
+		{
+			std::cout << "\nThere isn't point with index: " << index << "." << std::endl;
+		}
+		Sleep(delay);
+	}
+	template<class T>
+	void demo_remove_by_value(unsigned delay, T& list, Point point)
+	{
+		std::cout << "\nChoose:\n1)Remove by index.\n2)Remove by value. <-press"
+			<< "\n0)Back." << std::endl;
+		Sleep(delay);
+		demo_read_point(delay, point, "The point:");
+		if (list.remove_item(point))
+		{
+			std::cout << "\nThe point was removed!" << std::endl;
+		}
+		else
+		{
+			std::cout << "\nThere is no point entered." << std::endl;
+		}
+		Sleep(delay);
+	}
+	void demo_remove_exit(unsigned delay)
+	{
+		std::cout << "\nChoose:\n1)Remove by index.\n2)Remove by value."
+			<< "\n0)Back. <-press" << std::endl;
+		Sleep(delay);
+	}
+	void demo_find_menu(unsigned delay)
+	{
+		std::cout << "\nMenu:\n1)Add item.\n2)Remove item.\n3)Find items. <-press\n4)Write list.\n"
+			<< "5)Perform actions on items.\n6)Generate random items.\n0)Back." << std::endl;
+		Sleep(delay);
+	}
+	template<class T>
+	void demo_find_by_one_value(unsigned delay, T& list, Point point)
+	{
+		std::cout << "\nChoose:\n1)Find by value of point. <-press\n2)Find by value of begin point and value of end point."
+			<< "\n0)Back." << std::endl;
+		Sleep(delay);
+		demo_read_point(delay, point, "The point:");
+		std::vector<tdp::Item> items = list.find_items(point);
+		tdp::write_items(items);
+		Sleep(delay);
+	}
+	template<class T>
+	void demo_find_by_two_value(unsigned delay, T& list, Point begin_point, Point end_point)
+	{
+		std::cout << "\nChoose:\n1)Find by value of point.\n2)Find by value of begin point and value of end point. <-press"
+			<< "\n0)Back." << std::endl;
+		Sleep(delay);
+		demo_read_point(delay, begin_point, "Begin point:");
+		demo_read_point(delay, end_point, "End point:");
+		std::vector<tdp::Item> items = list.find_items(begin_point, end_point);
+		tdp::write_items(items);
+		Sleep(delay);
+	}
+	void demo_find_exit(unsigned delay)
+	{
+		std::cout << "\nChoose:\n1)Find by value of point.\n2)Find by value of begin point and value of end point."
+			<< "\n0)Back. <-press" << std::endl;
+		Sleep(delay);
+	}
+	template<class T>
+	void demo_write_list(unsigned delay, T& list)
+	{
+		std::cout << "\nMenu:\n1)Add item.\n2)Remove item.\n3)Find items.\n4)Write list. <-press\n"
+			<< "5)Perform actions on items.\n6)Generate random items.\n0)Back." << std::endl;
+		Sleep(delay);
+		list.write();
+		Sleep(2*delay);
+	}
+	void demo_perform_actions(unsigned delay)
+	{
+		std::cout << "\nMenu:\n1)Add item.\n2)Remove item.\n3)Find items.\n4)Write list.\n"
+			<< "5)Perform actions on items. <-press\n6)Generate random items.\n0)Back." << std::endl;
+		Sleep(delay);
+	}
+	void demo_perform_actions_exit(unsigned delay)
+	{
+		std::cout << "\nChoose:\n1)Find distance between two points in list.\n"
+			<< "2)Find distance between adjacent points in list.\n"
+			<< "3)Read point from file and add to list.\n"
+			<< "4)Add point to file from list.\n"
+			<< "5)Find length and area of circle by points in list.\n"
+			<< "0)Back. <-press" << std::endl;
+		Sleep(delay);
+	}
+	template<class T>
+	void demo_find_dictance(unsigned delay, T& list, std::size_t first_index, std::size_t second_index)
+	{
+		std::cout << "\nChoose:\n1)Find distance between two points in list. <-press\n"
+			<< "2)Find distance between adjacent points in list.\n"
+			<< "3)Read point from file and add to list.\n"
+			<< "4)Add point to file from list.\n"
+			<< "5)Find length and area of circle by points in list.\n"
+			<< "0)Back." << std::endl;
+		Sleep(delay);
+		demo_read_number(delay, first_index, "index of first point");
+		demo_read_number(delay, second_index, "index of second point");
+		double distance = list.find_distance_between_two_points(first_index, second_index);
+		if (distance == -1)
+		{
+			std::cout << "\nThere aren't points entered!" << std::endl;
+			Sleep(delay);
+			return;
+		}
+		std::cout << "\nDistance: " << distance << std::endl;
+		Sleep(delay);
+	}
+	template<class T>
+	void demo_find_distance_between_adjacent_points(unsigned delay, T& list)
+	{
+		std::cout << "\nChoose:\n1)Find distance between two points in list.\n"
+			<< "2)Find distance between adjacent points in list. <-press\n"
+			<< "3)Read point from file and add to list.\n"
+			<< "4)Add point to file from list.\n"
+			<< "5)Find length and area of circle by points in list.\n"
+			<< "0)Back." << std::endl;
+		Sleep(delay);
+		list.find_distance_between_adjacent_points();
+		Sleep(2*delay);
+	}
+	template<class T>
+	void demo_read_point(unsigned delay, T& list, std::size_t index, std::string path)
+	{
+		std::cout << "\nChoose:\n1)Find distance between two points in list.\n"
+			<< "2)Find distance between adjacent points in list.\n"
+			<< "3)Read point from file and add to list. <-press\n"
+			<< "4)Add point to file from list.\n"
+			<< "5)Find length and area of circle by points in list.\n"
+			<< "0)Back." << std::endl;
+		Sleep(delay);
+		std::cout << "\nEnter the path to file: <-write the path and press <Enter>" << std::endl;
+		Sleep(delay);
+		std::cout << "Enter the path to file: " + path << std::endl;
+		Sleep(delay);
+		demo_read_number(delay, index, "the index of point in file");
+		std::cout << "\nThe point: " << list.read_file(index, path) << " was added to list" << std::endl;
+		Sleep(delay);
+	}
+	template<class T>
+	void demo_add_point_to_file(unsigned delay, T& list, std::size_t index, std::string path)
+	{
+		std::cout << "\nChoose:\n1)Find distance between two points in list.\n"
+			<< "2)Find distance between adjacent points in list.\n"
+			<< "3)Read point from file and add to list.\n"
+			<< "4)Add point to file from list. <-press\n"
+			<< "5)Find length and area of circle by points in list.\n"
+			<< "0)Back." << std::endl;
+		Sleep(delay);
+		std::cout << "\nEnter the path to file: <-write the path and press <Enter>" << std::endl;
+		Sleep(delay);
+		std::cout << "Enter the path to file: " + path << std::endl;
+		Sleep(delay);
+		demo_read_number(delay, index, "the index of point");
+		if (list.append_file(index, path))
+		{
+			std::cout << "\nThe point was added to file!" << std::endl;
+		}
+		else
+		{
+			std::cout << "\nThere isn't point with index: " << index << "." << std::endl;
+		}
+		Sleep(delay);
+	}
+	template<class T>
+	void demo_circle(unsigned delay, T& list, std::size_t index_of_centre, std::size_t index)
+	{
+		std::cout << "\nChoose:\n1)Find distance between two points in list.\n"
+			<< "2)Find distance between adjacent points in list.\n"
+			<< "3)Read point from file and add to list.\n"
+			<< "4)Add point to file from list.\n"
+			<< "5)Find length and area of circle by points in list. <-press\n"
+			<< "0)Back." << std::endl;
+		Sleep(delay);
+		demo_read_number(delay, index_of_centre, "the index of point of centre of circle");
+		demo_read_number(delay, index, "the index of point of circle");
+		if (!list.find_length_and_area_of_circle(index_of_centre, index))
+		{
+			std::cout << "\nThere isn't point with indexes entered!" << std::endl;
+		}
+		Sleep(3*delay);
+	}
+	template<class T>
+	void demo_random_generator(unsigned delay, T& list, std::size_t size, double max_value)
+	{
+		std::cout << "\nMenu:\n1)Add item.\n2)Remove item.\n3)Find items.\n4)Write list.\n"
+			<< "5)Perform actions on items.\n6)Generate random items. <-press\n0)Back." << std::endl;
+		Sleep(delay);
+		demo_read_number(delay, size, "number of points");
+		demo_read_number(delay, max_value, "maximum coordinate value");
+		list.random_generator(size, max_value);
+		std::cout << "\nThe list was created!" << std::endl;
+		Sleep(delay);
+	}
+	void demo_back(unsigned delay)
+	{
+		std::cout << "\nMenu:\n1)Add item.\n2)Remove item.\n3)Find items.\n4)Write list.\n"
+			<< "5)Perform actions on items.\n6)Generate random items.\n0)Back. <-press" << std::endl;
+		Sleep(delay);
+	}
+	void demo_interactive_menu_exit(unsigned delay)
+	{
+		std::cout << "\nSelect the basis for the data structure:\n1)Linked list.\n"
+			<< "2)Array list.\n3)Binary tree.\n4)Avl tree.\n5)Two-Three tree.\n0)Back. <-press" << std::endl;
+		Sleep(delay);
+	}
+	void demo_mode_menu(unsigned delay)
+	{
+		list::Linked_list linked_list;
+		demo_interactive(delay);
+		demo_interactive_menu(delay);
+		demo_add_item(delay, linked_list, Point(33.1, 22.5, 1));
+		demo_add_item(delay, linked_list, Point(12, 91.9, 2.2));
+		demo_add_item(delay, linked_list, Point(17.51, 3.2, 56));
+		demo_add_item(delay, linked_list, Point(41, 1, 8.11));
+		demo_write_list(delay, linked_list);
+		demo_remove_menu(delay);
+		demo_remove_by_index(delay, linked_list, 2);
+		demo_remove_by_value(delay, linked_list, Point(41, 1, 8.11));
+		demo_remove_exit(delay);
+		demo_write_list(delay, linked_list);
+		demo_random_generator(delay, linked_list, 15, 20.1);
+		demo_write_list(delay, linked_list);
+		demo_add_item(delay, linked_list, Point(11, 13.3, 5.6));
+		demo_add_item(delay, linked_list, Point(4.21, 21, 1.11));
+		demo_add_item(delay, linked_list, Point(4.21, 21, 1.11));
+		demo_add_item(delay, linked_list, Point(4.21, 21, 1.11));
+		demo_find_menu(delay);
+		demo_find_by_one_value(delay, linked_list, Point(4.21, 21, 1.11));
+		demo_find_by_two_value(delay, linked_list, Point(-5, -5, -5), Point(10.2, 22, 1));
+		demo_find_exit(delay);
+		demo_perform_actions(delay);
+		demo_find_dictance(delay, linked_list, 1, 6);
+		demo_find_distance_between_adjacent_points(delay, linked_list);
+		demo_add_point_to_file(delay, linked_list, 0, "text.txt");
+		demo_add_point_to_file(delay, linked_list, 5, "text.txt");
+		demo_add_point_to_file(delay, linked_list, 7, "text.txt");
+		demo_read_point(delay, linked_list, 1, "text.txt");
+		demo_circle(delay, linked_list, 10, 3);
+		demo_perform_actions_exit(delay);
+		demo_write_list(delay, linked_list);
+		demo_back(delay);
+		demo_interactive_menu_exit(delay);
 	}
 }
 void demo_mode()
 {
-	all_demo::demo_mode_menu();
+	unsigned delay = correct::read_unsigned("a delay to display data(in milliseconds; normal = 1900)");
+	std::cout << "\nThe start of the demo mode(press <Ctrl + C> to exit)" << std::endl;
+	all_demo::demo_mode_menu(delay);
+	std::cout << "\nThe end of the demo mode\n" << std::endl;
+	Sleep(delay);
 }
 namespace all_benchmark
 {
