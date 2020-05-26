@@ -16,8 +16,8 @@ namespace binary
 	Binary_node::Binary_node(Binary_node* parent, Point point)
 	{
 		this->parent = parent;
-		this->left = nullptr;
-		this->right = nullptr;
+		left = nullptr;
+		right = nullptr;
 		this->point = point;
 	}
 	Binary_tree::Binary_tree()
@@ -55,7 +55,7 @@ namespace binary
 			root = new Binary_node(nullptr, point);
 			return;
 		}
-		add_item_current(root, point);
+		add_item_current(root, point);	
 	}
 	void Binary_tree::write_current(Binary_node* node, std::size_t& index)
 	{
@@ -258,6 +258,11 @@ namespace binary
 	}
 	void Binary_tree::find_distance_between_adjacent_points()
 	{
+		if (size < 2)
+		{
+			std::cout << "\nThere are not enough points!" << std::endl;
+			return;
+		}
 		std::cout << "\nDistance between adjacent points:" << std::endl;
 		for (std::size_t i = 0; i < size - 1; i++)
 		{
@@ -316,23 +321,19 @@ namespace binary
 		remove_children(root, Side::CENTRE);
 		size = 0;
 	}
-	void Binary_tree::copy_tree_current(Binary_node* node)
-	{
-		if (!node) return;
-		add_item(node->point);
-		copy_tree_current(node->left);
-		copy_tree_current(node->right);
-	}
-	Binary_tree::Binary_tree(Binary_tree& copy_tree)
+	Binary_tree::Binary_tree(std::vector<Point>& array)
 	{
 		root = nullptr;
 		size = 0;
-		copy_tree_current(copy_tree.root);
+		for (std::size_t i = 0; i < array.size(); i++)
+		{
+			add_item(array[i]);
+		}
 	}
 	std::size_t Binary_tree::count_size_of_memory()
 	{
 		std::size_t memory_size = 0;
-		memory_size += size * sizeof(Binary_node*);
+		memory_size += size * sizeof(Binary_node*) + sizeof(size);
 
 		return memory_size;
 	}

@@ -21,7 +21,7 @@ namespace list
 		List_node* head;
 		std::size_t size;
 		Linked_list();
-		Linked_list(Linked_list&);
+		Linked_list(std::vector<Point>&);
 		void add_item(Point);
 		void write();
 		bool remove_item(Point);

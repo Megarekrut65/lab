@@ -41,13 +41,12 @@ namespace avl
 		Avl_node* balance(Avl_node*);
 		int balance_factor(Avl_node*);
 		void balance();
-		void copy_tree_current(Avl_node*);
 	public:
 		Avl_node* root;
 		std::size_t size;
 
 		Avl_tree();
-		Avl_tree(Avl_tree&);
+		Avl_tree(std::vector<Point>&);
 		void add_item(Point);
 		void write();
 		bool remove_item(Point);

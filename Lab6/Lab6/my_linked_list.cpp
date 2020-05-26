@@ -175,7 +175,11 @@ namespace list
 	}
 	void Linked_list::find_distance_between_adjacent_points()
 	{
-		if (!head) return;
+		if (size < 2)
+		{
+			std::cout << "\nThere are not enough points!" << std::endl;
+			return;
+		}
 		std::cout << "\nDistance between adjacent points:" << std::endl;
 		std::size_t i = 0;
 		for (List_node* current = head; current->next; current = current->next, i++)
@@ -249,20 +253,19 @@ namespace list
 		}
 		size = 0;
 	}
-	Linked_list::Linked_list(Linked_list& copy_list)
+	Linked_list::Linked_list(std::vector<Point>& array)
 	{
 		head = nullptr;
 		size = 0;
-		for (List_node* current = copy_list.head; current; current = current->next)
+		for (std::size_t i = 0; i < array.size(); i++)
 		{
-			add_item(current->point);
+			add_item(array[i]);
 		}
 	}
 	std::size_t Linked_list::count_size_of_memory()
 	{
 		std::size_t memory_size = 0;
-		memory_size += size * sizeof(List_node*)
-			+ sizeof(size);
+		memory_size += size * sizeof(List_node*) + sizeof(size);
 
 		return memory_size;
 	}

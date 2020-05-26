@@ -108,8 +108,14 @@ namespace array
 	}
 	void Array_list::find_distance_between_adjacent_points()
 	{
+		std::size_t size = points.size();
+		if (size < 2)
+		{
+			std::cout << "\nThere are not enough points!" << std::endl;
+			return;
+		}
 		std::cout << "\nDistance between adjacent points:" << std::endl;		
-		for (std::size_t i = 0; i < points.size() - 1; i++)
+		for (std::size_t i = 0; i < size - 1; i++)
 		{
 			std::cout << i << " -> " << i + 1 << " = " << find_distance(points[i], points[i + 1]) << std::endl;
 		}
@@ -148,11 +154,11 @@ namespace array
 	{
 		points.clear();
 	}
-	Array_list::Array_list(Array_list& copy_list)
+	Array_list::Array_list(std::vector<Point>& array)
 	{
-		for (std::size_t i = 0; i < copy_list.points.size(); i++)
+		for (std::size_t i = 0; i < array.size(); i++)
 		{
-			add_item(copy_list.points[i]);
+			add_item(array[i]);
 		}
 	}
 	std::size_t Array_list::count_size_of_memory()

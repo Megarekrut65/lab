@@ -16,7 +16,7 @@ namespace array
 	public:
 		std::vector<Point> points;
 		Array_list();
-		Array_list(Array_list&);
+		Array_list(std::vector<Point>&);
 		void add_item(Point);
 		void write();
 		bool remove_item(std::size_t);

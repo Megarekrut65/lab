@@ -229,11 +229,12 @@ namespace avl
 	bool Avl_tree::remove_item(std::size_t index)
 	{
 		if (index >= size) return false;
+		std::size_t size = this->size;
 		std::size_t current = 0;
 		root = remove_item_current(root, current, index);
 		balance();
 
-		return (current < size);
+		return (this->size < size);
 	}
 	void Avl_tree::find_items_current(Avl_node* node, Point point, std::vector<Item>& items, std::size_t& index)
 	{
@@ -306,6 +307,11 @@ namespace avl
 	}
 	void Avl_tree::find_distance_between_adjacent_points()
 	{
+		if (size < 2)
+		{
+			std::cout << "\nThere are not enough points!" << std::endl;
+			return;
+		}
 		std::cout << "\nDistance between adjacent points:" << std::endl;
 		for (std::size_t i = 0; i < size - 1; i++)
 		{
@@ -366,23 +372,19 @@ namespace avl
 		root = nullptr;
 		size = 0;
 	}
-	void Avl_tree::copy_tree_current(Avl_node* node)
-	{
-		if (!node) return;
-		add_item(node->point);
-		copy_tree_current(node->left);
-		copy_tree_current(node->right);
-	}
-	Avl_tree::Avl_tree(Avl_tree& copy_tree)
+	Avl_tree::Avl_tree(std::vector<Point>& array)
 	{
 		root = nullptr;
 		size = 0;
-		copy_tree_current(copy_tree.root);
+		for (std::size_t i = 0; i < array.size(); i++)
+		{
+			add_item(array[i]);
+		}
 	}
 	std::size_t Avl_tree::count_size_of_memory()
 	{
 		std::size_t memory_size = 0;
-		memory_size += size * sizeof(Avl_node*);
+		memory_size += size * sizeof(Avl_node*) + sizeof(size);
 
 		return memory_size;
 	}

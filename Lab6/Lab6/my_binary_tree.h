@@ -33,12 +33,11 @@ namespace binary
 		bool append_file_current(Binary_node*, std::size_t, std::size_t&, const std::string&);
 		Binary_node* find_parent(Binary_node*);
 		void edit_tree(Binary_node*, Side);
-		void copy_tree_current(Binary_node*);
 	public:
 		Binary_node* root;
 		std::size_t size;
 		Binary_tree();
-		Binary_tree(Binary_tree&);
+		Binary_tree(std::vector<Point>&);
 		void add_item(Point);
 		void write();
 		bool remove_item(Point);
